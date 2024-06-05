@@ -2,12 +2,9 @@ name: Main CI (install/cache + lint/tests)
 
 on:
   workflow_call:
-  push:
-    branches:
-      - feat/csi-38 # todo: remove it before PR
   pull_request:
     branches:
-      - master
+      - main
     types:
       - opened
       - reopened
