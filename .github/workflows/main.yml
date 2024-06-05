@@ -1,0 +1,51 @@
+name: Main CI (install/cache + lint/tests)
+
+on:
+  workflow_call:
+  push:
+    branches:
+      - feat/csi-38 # todo: remove it before PR
+  pull_request:
+    branches:
+      - master
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+jobs:
+  install-and-cache:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ssh-key: "${{ secrets.COMMIT_KEY }}"
+
+      - name: Use get-npm-cache Action
+        id: npm-cache-dir
+        uses: ./.github/actions/npm-cache
+      - run: npm ci
+
+      - name: Save npm cache
+        id: npm-cache-save
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ steps.npm-cache-dir.outputs.cache-dir }}
+          key: "${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}"
+
+  lint-and-test:
+    runs-on: ubuntu-latest
+    needs: install-and-cache
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use get-npm-cache Action
+        uses: ./.github/actions/npm-cache
+      - run: npm ci
+
+      - run: npm run build
+      - run: npm run lint
+      - run: npm run test
