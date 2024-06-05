@@ -1,5 +1,5 @@
 {
-  "name": "@infitx-org/cross-network-proxy-adapter",
+  "name": "@infitx-org/inter-scheme-proxy-adapter",
   "version": "0.1.0",
   "description": "Schemes Proxy Implementation",
   "author": "Eugen Klymniuk (geka-evk)",
@@ -75,18 +75,18 @@
       "prettier --write --ignore-unknown"
     ]
   },
-  "homepage": "https://github.com/infitx-org/cross-network-proxy-adapter#readme",
+  "homepage": "https://github.com/infitx-org/inter-scheme-proxy-adapter#readme",
   "bugs": {
-    "url": "https://github.com/infitx-org/cross-network-proxy-adapter/issues"
+    "url": "https://github.com/infitx-org/inter-scheme-proxy-adapter/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/infitx-org/cross-network-proxy-adapter.git"
+    "url": "git+https://github.com/infitx-org/inter-scheme-proxy-adapter.git"
   },
   "keywords": [
     "infitx-org",
     "mojaloop",
     "proxy",
-    "cross-network-proxy-adapter"
+    "inter-scheme-proxy-adapter"
   ]
 }

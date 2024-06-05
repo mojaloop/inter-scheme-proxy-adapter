@@ -1,7 +1,7 @@
-# cross-network-proxy-adapter  (CNPA)
+# inter-scheme-proxy-adapter  (ISPA)
 
 
-A `cross-network-proxy-adapter  (CNPA)` project is Schemes Proxy Implementation.
+A `inter-scheme-proxy-adapter  (ISPA)` project is Schemes Proxy Implementation.
 
 Design is [here](https://github.com/infitx-org/uml_diagrams/blob/main/Proxy/Readme.md)
 

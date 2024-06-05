@@ -5,7 +5,7 @@ ARG NODE_VERSION=lts-alpine
 #  export NODE_VERSION="$(cat .nvmrc)-alpine" \
 #  docker build \
 #    --build-arg NODE_VERSION=$NODE_VERSION \
-#    -t infitx-org/cross-network-proxy-adapter:local \
+#    -t infitx-org/inter-scheme-proxy-adapter:local \
 #    . \
 #
 
