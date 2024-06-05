@@ -1,0 +1,92 @@
+{
+  "name": "@infitx-org/inter-scheme-proxy-adapter",
+  "version": "0.1.0",
+  "description": "Schemes Proxy Implementation",
+  "author": "Eugen Klymniuk (geka-evk)",
+  "contributors": [
+    "Eugen Klymniuk <eugen.klymniuk@infitx.com>"
+  ],
+  "license": "Apache-2.0",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=18.x"
+  },
+  "scripts": {
+    "prepare": "husky || true",
+    "prepublishOnly": "npm run build",
+    "lint": "eslint ./src/**/*.ts ./test/**/*.ts",
+    "lint:fix": "npm run lint -- --fix",
+    "build": "tsc",
+    "watch": "tsc -w",
+    "start": "npm run start:no-build",
+    "start:no-build": "node dist/index.js",
+    "start:build": "npm run build && npm run start:no-build",
+    "start:dev": "ts-node -r tsconfig-paths/register -P ./tsconfig.json src/index.ts",
+    "test": "npm run test:unit",
+    "test:unit": "jest --testMatch='**/unit/**/*.test.ts'",
+    "test:xunit": "JEST_JUNIT_OUTPUT_DIR=./test/reports/ JEST_JUNIT_OUTPUT_NAME=xunit.xml npm run test:unit -- --reporters=jest-junit",
+    "test:coverage": "npm run test:unit -- --coverage --coverageThreshold='{}'",
+    "test:coverage-check": "npm run test:unit -- --coverage",
+    "test:int": "jest --testMatch='**/test/integration/**/*.test.ts'",
+    "test:functional": "echo \"ACTION: Add functional test here, or remove this script. Also check CI configs to comment out the necessary job'\"",
+    "warn-pre-commit": "echo \"pre commit tasks running. build and test\"",
+    "audit:resolve": "npx resolve-audit --production",
+    "audit:check": "npx check-audit --production",
+    "dep:check": "npx --no-install ncu -e 2",
+    "dep:update": "npx --no-install ncu -u",
+    "release": "npx standard-version --no-verify --releaseCommitMessageFormat 'ci(release): {{currentTag}} [skip ci]'",
+    "snapshot": "npx standard-version --no-verify --skip.changelog --prerelease snapshot --releaseCommitMessageFormat 'ci(snapshot): {{currentTag}}'"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.3.0",
+    "@commitlint/config-conventional": "^19.2.2",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.14.2",
+    "@typescript-eslint/eslint-plugin": "7.12.0",
+    "@typescript-eslint/parser": "7.12.0",
+    "eslint": "8.56.0",
+    "eslint-config-prettier": "9.1.0",
+    "eslint-plugin-import": "2.29.1",
+    "husky": "^9.0.11",
+    "jest": "^29.7.0",
+    "jest-junit": "^16.0.0",
+    "lint-staged": "^15.2.5",
+    "npm-audit-resolver": "3.0.0-RC.0",
+    "npm-check-updates": "16.14.20",
+    "prettier": "3.3.1",
+    "replace": "^1.2.2",
+    "standard-version": "^9.5.0",
+    "ts-jest": "29.1.4",
+    "ts-node": "10.9.2",
+    "typescript": "5.4.5"
+  },
+  "standard-version": {
+    "scripts": {
+      "postchangelog": "replace '\\[infitx-org/#(\\d+)\\]\\(https://github.com/infitx-org/(.*)/issues/(\\d+)\\)' '[infitx-org/#$1](https://github.com/infitx-org/project/issues/$1)' CHANGELOG.md"
+    }
+  },
+  "lint-staged": {
+    "./src/*.ts": [
+      "eslint --fix",
+      "prettier --write --ignore-unknown"
+    ]
+  },
+  "homepage": "https://github.com/infitx-org/inter-scheme-proxy-adapter#readme",
+  "bugs": {
+    "url": "https://github.com/infitx-org/inter-scheme-proxy-adapter/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/infitx-org/inter-scheme-proxy-adapter.git"
+  },
+  "keywords": [
+    "infitx-org",
+    "mojaloop",
+    "proxy",
+    "inter-scheme-proxy-adapter"
+  ]
+}
