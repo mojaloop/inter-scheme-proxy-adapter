@@ -7,10 +7,6 @@
     "Eugen Klymniuk <eugen.klymniuk@infitx.com>"
   ],
   "license": "Apache-2.0",
-  "bugs": {
-    "url": "https://github.com/infitx-org/cross-network-proxy-adapter/issues"
-  },
-  "homepage": "https://github.com/infitx-org/cross-network-proxy-adapter#readme",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "files": [
@@ -49,7 +45,7 @@
     "@commitlint/cli": "^19.3.0",
     "@commitlint/config-conventional": "^19.2.2",
     "@types/jest": "^29.5.12",
-    "@types/node": "^20.14.1",
+    "@types/node": "^20.14.2",
     "@typescript-eslint/eslint-plugin": "7.12.0",
     "@typescript-eslint/parser": "7.12.0",
     "eslint": "8.56.0",
@@ -61,7 +57,7 @@
     "lint-staged": "^15.2.5",
     "npm-audit-resolver": "3.0.0-RC.0",
     "npm-check-updates": "16.14.20",
-    "prettier": "3.3.0",
+    "prettier": "3.3.1",
     "replace": "^1.2.2",
     "standard-version": "^9.5.0",
     "ts-jest": "29.1.4",
@@ -78,6 +74,10 @@
       "eslint --fix",
       "prettier --write --ignore-unknown"
     ]
+  },
+  "homepage": "https://github.com/infitx-org/cross-network-proxy-adapter#readme",
+  "bugs": {
+    "url": "https://github.com/infitx-org/cross-network-proxy-adapter/issues"
   },
   "repository": {
     "type": "git",
