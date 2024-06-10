@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  echo-server:
+    build:
+      context: ./docker/echo-server
+      dockerfile: Dockerfile
+    ports:
+      - "6000:6000"
+    command: npm start
+    restart: always

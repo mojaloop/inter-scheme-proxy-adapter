@@ -20,3 +20,105 @@
 
  --------------
  ******/
+
+// import OpenAPIBackend from 'openapi-backend';
+import Hapi from '@hapi/hapi';
+import h2o2 from '@hapi/h2o2';
+// import Wreck from '@hapi/wreck';
+
+import config from './config';
+import { loggingPlugin } from './plugins';
+import { startingProcess, loggerFactory } from './utils';
+
+const logger = loggerFactory('ISPA');
+const plugins = [
+  {
+    plugin: loggingPlugin,
+    options: { logger },
+  },
+  h2o2,
+];
+// add other plugins here
+
+const start = async () => {
+  const server = new Hapi.Server({
+    host: config.get('HTTP_HOST'),
+    port: config.get('HTTP_PORT'),
+  });
+  await server.register(plugins);
+
+  const proxyConfig = {
+    uri: `${config.get('PROXY_URI')}{path}{query}`,
+    passThrough: true,
+    timeout: 30_000,
+  };
+
+  // const api = new OpenAPIBackend({
+  //   definition: config.get('API_SPEC_PATH'),
+  //   strict: true,
+  //   handlers: {
+  //     validationFail: async (context, req: Hapi.Request, h: Hapi.ResponseToolkit) =>
+  //       h.response({ err: context.validation.errors }).code(400),
+  //     notFound: async (context, req: Hapi.Request, h: Hapi.ResponseToolkit) =>
+  //       h.response({ err: 'Not found' }).code(404),
+  //     notImplemented: async (c, req: Hapi.Request, h: Hapi.ResponseToolkit) => {
+  //       // req.payload = c.request.body;
+  //       logger.debug('validation passed, proxying...', req.payload);
+  //       return h.proxy(proxyConfig);
+  //     },
+  //   },
+  // });
+
+  // await api.init();
+
+  // use as a catch-all handler
+  server.route([
+    // {
+    //   method: '*',
+    //   path: '/{path*}',
+    //   handler: async (request: Hapi.Request, h: Hapi.ResponseToolkit) => {
+    //     const { method, path, query, headers } = request;
+    //     const body = await Wreck.read(request.raw.req, { json: true });
+    //     const req = {
+    //       method,
+    //       path,
+    //       body,
+    //       query,
+    //       headers,
+    //     };
+    //     logger.info('parsed request: ', req);
+    //     logger.info('Hapi payload request: ', request.payload);
+    //     return api.handleRequest(req, request, h);
+    //   },
+    //   options: {
+    //     payload: {
+    //       // Cannot proxy if payload is parsed or if output is not stream or data
+    //       output: 'stream',
+    //       parse: false,
+    //     },
+    //   },
+    // },
+    {
+      method: '*',
+      path: '/{path*}', // '/proxy',
+      handler: async (request: Hapi.Request, h: Hapi.ResponseToolkit) => {
+        logger.verbose('proxying request: ', request.payload);
+        return h.proxy(proxyConfig);
+      },
+      options: {
+        payload: {
+          // Cannot proxy if payload is parsed or if output is not stream or data
+          output: 'stream',
+          parse: false,
+        },
+      },
+    },
+  ]);
+  await server.start();
+
+  logger.info('server is running on', server.info);
+};
+
+const stop = async () => {};
+
+startingProcess(start, stop, logger);
