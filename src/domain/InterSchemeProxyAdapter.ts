@@ -24,6 +24,7 @@
  **********/
 
 import { iISPA, ISPADeps, ProxyHandlerInput } from './types';
+import { httpRequest } from '../infra'; // todo: avoid this dependency (pass in ctor
 
 export class InterSchemeProxyAdapter implements iISPA {
   constructor(private readonly deps: ISPADeps) {
@@ -33,8 +34,17 @@ export class InterSchemeProxyAdapter implements iISPA {
   async handleProxyRequest(input: ProxyHandlerInput) {
     const { ispaService, logger } = this.deps;
     const proxyTarget = ispaService.getProxyTarget(input);
-    logger.info('incoming request for being proxied is ready', proxyTarget);
-    return proxyTarget;
+
+    // todo: think, if it's better to move the logic to ISPAService
+    const response = await httpRequest({
+      url: proxyTarget.url,
+      // headers: proxyTarget.headers,
+      method: input.method,
+      data: input.payload,
+    });
+    logger.info('proxy response is ready', response);
+
+    return response;
   }
 
   async start(): Promise<void> {

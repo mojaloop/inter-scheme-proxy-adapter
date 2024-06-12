@@ -35,9 +35,7 @@
     "prepare": "husky || true"
   },
   "dependencies": {
-    "@hapi/h2o2": "^10.0.4",
     "@hapi/hapi": "^21.3.10",
-    "@hapi/wreck": "^18.1.0",
     "@mojaloop/central-services-logger": "^11.3.1",
     "@mojaloop/sdk-standard-components": "^18.2.0",
     "axios": "^1.7.2",

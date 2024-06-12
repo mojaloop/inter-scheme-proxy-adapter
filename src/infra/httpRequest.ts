@@ -1,6 +1,8 @@
 import https from 'node:https';
 import axios from 'axios';
+
 import config from '../config';
+import { ProxyHandlerResponse } from '../domain/types';
 import { loggerFactory } from '../utils';
 import { ProxyTlsAgent } from './types';
 import { readCertsFromFile } from './readCertsFromFile';
@@ -25,18 +27,18 @@ export type HttpRequestOptions = {
   data?: unknown;
 };
 
-export const httpRequest = async (options: HttpRequestOptions) => {
+export const httpRequest = async (options: HttpRequestOptions): Promise<ProxyHandlerResponse> => {
   try {
     const result = await axios({
       ...options,
       ...(httpsAgent && { httpsAgent }),
     });
-    const { data, status } = result;
-    logger.verbose('proxy response:', { data, status });
+    const { data, status, headers } = result;
+    logger.verbose('proxy response:', { data, status, headers });
 
-    return { data, status };
+    return { data, status, headers };
   } catch (err: unknown) {
     logger.error('proxy request error:', err);
-    return { data: null, status: 502 };
+    return { data: null, status: 502 }; // think, if we need to provide headers
   }
 };

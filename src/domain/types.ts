@@ -6,16 +6,25 @@ export type ProxyDetails = {
   baseUrl: string;
 };
 
-type Headers = Record<string, string>;
-export type ProxyHandlerInput = {
-  url: URL; // incoming url
-  headers: Headers;
-  proxyDetails: ProxyDetails;
-};
-export type ProxyHandlerResponse = {
-  // uri: string;
+export type ProxyTarget = {
   url: string;
   headers: Headers;
+};
+
+type Headers = Record<string, string>;
+
+export type ProxyHandlerInput = {
+  url: URL; // incoming url
+  method: string;
+  headers: Headers;
+  payload?: unknown;
+  proxyDetails: ProxyDetails;
+};
+
+export type ProxyHandlerResponse = {
+  status: number;
+  data: unknown;
+  headers?: unknown;
 };
 
 export type ProxyHandlerFn = (args: ProxyHandlerInput) => Promise<ProxyHandlerResponse>;
@@ -28,7 +37,7 @@ export interface iISPA {
 }
 
 export interface ISPAServiceInterface {
-  getProxyTarget: (args: ProxyHandlerInput) => ProxyHandlerResponse;
+  getProxyTarget: (args: ProxyHandlerInput) => ProxyTarget;
 }
 
 export type ISPADeps = {
