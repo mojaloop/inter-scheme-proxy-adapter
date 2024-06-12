@@ -1,6 +1,9 @@
 import { URL } from 'node:url';
 import { ServerInfo, Server } from '@hapi/hapi';
+import { INTERNAL_EVENTS } from '../constants';
 import { LogMethods, LogContext } from '../utils/types';
+
+type Headers = Record<string, string>;
 
 export type ProxyDetails = {
   baseUrl: string;
@@ -11,9 +14,7 @@ export type ProxyTarget = {
   headers: Headers;
 };
 
-type Headers = Record<string, string>;
-
-export type ProxyHandlerInput = {
+export type IncomingRequestDetails = {
   url: URL; // incoming url
   method: string;
   headers: Headers;
@@ -27,23 +28,26 @@ export type ProxyHandlerResponse = {
   headers?: unknown;
 };
 
-export type ProxyHandlerFn = (args: ProxyHandlerInput) => Promise<ProxyHandlerResponse>;
+export type ProxyHandlerFn = (
+  reqDetails: IncomingRequestDetails,
+  serverState: ServerState,
+) => Promise<ProxyHandlerResponse>;
 
-export interface iISPA {
-  // todo: find better name
+export interface IProxyAdapter {
   start: () => Promise<void>;
   stop: () => Promise<void>;
   handleProxyRequest: ProxyHandlerFn;
 }
 
 export interface ISPAServiceInterface {
-  getProxyTarget: (args: ProxyHandlerInput) => ProxyTarget;
+  getProxyTarget: (reqDetails: IncomingRequestDetails, state: ServerState) => ProxyTarget;
 }
 
 export type ISPADeps = {
   ispaService: ISPAServiceInterface;
   httpServerA: IHttpServer;
   httpServerB: IHttpServer;
+  httpRequest: HttpRequest;
   logger: ILogger;
 };
 
@@ -52,13 +56,28 @@ export type ISPAServiceDeps = {
   // todo: add axios instance here
 };
 
+export type HttpRequestOptions = {
+  url: string;
+  method: string;
+  headers: Headers;
+  data?: unknown; // rename to payload?
+};
+
+export type HttpRequest = (options: HttpRequestOptions) => Promise<ProxyHandlerResponse>;
+
 export interface ILogger extends LogMethods {
   child(context?: LogContext): ILogger;
 }
 
+export type ServerState = {
+  accessToken: string;
+  // httpsAgent: Agent | null;
+};
+
 export interface IHttpServer {
   start: (proxyHandlerFn: ProxyHandlerFn) => Promise<boolean>;
   stop: () => Promise<boolean>;
-  info: ServerInfo; // todo: think, if we need this
+  emit: (event: typeof INTERNAL_EVENTS.state, data: Partial<ServerState>) => boolean;
+  info: ServerInfo; // think, if we need this
   hapiServer: Readonly<Server>; // for testing purposes
 }

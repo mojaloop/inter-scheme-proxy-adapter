@@ -2,11 +2,11 @@ import convict from 'convict';
 import { AppConfig } from './infra';
 
 const config = convict<AppConfig>({
-  PROXY_DFSP_ID: {
+  DFSP_ID: {
     doc: 'The Proxy DFSP ID',
     format: String,
     default: null,
-    env: 'PROXY_DFSP_ID',
+    env: 'DFSP_ID',
   },
 
   mtlsConfig: {
@@ -43,13 +43,13 @@ const config = convict<AppConfig>({
       doc: 'HTTP port to listen on for serverA',
       format: 'port',
       default: 4100,
-      env: 'HTTP_PORT_A',
+      env: 'INBOUND_LISTEN_PORT_A',
     },
     host: {
       doc: 'Hostname or IP address where the serverA listens for incoming requests',
       format: String,
       default: '0.0.0.0',
-      env: 'HTTP_HOST_A',
+      env: 'INBOUND_HOST_A',
     },
     mgmtApi: {
       host: {
@@ -72,13 +72,13 @@ const config = convict<AppConfig>({
       doc: 'HTTP port to listen on for serverB',
       format: 'port',
       default: 4200,
-      env: 'HTTP_PORT_B',
+      env: 'INBOUND_LISTEN_PORT_B',
     },
     host: {
       doc: 'Hostname or IP address where the serverB listens for incoming requests',
       format: String,
       default: '0.0.0.0',
-      env: 'HTTP_HOST_B',
+      env: 'INBOUND_HOST_B',
     },
     mgmtApi: {
       host: {
@@ -111,22 +111,6 @@ const config = convict<AppConfig>({
       format: String,
       default: null,
       env: 'HUB_B_BASE_URL',
-    },
-  },
-
-  proxyConfig: {
-    // ho2o related
-    timeout: {
-      doc: 'Number of milliseconds before aborting the upstream request',
-      format: Number,
-      default: 10_000,
-      env: 'PROXY_URI_TIMEOUT',
-    },
-    passThrough: {
-      doc: 'Defines if headers from/to a client to/from upstream service should be forwarded',
-      format: Boolean,
-      default: true,
-      // env: 'PROXY_PASS_THROUGH',
     },
   },
 

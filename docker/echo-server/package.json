@@ -2,6 +2,8 @@
   "name": "echo-server",
   "version": "0.1.0",
   "description": "Simple echo HTTP server",
+  "author": "Eugen Klymniuk (geka-evk)",
+  "license": "Apache-2.0",
   "main": "src/server.ts",
   "scripts": {
     "start": "ts-node src/server.ts",
@@ -17,8 +19,6 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.4.5"
   },
-  "author": "Eugen Klymniuk (geka-evk)",
-  "license": "Apache-2.0",
   "devDependencies": {
     "@types/body-parser": "^1.19.5",
     "@types/express": "^4.17.21"

@@ -23,24 +23,26 @@
  --------------
  **********/
 
-import { iISPA, ISPADeps, ProxyHandlerInput } from './types';
-import { httpRequest } from '../infra'; // todo: avoid this dependency (pass in ctor
+import { INTERNAL_EVENTS } from '../constants';
+import { IProxyAdapter, ISPADeps, IncomingRequestDetails, ServerState } from './types';
 
-export class InterSchemeProxyAdapter implements iISPA {
+export const MOCK_TOKEN = 'noAccessTokenYet';
+
+export class InterSchemeProxyAdapter implements IProxyAdapter {
   constructor(private readonly deps: ISPADeps) {
     this.handleProxyRequest = this.handleProxyRequest.bind(this);
   }
 
-  async handleProxyRequest(input: ProxyHandlerInput) {
-    const { ispaService, logger } = this.deps;
-    const proxyTarget = ispaService.getProxyTarget(input);
+  async handleProxyRequest(reqDetails: IncomingRequestDetails, state: ServerState) {
+    const { ispaService, httpRequest, logger } = this.deps;
+    const proxyTarget = ispaService.getProxyTarget(reqDetails, state);
 
-    // todo: think, if it's better to move the logic to ISPAService
+    // todo: think, if it's ok to use the same agent to call both hubs
     const response = await httpRequest({
       url: proxyTarget.url,
-      // headers: proxyTarget.headers,
-      method: input.method,
-      data: input.payload,
+      headers: proxyTarget.headers,
+      method: reqDetails.method,
+      data: reqDetails.payload,
     });
     logger.info('proxy response is ready', response);
 
@@ -48,6 +50,9 @@ export class InterSchemeProxyAdapter implements iISPA {
   }
 
   async start(): Promise<void> {
+    // todo: get certs
+    await this.getAccessTokens();
+
     const [isAStarted, isBStarted] = await Promise.all([
       this.deps.httpServerA.start(this.handleProxyRequest),
       this.deps.httpServerB.start(this.handleProxyRequest),
@@ -66,5 +71,16 @@ export class InterSchemeProxyAdapter implements iISPA {
 
   private async sendProxyRequest() {
     // send proxy request
+  }
+
+  private async getAccessTokens() {
+    // todo: add logic to obtain access tokens [CSI-126]
+    const tokenA = MOCK_TOKEN;
+    const tokenB = MOCK_TOKEN;
+
+    this.deps.httpServerA.emit(INTERNAL_EVENTS.state, { accessToken: tokenA });
+    this.deps.httpServerB.emit(INTERNAL_EVENTS.state, { accessToken: tokenB });
+
+    return { tokenA, tokenB }; // think, if we need this
   }
 }

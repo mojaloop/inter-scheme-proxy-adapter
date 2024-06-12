@@ -6,6 +6,10 @@ module.exports = {
   collectCoverage: true,
   moduleNameMapper: {
     '^#src/(.*)$': '<rootDir>/src/$1',
+    '^#test/(.*)$': '<rootDir>/test/$1',
   },
   setupFiles: ['./test/setup.ts'],
+  transform: {
+    '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.test.json' }],
+  },
 };

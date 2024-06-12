@@ -17,9 +17,11 @@ services:
     command: npm start
     restart: always
     env_file: .env
+    volumes:
+      - ./certs/:/opt/app/certs/
     ports:
-      - "${HTTP_PORT_A}:4100"
-      - "${HTTP_PORT_B}:4200"
+      - "${HTTP_PORT_A}:${HTTP_PORT_A}"
+      - "${HTTP_PORT_B}:${HTTP_PORT_A}"
 
   hub-a:
     <<: *HUB

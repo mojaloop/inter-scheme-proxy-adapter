@@ -1,8 +1,8 @@
 import config from '../config';
-import { PROXY_HEADER } from '../constants';
-import { ISPAServiceInterface, ISPAServiceDeps, ILogger, ProxyHandlerInput } from './types';
+import { PROXY_HEADER, AUTH_HEADER } from '../constants';
+import { ISPAServiceInterface, ISPAServiceDeps, IncomingRequestDetails, ServerState, ILogger } from './types';
 
-const { PROXY_DFSP_ID } = config.get(); // or pass it as a parameter in ctor?
+const { DFSP_ID } = config.get(); // or pass it as a parameter in ctor?
 
 export class ISPAService implements ISPAServiceInterface {
   private readonly log: ILogger;
@@ -11,15 +11,19 @@ export class ISPAService implements ISPAServiceInterface {
     this.log = deps.logger.child(ISPAService.name);
   }
 
-  getProxyTarget(input: ProxyHandlerInput) {
-    const { pathname, search } = input.url;
-    const { baseUrl } = input.proxyDetails;
+  getProxyTarget(reqDetails: IncomingRequestDetails, state: ServerState) {
+    const { pathname, search } = reqDetails.url;
+    const { baseUrl } = reqDetails.proxyDetails;
+
+    delete reqDetails.headers['content-length'];
+    // todo: clarify, why without removing content-length header request just stuck
 
     const proxyTarget = {
       url: `${baseUrl}${pathname}${search}`,
       headers: {
-        ...input.headers,
-        [PROXY_HEADER]: PROXY_DFSP_ID,
+        ...reqDetails.headers,
+        [PROXY_HEADER]: DFSP_ID,
+        [AUTH_HEADER]: `Bearer ${state.accessToken}`,
       },
     };
     this.log.verbose('proxyTarget: ', proxyTarget);

@@ -21,7 +21,7 @@ export const loggingPlugin: Plugin<PluginOptions> = {
           received,
         };
         Object.assign(req.app, { context });
-        logger.info(`[--> req] ${method.toUpperCase()} ${path}`, context);
+        logger.info(`[==> req] ${method.toUpperCase()} ${path}`, context);
 
         return h.continue;
       },
@@ -38,7 +38,7 @@ export const loggingPlugin: Plugin<PluginOptions> = {
         if (statusCode >= 300) {
           logger.warn('bad response:', response);
         }
-        logger.info(`[<-- ${statusCode}][${responseTimeSec} s] ${method.toUpperCase()} ${path}`, context);
+        logger.info(`[<== ${statusCode}][${responseTimeSec} s] ${method.toUpperCase()} ${path}`, context);
 
         return h.continue;
       },
