@@ -51,6 +51,20 @@ const config = convict<AppConfig>({
       default: '0.0.0.0',
       env: 'HTTP_HOST_A',
     },
+    mgmtApi: {
+      host: {
+        doc: 'Hostname or IP address where the management API listens for incoming requests',
+        format: String,
+        default: 'localhost',
+        env: 'MGMT_API_HOST_A',
+      },
+      port: {
+        doc: 'HTTP port to listen on for the management API',
+        format: 'port',
+        default: 4000,
+        env: 'MGMT_API_PORT_A',
+      },
+    },
   },
 
   serverBConfig: {
@@ -65,6 +79,20 @@ const config = convict<AppConfig>({
       format: String,
       default: '0.0.0.0',
       env: 'HTTP_HOST_B',
+    },
+    mgmtApi: {
+      host: {
+        doc: 'Hostname or IP address where the management API listens for incoming requests',
+        format: String,
+        default: 'localhost',
+        env: 'MGMT_API_HOST_B',
+      },
+      port: {
+        doc: 'HTTP port to listen on for the management API',
+        format: 'port',
+        default: 4000,
+        env: 'MGMT_API_PORT_B',
+      },
     },
   },
 
@@ -107,6 +135,13 @@ const config = convict<AppConfig>({
     format: String, // todo: use LogLevel type
     default: 'info',
     env: 'LOG_LEVEL',
+  },
+
+  pm4mlEnabled: {
+    doc: 'Defines if pm4ml is enabled',
+    format: Boolean,
+    default: false,
+    env: 'PM4ML_ENABLED',
   },
 });
 
