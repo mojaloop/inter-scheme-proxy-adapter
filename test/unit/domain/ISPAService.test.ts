@@ -44,6 +44,7 @@ describe('ISPAService Tests -->', () => {
 
     const proxyDetails = service.getProxyTarget({
       url: incomingUrl,
+      method: 'GET',
       headers,
       proxyDetails: { baseUrl },
     });
