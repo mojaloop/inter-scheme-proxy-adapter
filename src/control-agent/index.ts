@@ -73,7 +73,7 @@ const buildPatchConfiguration = (oldConf: GenericObject, newConf: GenericObject,
  * Public object exposing an API to build valid protocol messages.
  * It is not the only way to build valid messages within the protocol.
  *************************************************************************/
-const build = {
+export const build = {
   CONFIGURATION: {
     PATCH: buildPatchConfiguration,
     READ: (id?: string) => buildMsg(VERB.READ, MESSAGE.CONFIGURATION, {}, id),
@@ -89,6 +89,23 @@ const build = {
 };
 
 /**************************************************************************
+ * IClientParams
+ *
+ * Interface for the parameters required to create a new Client instance
+ *
+ * address   - address of control server
+ * port      - port of control server
+ * logger    - Logger- see SDK logger used elsewhere
+ * appConfig - the application configuration
+ *************************************************************************/
+export interface IClientParams { 
+  address?: string;
+  port: number;
+  logger: ILogger;
+  appConfig: AppConfig;
+}
+
+/**************************************************************************
  * Client
  *
  * The Control Client. Client for the websocket control API.
@@ -98,14 +115,14 @@ const build = {
  * address   - address of control server
  * port      - port of control server
  *************************************************************************/
-class Client extends ws {
+export class Client extends ws {
   private _logger: ILogger;
   private _appConfig: GenericObject;
   /**
    * Consider this a private constructor.
    * `Client` instances outside of this class should be created via the `Create(...args)` static method.
    */
-  constructor({ address = 'localhost', port, logger, appConfig }: { address?: string, port: number, logger: ILogger, appConfig: AppConfig }) {
+  constructor({ address = 'localhost', port, logger, appConfig }: IClientParams ) {
     super(`ws://${address}:${port}`);
     this._logger = logger;
     this._appConfig = appConfig;
@@ -116,19 +133,19 @@ class Client extends ws {
     return build;
   }
 
-  static Create(...args) {
+  static Create(args: IClientParams) {
     return new Promise((resolve, reject) => {
-      const client = new Client(...args);
+      const client = new Client(args);
       client.on('open', () => resolve(client));
       client.on('error', (err) => reject(err));
       client.on('message', client._handle);
     });
   }
 
-  async send(msg: string | GenericObject) {
+  async sendMsg(msg: string | GenericObject) {
     const data = typeof msg === 'string' ? msg : serialise(msg);
-    this._logger.isDebugEnabled && this._logger.debug('Sending message', { data });
-    return new Promise((resolve) => super.send.call(this, data, resolve));
+    this._logger.debug('Sending message', { data });
+    return new Promise((resolve) => super.send.call(this, data, {}, resolve));
   }
 
   // Receive a single message
@@ -188,8 +205,3 @@ class Client extends ws {
     }
   }
 }
-
-module.exports = {
-  Client,
-  build,
-};
