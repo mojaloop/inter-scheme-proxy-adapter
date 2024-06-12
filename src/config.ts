@@ -9,32 +9,61 @@ const config = convict<AppConfig>({
     env: 'DFSP_ID',
   },
 
-  mtlsConfig: {
+  mtlsConfigA: {
     enabled: {
-      doc: 'Defines if mTLS is enabled',
+      doc: 'Defines if mTLS is enabled on hub A',
       format: Boolean,
       default: true,
-      env: 'MTLS_ENABLED',
+      env: 'OUTBOUND_MUTUAL_TLS_ENABLED_A',
     },
     // todo: think, how to make caCertPath, clientCertPath, clientKeyPath NOT required if mTLS is disabled
+    caCertPath: {
+      doc: 'CA cert file location for hub A',
+      format: String,
+      default: null,
+      env: 'OUT_CA_CERT_PATH_A',
+    },
+    clientCertPath: {
+      doc: 'Client cert file location for hub A',
+      format: String,
+      default: null,
+      env: 'OUT_CLIENT_CERT_PATH_A',
+    },
+    clientKeyPath: {
+      doc: 'Client private key file location for hub A',
+      format: String,
+      default: null,
+      sensitive: true,
+      env: 'OUT_CLIENT_KEY_PATH_A',
+    },
+  },
+
+  mtlsConfigB: {
+    enabled: {
+      doc: 'Defines if mTLS is enabled on hub B',
+      format: Boolean,
+      default: true,
+      env: 'OUTBOUND_MUTUAL_TLS_ENABLED_B',
+    },
+    // think, how to make caCertPath, clientCertPath, clientKeyPath NOT required if mTLS is disabled
     caCertPath: {
       doc: 'CA cert file location',
       format: String,
       default: null,
-      env: 'MTLS_CA_CERT_PATH',
+      env: 'OUT_CA_CERT_PATH_B',
     },
     clientCertPath: {
       doc: 'Client cert file location',
       format: String,
       default: null,
-      env: 'MTLS_CLIENT_CERT_PATH',
+      env: 'OUT_CLIENT_CERT_PATH_B',
     },
     clientKeyPath: {
       doc: 'Client private key file location',
       format: String,
       default: null,
       sensitive: true,
-      env: 'MTLS_CLIENT_KEY_PATH',
+      env: 'OUT_CLIENT_KEY_PATH_B',
     },
   },
 

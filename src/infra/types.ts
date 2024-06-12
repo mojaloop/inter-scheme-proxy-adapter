@@ -5,7 +5,8 @@ export type AppConfig = {
   DFSP_ID: string;
   LOG_LEVEL: string; // todo: use LogLevel type
 
-  mtlsConfig: MtlsConfig;
+  mtlsConfigA: MtlsConfig;
+  mtlsConfigB: MtlsConfig;
 
   serverAConfig: ServerConfig;
   serverBConfig: ServerConfig;
@@ -24,7 +25,7 @@ type ServerConfig = {
   port: number;
 };
 
-type MtlsConfig = {
+export type MtlsConfig = {
   enabled: boolean;
   caCertPath: string;
   clientCertPath: string;
@@ -42,6 +43,6 @@ export type ProxyTlsAgent = Agent | null;
 export type HttpServerDeps = {
   serverConfig: ServerConfig;
   proxyDetails: ProxyDetails;
-  proxyTlsAgent: ProxyTlsAgent;
+  proxyTlsAgent: ProxyTlsAgent; // todo: rename to httpsAgent
   logger: ILogger;
 };

@@ -1,6 +1,7 @@
 import { URL } from 'node:url';
 import { ServerInfo, Server } from '@hapi/hapi';
 import { INTERNAL_EVENTS } from '../constants';
+import { ProxyTlsAgent } from '../infra/types';
 import { LogMethods, LogContext } from '../utils/types';
 
 type Headers = Record<string, string>;
@@ -57,10 +58,12 @@ export type ISPAServiceDeps = {
 };
 
 export type HttpRequestOptions = {
+  httpsAgent: ProxyTlsAgent;
   url: string;
   method: string;
   headers: Headers;
   data?: unknown; // rename to payload?
+  // todo: add logger here
 };
 
 export type HttpRequest = (options: HttpRequestOptions) => Promise<ProxyHandlerResponse>;
@@ -71,7 +74,7 @@ export interface ILogger extends LogMethods {
 
 export type ServerState = {
   accessToken: string;
-  // httpsAgent: Agent | null;
+  httpsAgent: ProxyTlsAgent;
 };
 
 export interface IHttpServer {

@@ -10,11 +10,14 @@ export class HttpServer extends EventEmitter implements IHttpServer {
   private readonly server: Hapi.Server;
   private state: ServerState = {
     accessToken: '',
+    httpsAgent: null,
   };
 
   constructor(private readonly deps: HttpServerDeps) {
     super();
     this.server = new Hapi.Server(deps.serverConfig);
+    this.state.httpsAgent = deps.proxyTlsAgent;
+    // todo: add a separate method for state updates
     this.initInternalEvents();
   }
 
@@ -61,20 +64,19 @@ export class HttpServer extends EventEmitter implements IHttpServer {
 
     this.server.route({
       method: '*',
-      path: '/{path*}',
+      path: '/{any*}',
       handler: async (request: Hapi.Request, h: Hapi.ResponseToolkit) => {
-        const { state } = this;
         const { proxyDetails } = this.deps;
         const { url, method, headers, payload } = request;
 
         const reqDetails = {
-          proxyDetails, // maybe ,move it to state?
+          proxyDetails, // todo: move it to serverState
           url,
           method,
           headers,
           payload,
         };
-        const response = await proxyHandlerFn(reqDetails, state); // or better { ...state }?
+        const response = await proxyHandlerFn(reqDetails, this.state); // or better { ...this.state }?
 
         return h.response(response.data || undefined).code(response.status);
         // todo: think how to handle headers

@@ -33,12 +33,13 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
     this.handleProxyRequest = this.handleProxyRequest.bind(this);
   }
 
-  async handleProxyRequest(reqDetails: IncomingRequestDetails, state: ServerState) {
+  async handleProxyRequest(reqDetails: IncomingRequestDetails, serverState: ServerState) {
     const { ispaService, httpRequest, logger } = this.deps;
-    const proxyTarget = ispaService.getProxyTarget(reqDetails, state);
+    const { httpsAgent } = serverState;
+    const proxyTarget = ispaService.getProxyTarget(reqDetails, serverState); // pass only accessToken
 
-    // todo: think, if it's ok to use the same agent to call both hubs
     const response = await httpRequest({
+      httpsAgent,
       url: proxyTarget.url,
       headers: proxyTarget.headers,
       method: reqDetails.method,

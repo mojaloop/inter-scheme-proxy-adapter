@@ -3,9 +3,11 @@ import config from '#src/config';
 
 // prettier-ignore
 export const serverStateDto = ({
-  accessToken = 'testAccessToken'
+  accessToken = 'testAccessToken',
+  httpsAgent = null,
 } = {}): ServerState => ({
   accessToken,
+  httpsAgent,
 });
 
 // prettier-ignore

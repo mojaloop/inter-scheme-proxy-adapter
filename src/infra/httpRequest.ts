@@ -1,29 +1,16 @@
-import https from 'node:https';
+// import https from 'node:https';
 import axios from 'axios';
-
-import config from '../config';
 import { HttpRequestOptions, ProxyHandlerResponse } from '../domain/types';
 import { loggerFactory } from '../utils';
-import { ProxyTlsAgent } from './types';
-import { readCertsFromFile } from './readCertsFromFile';
 
 const logger = loggerFactory('httpRequest');
-
-const createTlsProxyAgent = (): ProxyTlsAgent => {
-  if (!config.get('mtlsConfig.enabled')) {
-    return null;
-  }
-  logger.info('mTLS is enabled');
-  const tlsOptions = readCertsFromFile();
-  return new https.Agent(tlsOptions);
-};
-
-const httpsAgent = createTlsProxyAgent();
+// todo: pass logger through HttpRequestOptions
 
 export const httpRequest = async (options: HttpRequestOptions): Promise<ProxyHandlerResponse> => {
+  const { httpsAgent, ...restOptions } = options;
   try {
     const result = await axios({
-      ...options,
+      ...restOptions,
       ...(httpsAgent && { httpsAgent }),
     });
     const { data, status, headers } = result;
