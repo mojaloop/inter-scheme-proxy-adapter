@@ -25,8 +25,10 @@
 
 import { ISPAService, ISPAServiceInterface } from '#src/domain';
 import { loggerFactory } from '#src/utils';
-import { PROXY_HEADER } from '#src/constants';
+import { PROXY_HEADER, AUTH_HEADER } from '#src/constants';
 import config from '#src/config';
+
+// import * as fixtures from '#test/fixtures';
 
 describe('ISPAService Tests -->', () => {
   const logger = loggerFactory('test');
@@ -41,6 +43,7 @@ describe('ISPAService Tests -->', () => {
     const incomingUrl = new URL(`http://localhost:12345${pathWithSearchParams}`);
     const headers = { h: 'h1' };
     const { baseUrl } = config.get('hubBConfig');
+    const token = 'TOKEN_NOT_IMPLEMENTED_YET'; // todo: update after implement token retrieval
 
     const proxyDetails = service.getProxyTarget({
       url: incomingUrl,
@@ -53,6 +56,7 @@ describe('ISPAService Tests -->', () => {
     expect(proxyDetails.headers).toEqual({
       ...headers,
       [PROXY_HEADER]: config.get('PROXY_DFSP_ID'),
+      [AUTH_HEADER]: `Bearer ${token}`,
     });
   });
 });

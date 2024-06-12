@@ -2,7 +2,7 @@ import https from 'node:https';
 import axios from 'axios';
 
 import config from '../config';
-import { ProxyHandlerResponse } from '../domain/types';
+import { HttpRequestOptions, ProxyHandlerResponse } from '../domain/types';
 import { loggerFactory } from '../utils';
 import { ProxyTlsAgent } from './types';
 import { readCertsFromFile } from './readCertsFromFile';
@@ -19,13 +19,6 @@ const createTlsProxyAgent = (): ProxyTlsAgent => {
 };
 
 const httpsAgent = createTlsProxyAgent();
-
-export type HttpRequestOptions = {
-  url: string;
-  method: string;
-  // headers: Record<string, string>;
-  data?: unknown;
-};
 
 export const httpRequest = async (options: HttpRequestOptions): Promise<ProxyHandlerResponse> => {
   try {

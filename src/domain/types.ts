@@ -2,6 +2,8 @@ import { URL } from 'node:url';
 import { ServerInfo, Server } from '@hapi/hapi';
 import { LogMethods, LogContext } from '../utils/types';
 
+type Headers = Record<string, string>;
+
 export type ProxyDetails = {
   baseUrl: string;
 };
@@ -11,9 +13,7 @@ export type ProxyTarget = {
   headers: Headers;
 };
 
-type Headers = Record<string, string>;
-
-export type ProxyHandlerInput = {
+export type IncomingRequestDetails = {
   url: URL; // incoming url
   method: string;
   headers: Headers;
@@ -27,23 +27,23 @@ export type ProxyHandlerResponse = {
   headers?: unknown;
 };
 
-export type ProxyHandlerFn = (args: ProxyHandlerInput) => Promise<ProxyHandlerResponse>;
+export type ProxyHandlerFn = (args: IncomingRequestDetails) => Promise<ProxyHandlerResponse>;
 
-export interface iISPA {
-  // todo: find better name
+export interface IProxyAdapter {
   start: () => Promise<void>;
   stop: () => Promise<void>;
   handleProxyRequest: ProxyHandlerFn;
 }
 
 export interface ISPAServiceInterface {
-  getProxyTarget: (args: ProxyHandlerInput) => ProxyTarget;
+  getProxyTarget: (args: IncomingRequestDetails) => ProxyTarget;
 }
 
 export type ISPADeps = {
   ispaService: ISPAServiceInterface;
   httpServerA: IHttpServer;
   httpServerB: IHttpServer;
+  httpRequest: HttpRequest;
   logger: ILogger;
 };
 
@@ -51,6 +51,15 @@ export type ISPAServiceDeps = {
   logger: ILogger;
   // todo: add axios instance here
 };
+
+export type HttpRequestOptions = {
+  url: string;
+  method: string;
+  headers: Headers;
+  data?: unknown; // rename to payload?
+};
+
+export type HttpRequest = (options: HttpRequestOptions) => Promise<ProxyHandlerResponse>;
 
 export interface ILogger extends LogMethods {
   child(context?: LogContext): ILogger;

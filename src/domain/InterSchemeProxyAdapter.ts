@@ -23,22 +23,21 @@
  --------------
  **********/
 
-import { iISPA, ISPADeps, ProxyHandlerInput } from './types';
-import { httpRequest } from '../infra'; // todo: avoid this dependency (pass in ctor
+import { IProxyAdapter, ISPADeps, IncomingRequestDetails } from './types';
 
-export class InterSchemeProxyAdapter implements iISPA {
+export class InterSchemeProxyAdapter implements IProxyAdapter {
   constructor(private readonly deps: ISPADeps) {
     this.handleProxyRequest = this.handleProxyRequest.bind(this);
   }
 
-  async handleProxyRequest(input: ProxyHandlerInput) {
-    const { ispaService, logger } = this.deps;
+  async handleProxyRequest(input: IncomingRequestDetails) {
+    const { ispaService, httpRequest, logger } = this.deps;
     const proxyTarget = ispaService.getProxyTarget(input);
 
-    // todo: think, if it's better to move the logic to ISPAService
+    // todo: think, if it's ok to use the same agent to call both hubs
     const response = await httpRequest({
       url: proxyTarget.url,
-      // headers: proxyTarget.headers,
+      headers: proxyTarget.headers,
       method: input.method,
       data: input.payload,
     });

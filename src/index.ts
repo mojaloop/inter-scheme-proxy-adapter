@@ -22,11 +22,11 @@
  ******/
 
 import config from './config';
-import { ISPAService, InterSchemeProxyAdapter, iISPA } from './domain';
-import { createHttpServers } from './infra';
+import { InterSchemeProxyAdapter, ISPAService } from './domain';
+import { createHttpServers, httpRequest } from './infra';
 import { startingProcess, loggerFactory } from './utils';
 
-let proxyAdapter: iISPA;
+let proxyAdapter: InterSchemeProxyAdapter;
 
 const start = async () => {
   const logger = loggerFactory(`ISPA-${config.get('PROXY_DFSP_ID')}`);
@@ -37,6 +37,7 @@ const start = async () => {
     ispaService,
     httpServerA,
     httpServerB,
+    httpRequest,
     logger,
   });
   await proxyAdapter.start();
