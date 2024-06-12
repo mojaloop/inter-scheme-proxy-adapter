@@ -5,14 +5,22 @@
   "main": "src/server.ts",
   "scripts": {
     "start": "ts-node src/server.ts",
+    "start:mtls": "ts-node src/mtlsServer.ts",
+    "start:express": "ts-node src/expressServer.ts",
     "start:hapi": "ts-node src/hapiServer.ts"
   },
   "dependencies": {
     "@hapi/hapi": "^21.3.9",
     "@types/node": "^20.14.2",
+    "body-parser": "^1.20.2",
+    "express": "^4.19.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.5"
   },
   "author": "Eugen Klymniuk (geka-evk)",
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@types/body-parser": "^1.19.5",
+    "@types/express": "^4.17.21"
+  }
 }

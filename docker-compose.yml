@@ -1,11 +1,32 @@
 version: '3.8'
 
+x-hub: &HUB
+  build:
+    context: ./docker/echo-server
+    dockerfile: Dockerfile
+  command: npm start
+  restart: always
+  env_file: .env
+
+
 services:
-  echo-server:
+  proxy:
     build:
-      context: ./docker/echo-server
+      context: ./
       dockerfile: Dockerfile
-    ports:
-      - "6000:6000"
     command: npm start
     restart: always
+    env_file: .env
+    ports:
+      - "${HTTP_PORT_A}:4100"
+      - "${HTTP_PORT_B}:4200"
+
+  hub-a:
+    <<: *HUB
+    ports:
+      - "${HUB_A_PORT}:6000"
+
+  hub-b:
+    <<: *HUB
+    ports:
+      - "${HUB_B_PORT}:6000"

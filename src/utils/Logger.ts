@@ -12,8 +12,7 @@ const makeLogString = (message: string, metaData?: unknown) => {
   return metaData ? `${message} - ${stringify(metaData)}` : message;
 };
 
-// todo: set logLevel from config
-export const loggerFactory = (context: LogContext): ILogger => new Logger(context);
+export const loggerFactory = (context?: LogContext): ILogger => new Logger(context);
 
 export class Logger implements ILogger {
   private readonly mlLogger = mlLogger;

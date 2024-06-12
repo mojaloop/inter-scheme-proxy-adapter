@@ -1,3 +1,5 @@
+import { ILogger } from '../../../domain';
+
 export type ReqAppState = {
   context: {
     id: string;
@@ -6,4 +8,8 @@ export type ReqAppState = {
     method: string;
     received: number;
   };
+};
+
+export type PluginOptions = {
+  logger: ILogger;
 };

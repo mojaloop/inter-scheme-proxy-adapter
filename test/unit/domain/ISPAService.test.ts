@@ -5,6 +5,7 @@
  The Mojaloop files are made available by the Bill & Melinda Gates Foundation under the Apache License, Version 2.0 (the "License") and you may not use these files except in compliance with the License. You may obtain a copy of the License at
  http://www.apache.org/licenses/LICENSE-2.0
  Unless required by applicable law or agreed to in writing, the Mojaloop files are distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+
  Contributors
  --------------
  This is the official list of the Mojaloop project contributors for this file.
@@ -18,32 +19,39 @@
  * Gates Foundation
  - Name Surname <name.surname@gatesfoundation.com>
 
+ * Eugen Klymniuk <eugen.klymniuk@infitx.com>
  --------------
- ******/
+ **********/
 
-import config from './config';
-import { ISPAService, InterSchemeProxyAdapter, iISPA } from './domain';
-import { createHttpServers } from './infra';
-import { startingProcess, loggerFactory } from './utils';
+import { ISPAService, ISPAServiceInterface } from '#src/domain';
+import { loggerFactory } from '#src/utils';
+import { PROXY_HEADER } from '#src/constants';
+import config from '#src/config';
 
-let proxyAdapter: iISPA;
+describe('ISPAService Tests -->', () => {
+  const logger = loggerFactory('test');
 
-const start = async () => {
-  const logger = loggerFactory(`ISPA-${config.get('PROXY_DFSP_ID')}`);
-  const { httpServerA, httpServerB } = createHttpServers({ logger });
-
-  const ispaService = new ISPAService({ logger });
-  proxyAdapter = new InterSchemeProxyAdapter({
-    ispaService,
-    httpServerA,
-    httpServerB,
-    logger,
+  let service: ISPAServiceInterface;
+  beforeEach(() => {
+    service = new ISPAService({ logger });
   });
-  await proxyAdapter.start();
-};
 
-const stop = async () => {
-  await proxyAdapter?.stop();
-};
+  test('should return correct proxy details', () => {
+    const pathWithSearchParams = '/path?query=1';
+    const incomingUrl = new URL(`http://localhost:12345${pathWithSearchParams}`);
+    const headers = { h: 'h1' };
+    const { baseUrl } = config.get('hubBConfig');
 
-startingProcess(start, stop);
+    const proxyDetails = service.getProxyTarget({
+      url: incomingUrl,
+      headers,
+      proxyDetails: { baseUrl },
+    });
+
+    expect(proxyDetails.url).toBe(`${baseUrl}${pathWithSearchParams}`);
+    expect(proxyDetails.headers).toEqual({
+      ...headers,
+      [PROXY_HEADER]: config.get('PROXY_DFSP_ID'),
+    });
+  });
+});

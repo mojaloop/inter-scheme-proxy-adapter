@@ -1,13 +1,15 @@
 import process from 'node:process';
 import * as v8 from 'node:v8';
+
 import { ILogger } from '../domain';
+import { loggerFactory } from '../utils';
 import { SERVICE_NAME } from '../constants';
 
 const SIGNALS = ['SIGINT', 'SIGTERM'];
 
-type TFn = () => Promise<unknown>;
+type AsyncFn = () => Promise<unknown>;
 
-export const startingProcess = (startFn: TFn, stopFn: TFn, logger: ILogger) => {
+export const startingProcess = (startFn: AsyncFn, stopFn: AsyncFn, logger: ILogger = loggerFactory()) => {
   const startTime = Date.now();
   logger.debug(`starting ${SERVICE_NAME}...`, { startTime });
 

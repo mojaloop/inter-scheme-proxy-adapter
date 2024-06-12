@@ -1,17 +1,5 @@
 import { Plugin, Request, ResponseToolkit } from '@hapi/hapi';
-import { ILogger } from '../domain';
-import { ReqAppState } from './types';
-import config from '../config';
-
-const proxyConfig = {
-  uri: `${config.get('PROXY_URI')}{path}{query}`,
-  passThrough: true,
-  timeout: 30_000,
-};
-
-type PluginOptions = {
-  logger: ILogger;
-};
+import { ReqAppState, PluginOptions } from './types';
 
 export const loggingPlugin: Plugin<PluginOptions> = {
   name: 'loggingPlugin',
@@ -39,14 +27,6 @@ export const loggingPlugin: Plugin<PluginOptions> = {
       },
     });
 
-    // server.ext({
-    //   type: 'onPreResponse',
-    //   method: (req: Request, h: ResponseToolkit) => {
-    //     logger.verbose('proxying request...', req.payload);
-    //     return h.proxy(proxyConfig);
-    //   },
-    // });
-
     server.ext({
       type: 'onPreResponse',
       method: (req: Request, h: ResponseToolkit) => {
@@ -55,6 +35,9 @@ export const loggingPlugin: Plugin<PluginOptions> = {
         const responseTimeSec = ((Date.now() - context.received) / 1000).toFixed(3);
 
         const statusCode = response instanceof Error ? response.output.statusCode : response.statusCode;
+        if (statusCode >= 300) {
+          logger.warn('bad response:', response);
+        }
         logger.info(`[<-- ${statusCode}][${responseTimeSec} s] ${method.toUpperCase()} ${path}`, context);
 
         return h.continue;

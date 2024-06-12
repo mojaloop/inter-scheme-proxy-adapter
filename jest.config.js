@@ -4,4 +4,8 @@ module.exports = {
   verbose: true,
   clearMocks: true,
   collectCoverage: true,
+  moduleNameMapper: {
+    '^#src/(.*)$': '<rootDir>/src/$1',
+  },
+  setupFiles: ['./test/setup.ts'],
 };

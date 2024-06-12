@@ -2,6 +2,9 @@
   "compilerOptions": {
     "baseUrl": "./",
     "rootDir": "./src",
+    "paths": {
+      "#src/*": ["./src/*"]
+    },
     "outDir": "./dist",
     "strict": true,
     "noUncheckedIndexedAccess": true,

@@ -23,6 +23,38 @@
  --------------
  **********/
 
-export class InterSchemeProxyAdapter {
+import { iISPA, ISPADeps, ProxyHandlerInput } from './types';
 
+export class InterSchemeProxyAdapter implements iISPA {
+  constructor(private readonly deps: ISPADeps) {
+    this.handleProxyRequest = this.handleProxyRequest.bind(this);
+  }
+
+  async handleProxyRequest(input: ProxyHandlerInput) {
+    const { ispaService, logger } = this.deps;
+    const proxyTarget = ispaService.getProxyTarget(input);
+    logger.info('incoming request for being proxied is ready', proxyTarget);
+    return proxyTarget;
+  }
+
+  async start(): Promise<void> {
+    const [isAStarted, isBStarted] = await Promise.all([
+      this.deps.httpServerA.start(this.handleProxyRequest),
+      this.deps.httpServerB.start(this.handleProxyRequest),
+    ]);
+    this.deps.logger.info('ISPA is started', { isAStarted, isBStarted });
+  }
+
+  async stop(): Promise<void> {
+    // prettier-ignore
+    const [isAStopped, isBStopped] = await Promise.all([
+      this.deps.httpServerA.stop(),
+      this.deps.httpServerB.stop(),
+    ]);
+    this.deps.logger.info('ISPA is stopped', { isAStopped, isBStopped });
+  }
+
+  private async sendProxyRequest() {
+    // send proxy request
+  }
 }
