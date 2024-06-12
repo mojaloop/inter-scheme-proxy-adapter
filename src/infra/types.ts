@@ -1,6 +1,7 @@
 import { type Agent } from 'node:https';
 import Wreck from '@hapi/wreck';
 import { ILogger, ProxyDetails } from '../domain/types';
+import { Client } from '#src/control-agent';
 
 export type AppConfig = {
   PROXY_DFSP_ID: string;
@@ -14,6 +15,8 @@ export type AppConfig = {
 
   hubAConfig: HubConfig;
   hubBConfig: HubConfig;
+
+  pm4mlEnabled: boolean;
 };
 
 type HubConfig = {
@@ -29,6 +32,7 @@ type ProxyConfig = {
 type ServerConfig = {
   host: string;
   port: number;
+  mgmtApi: MgtAPiConfig;
 };
 
 type MtlsConfig = {
@@ -36,6 +40,11 @@ type MtlsConfig = {
   caCertPath: string;
   clientCertPath: string;
   clientKeyPath: string;
+};
+
+type MgtAPiConfig = {
+  host: string;
+  port: number;
 };
 
 export type TlsOptions = Readonly<{
@@ -55,4 +64,5 @@ export type HttpServerDeps = {
   // proxyHttpClient: ProxyHttpClient;
   proxyTlsAgent: ProxyTlsAgent;
   logger: ILogger;
+  controlClient: Client | null;
 };

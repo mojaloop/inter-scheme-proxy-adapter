@@ -133,7 +133,7 @@ export class Client extends ws {
     return build;
   }
 
-  static Create(args: IClientParams) {
+  static Create(args: IClientParams): Promise<Client> {
     return new Promise((resolve, reject) => {
       const client = new Client(args);
       client.on('open', () => resolve(client));

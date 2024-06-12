@@ -6,6 +6,7 @@ import axios from 'axios';
 import config from '../../config';
 import { IHttpServer, ILogger } from '../../domain';
 import { HttpServer, ProxyTlsAgent, ProxyHttpClient, readCertsFromFile } from '../../infra';
+import { Client } from '#src/control-agent';
 
 const createTlsProxyAgent = (logger: ILogger): ProxyTlsAgent => {
   if (!config.get('mtlsConfig.enabled')) {
@@ -59,11 +60,11 @@ type createHttpServersDeps = {
   logger: ILogger;
 };
 
-export const createHttpServers = (deps: createHttpServersDeps): httpServersMap => {
+export const createHttpServers = async (deps: createHttpServersDeps): Promise<httpServersMap> => {
   const { logger } = deps;
-
+  const serverAConfig = config.get('serverAConfig');
   const httpServerA = new HttpServer({
-    serverConfig: config.get('serverAConfig'),
+    serverConfig: serverAConfig,
     proxyConfig: config.get('proxyConfig'),
     proxyDetails: {
       baseUrl: config.get('hubBConfig').baseUrl,
@@ -71,10 +72,17 @@ export const createHttpServers = (deps: createHttpServersDeps): httpServersMap =
     // proxyHttpClient: createHttpClient(logger),
     proxyTlsAgent: createTlsProxyAgent(logger),
     logger: logger.child('serverA'),
+    controlClient: config.get('pm4mlEnabled') ? await Client.Create({ 
+      address: serverAConfig.mgmtApi.host, 
+      port: serverAConfig.mgmtApi.port, 
+      logger, 
+      appConfig: config.get() 
+    }) : null,
   });
 
+  const serverBConfig = config.get('serverBConfig');
   const httpServerB = new HttpServer({
-    serverConfig: config.get('serverBConfig'),
+    serverConfig: serverBConfig,
     proxyConfig: config.get('proxyConfig'),
     proxyDetails: {
       baseUrl: config.get('hubAConfig').baseUrl,
@@ -82,6 +90,12 @@ export const createHttpServers = (deps: createHttpServersDeps): httpServersMap =
     // proxyHttpClient: createHttpClient(logger),
     proxyTlsAgent: createTlsProxyAgent(logger),
     logger: logger.child('serverB'),
+    controlClient: config.get('pm4mlEnabled') ? await Client.Create({ 
+      address: serverBConfig.mgmtApi.host, 
+      port: serverBConfig.mgmtApi.port, 
+      logger, 
+      appConfig: config.get() 
+    }) : null,
   });
 
   return Object.freeze({
