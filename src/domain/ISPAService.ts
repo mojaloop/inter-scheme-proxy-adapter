@@ -2,7 +2,7 @@ import config from '../config';
 import { PROXY_HEADER, AUTH_HEADER } from '../constants';
 import { ISPAServiceInterface, ISPAServiceDeps, IncomingRequestDetails, ServerState, ILogger } from './types';
 
-const { DFSP_ID } = config.get(); // or pass it as a parameter in ctor?
+const { PROXY_ID } = config.get(); // or pass it as a parameter in ctor?
 
 export class ISPAService implements ISPAServiceInterface {
   private readonly log: ILogger;
@@ -22,7 +22,7 @@ export class ISPAService implements ISPAServiceInterface {
       url: `${baseUrl}${pathname}${search}`,
       headers: {
         ...reqDetails.headers,
-        [PROXY_HEADER]: DFSP_ID,
+        [PROXY_HEADER]: PROXY_ID,
         [AUTH_HEADER]: `Bearer ${state.accessToken}`,
       },
     };

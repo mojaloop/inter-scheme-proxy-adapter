@@ -57,7 +57,7 @@ describe('ISPAService Tests -->', () => {
     expect(proxyTarget.url).toBe(`${proxyDetails.baseUrl}/${path}?${query}`);
     expect(proxyTarget.headers).toEqual({
       ...headers,
-      [PROXY_HEADER]: config.get('DFSP_ID'),
+      [PROXY_HEADER]: config.get('PROXY_ID'),
       [AUTH_HEADER]: `Bearer ${serverState.accessToken}`,
     });
   });

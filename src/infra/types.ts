@@ -2,7 +2,7 @@ import { type Agent } from 'node:https';
 import { ILogger, ProxyDetails } from '../domain/types';
 
 export type AppConfig = {
-  DFSP_ID: string;
+  PROXY_ID: string;
   LOG_LEVEL: string; // todo: use LogLevel type
 
   mtlsConfigA: MtlsConfig;

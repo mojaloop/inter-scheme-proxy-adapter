@@ -2,11 +2,11 @@ import convict from 'convict';
 import { AppConfig } from './infra';
 
 const config = convict<AppConfig>({
-  DFSP_ID: {
+  PROXY_ID: {
     doc: 'The Proxy DFSP ID',
     format: String,
     default: null,
-    env: 'DFSP_ID',
+    env: 'PROXY_ID',
   },
 
   mtlsConfigA: {
@@ -102,7 +102,7 @@ const config = convict<AppConfig>({
       doc: 'Base URL on hub A',
       format: String,
       default: null,
-      env: 'HUB_A_BASE_URL',
+      env: 'PEER_ENDPOINT_A',
     },
   },
 
@@ -111,7 +111,7 @@ const config = convict<AppConfig>({
       doc: 'Base URL on hub B',
       format: String,
       default: null,
-      env: 'HUB_B_BASE_URL',
+      env: 'PEER_ENDPOINT_B',
     },
   },
 

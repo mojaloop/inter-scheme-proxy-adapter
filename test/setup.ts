@@ -1,8 +1,8 @@
 // define required env vars
 Object.assign(process.env, {
-  DFSP_ID: 'proxy1',
-  HUB_A_BASE_URL: 'https://localhost:11443',
-  HUB_B_BASE_URL: 'https://localhost:22443',
+  PROXY_ID: 'proxy1',
+  PEER_ENDPOINT_A: 'https://localhost:11443',
+  PEER_ENDPOINT_B: 'https://localhost:22443',
 
   OUTBOUND_MUTUAL_TLS_ENABLED_A: true,
   OUT_CA_CERT_PATH_A: 'ca-cert.pem',
