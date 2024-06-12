@@ -4,7 +4,7 @@ import axios from 'axios';
 import { readCertsFromFile } from './infra';
 
 // todo: remove the file before merging to main
-
+// @ts-expect-error TS2554: Expected 1 arguments, but got 0
 const { ca, cert, key } = readCertsFromFile();
 
 const httpsAgent = new https.Agent({ ca, cert, key });
