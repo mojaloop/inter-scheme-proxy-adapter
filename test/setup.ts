@@ -1,6 +1,6 @@
 // define required env vars
 Object.assign(process.env, {
-  PROXY_DFSP_ID: 'proxy1',
+  DFSP_ID: 'proxy1',
   HUB_A_BASE_URL: 'https://localhost:11443',
   HUB_B_BASE_URL: 'https://localhost:22443',
 

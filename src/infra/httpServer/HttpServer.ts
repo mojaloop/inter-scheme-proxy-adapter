@@ -1,14 +1,21 @@
+import { EventEmitter } from 'node:events';
 import Hapi from '@hapi/hapi';
 
-import { ProxyHandlerFn, IHttpServer } from '../../domain/types';
+import { ProxyHandlerFn, IHttpServer, ServerState } from '../../domain/types';
+import { INTERNAL_EVENTS } from '../../constants';
 import { HttpServerDeps } from '../types';
 import { loggingPlugin } from './plugins';
 
-export class HttpServer implements IHttpServer {
+export class HttpServer extends EventEmitter implements IHttpServer {
   private readonly server: Hapi.Server;
+  private state: ServerState = {
+    accessToken: '',
+  };
 
   constructor(private readonly deps: HttpServerDeps) {
+    super();
     this.server = new Hapi.Server(deps.serverConfig);
+    this.initInternalEvents();
   }
 
   async start(proxyHandler: ProxyHandlerFn): Promise<boolean> {
@@ -56,16 +63,18 @@ export class HttpServer implements IHttpServer {
       method: '*',
       path: '/{path*}',
       handler: async (request: Hapi.Request, h: Hapi.ResponseToolkit) => {
+        const { state } = this;
         const { proxyDetails } = this.deps;
         const { url, method, headers, payload } = request;
 
-        const response = await proxyHandlerFn({
-          proxyDetails,
+        const reqDetails = {
+          proxyDetails, // maybe ,move it to state?
           url,
           method,
           headers,
           payload,
-        });
+        };
+        const response = await proxyHandlerFn(reqDetails, state); // or better { ...state }?
 
         return h.response(response.data || undefined).code(response.status);
         // todo: think how to handle headers
@@ -74,5 +83,17 @@ export class HttpServer implements IHttpServer {
 
     logger.debug('proxy route registered');
     return true;
+  }
+
+  private initInternalEvents() {
+    const { logger } = this.deps;
+    // todo: think better way to update tokens/certs
+    this.on(INTERNAL_EVENTS.state, (data: ServerState) => {
+      if (!data) return;
+      if (data.accessToken) {
+        this.state.accessToken = data.accessToken;
+        logger.debug('accessToken is updated', data.accessToken);
+      }
+    });
   }
 }

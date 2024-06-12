@@ -29,6 +29,7 @@ import { loggerFactory } from '#src/utils';
 import config from '#src/config';
 
 import * as fixtures from '#test/fixtures';
+import { proxyDetailsDto, requestDetailsDto } from '#test/fixtures';
 
 describe('ISPAService Tests -->', () => {
   const logger = loggerFactory('test');
@@ -39,24 +40,25 @@ describe('ISPAService Tests -->', () => {
   });
 
   test('should return correct proxy details', () => {
-    const pathWithSearchParams = '/path?query=1';
-    const incomingUrl = new URL(`http://localhost:12345${pathWithSearchParams}`);
-    const headers = { h: 'h1' };
-    const { baseUrl } = config.get('hubBConfig');
-    const token = fixtures.mockBearerToken(); // todo: update after implement token retrieval
-
-    const proxyDetails = service.getProxyTarget({
-      url: incomingUrl,
-      method: 'GET',
+    const path = 'api/test';
+    const query = 'query=test';
+    const headers = { h1: 'test' };
+    const proxyDetails = fixtures.proxyDetailsDto();
+    const reqDetails = requestDetailsDto({
+      path,
+      query,
       headers,
-      proxyDetails: { baseUrl },
+      proxyDetails,
     });
+    const serverState = fixtures.serverStateDto();
 
-    expect(proxyDetails.url).toBe(`${baseUrl}${pathWithSearchParams}`);
-    expect(proxyDetails.headers).toEqual({
+    const proxyTarget = service.getProxyTarget(reqDetails, serverState);
+
+    expect(proxyTarget.url).toBe(`${proxyDetails.baseUrl}/${path}?${query}`);
+    expect(proxyTarget.headers).toEqual({
       ...headers,
-      [PROXY_HEADER]: config.get('PROXY_DFSP_ID'),
-      [AUTH_HEADER]: `Bearer ${token}`,
+      [PROXY_HEADER]: config.get('DFSP_ID'),
+      [AUTH_HEADER]: `Bearer ${serverState.accessToken}`,
     });
   });
 });

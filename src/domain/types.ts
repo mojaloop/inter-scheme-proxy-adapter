@@ -1,5 +1,6 @@
 import { URL } from 'node:url';
 import { ServerInfo, Server } from '@hapi/hapi';
+import { INTERNAL_EVENTS } from '../constants';
 import { LogMethods, LogContext } from '../utils/types';
 
 type Headers = Record<string, string>;
@@ -27,7 +28,10 @@ export type ProxyHandlerResponse = {
   headers?: unknown;
 };
 
-export type ProxyHandlerFn = (args: IncomingRequestDetails) => Promise<ProxyHandlerResponse>;
+export type ProxyHandlerFn = (
+  reqDetails: IncomingRequestDetails,
+  serverState: ServerState,
+) => Promise<ProxyHandlerResponse>;
 
 export interface IProxyAdapter {
   start: () => Promise<void>;
@@ -36,7 +40,7 @@ export interface IProxyAdapter {
 }
 
 export interface ISPAServiceInterface {
-  getProxyTarget: (args: IncomingRequestDetails) => ProxyTarget;
+  getProxyTarget: (reqDetails: IncomingRequestDetails, state: ServerState) => ProxyTarget;
 }
 
 export type ISPADeps = {
@@ -65,9 +69,15 @@ export interface ILogger extends LogMethods {
   child(context?: LogContext): ILogger;
 }
 
+export type ServerState = {
+  accessToken: string;
+  // httpsAgent: Agent | null;
+};
+
 export interface IHttpServer {
   start: (proxyHandlerFn: ProxyHandlerFn) => Promise<boolean>;
   stop: () => Promise<boolean>;
-  info: ServerInfo; // todo: think, if we need this
+  emit: (event: typeof INTERNAL_EVENTS.state, data: Partial<ServerState>) => boolean;
+  info: ServerInfo; // think, if we need this
   hapiServer: Readonly<Server>; // for testing purposes
 }
