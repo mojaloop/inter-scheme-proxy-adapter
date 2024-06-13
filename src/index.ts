@@ -30,7 +30,7 @@ import { startingProcess, loggerFactory } from './utils';
 let proxyAdapter: InterSchemeProxyAdapter;
 
 const start = async () => {
-  const logger = loggerFactory(`ISPA-${config.get('DFSP_ID')}`);
+  const logger = loggerFactory(`ISPA-${config.get('PROXY_ID')}`);
   const { httpServerA, httpServerB } = await createHttpServers({ logger });
   const { controlAgentA, controlAgentB } = await createControlAgents({ logger });
 

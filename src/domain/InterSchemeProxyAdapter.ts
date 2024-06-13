@@ -25,7 +25,11 @@
 
 import { GenericObject, ICACerts } from '#src/infra/control-agent/types';
 import { INTERNAL_EVENTS } from '../constants';
-import { IProxyAdapter, ISPADeps, IncomingRequestDetails, ServerState } from './types';
+import { IProxyAdapter, ISPADeps, IncomingRequestDetails, ServerState, ServerStateEvent } from './types';
+
+import { readCertsFromFile } from '../infra';
+// todo: remove it after menAPI integration is ready!
+import config from '../config';
 
 export const MOCK_TOKEN = 'noAccessTokenYet';
 
@@ -34,24 +38,22 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
     this.handleProxyRequest = this.handleProxyRequest.bind(this);
   }
 
-  async handleProxyRequest(reqDetails: IncomingRequestDetails, state: ServerState) {
-    const { ispaService, httpRequest, logger } = this.deps;
-    const proxyTarget = ispaService.getProxyTarget(reqDetails, state);
+  async handleProxyRequest(reqDetails: IncomingRequestDetails, serverState: ServerState) {
+    const { ispaService, httpRequest } = this.deps;
+    const { httpsAgent } = serverState;
+    const proxyTarget = ispaService.getProxyTarget(reqDetails, serverState); // pass only accessToken
 
-    // todo: think, if it's ok to use the same agent to call both hubs
-    const response = await httpRequest({
+    return httpRequest({
+      httpsAgent,
       url: proxyTarget.url,
       headers: proxyTarget.headers,
       method: reqDetails.method,
       data: reqDetails.payload,
     });
-    logger.info('proxy response is ready', response);
-
-    return response;
   }
 
   async start(): Promise<void> {
-    // todo: get certs
+    await this.getCerts();
     await this.getAccessTokens();
     await this.initControlAgents();
 
@@ -59,6 +61,7 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
       this.deps.httpServerA.start(this.handleProxyRequest),
       this.deps.httpServerB.start(this.handleProxyRequest),
     ]);
+
     this.deps.logger.info('ISPA is started', { isAStarted, isBStarted });
   }
 
@@ -71,30 +74,43 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
     this.deps.logger.info('ISPA is stopped', { isAStopped, isBStopped });
   }
 
-  private async sendProxyRequest() {
-    // send proxy request
-  }
-
   private async getAccessTokens() {
     // todo: add logic to obtain access tokens [CSI-126]
     const tokenA = MOCK_TOKEN;
     const tokenB = MOCK_TOKEN;
 
-    this.deps.httpServerA.emit(INTERNAL_EVENTS.state, { accessToken: tokenA });
-    this.deps.httpServerB.emit(INTERNAL_EVENTS.state, { accessToken: tokenB });
+    this.emitStateEventServerA({ accessToken: tokenA });
+    this.emitStateEventServerB({ accessToken: tokenB });
+  }
 
-    return { tokenA, tokenB }; // think, if we need this
+  private async getCerts() {
+    // todo: use MenAPI instead
+    const { mtlsConfigA, mtlsConfigB } = config.get();
+    const certsA = readCertsFromFile(mtlsConfigA);
+    const certsB = readCertsFromFile(mtlsConfigB);
+
+    this.emitStateEventServerA({ certs: certsB });
+    this.emitStateEventServerB({ certs: certsA });
+  }
+
+  private emitStateEventServerA(event: ServerStateEvent) {
+    this.deps.httpServerA.emit(INTERNAL_EVENTS.state, event);
+  }
+
+  private emitStateEventServerB(event: ServerStateEvent) {
+    this.deps.httpServerB.emit(INTERNAL_EVENTS.state, event);
   }
 
   private async initControlAgents() {
     const { httpServerA, httpServerB  } = this.deps;
     
-    this.deps.controlAgentA.init({
-      onCert: (certs: ICACerts) => { httpServerA.emit(INTERNAL_EVENTS.state, { certs } as GenericObject ); }
-    });
-
-    this.deps.controlAgentB.init({
-      onCert: (certs: ICACerts) => { httpServerB.emit(INTERNAL_EVENTS.state, { certs } as GenericObject ); }
-    });
+    return Promise.all([
+      this.deps.controlAgentA.init({
+        onCert: (certs: ICACerts) => { httpServerA.emit(INTERNAL_EVENTS.state, { certs } as GenericObject ); }
+      }),
+      this.deps.controlAgentB.init({
+        onCert: (certs: ICACerts) => { httpServerB.emit(INTERNAL_EVENTS.state, { certs } as GenericObject ); }
+      }),
+    ]);
   }
 }

@@ -1,6 +1,7 @@
 import { URL } from 'node:url';
 import { ServerInfo, Server } from '@hapi/hapi';
 import { INTERNAL_EVENTS } from '../constants';
+import { ProxyTlsAgent, TlsOptions } from '../infra/types';
 import { LogMethods, LogContext } from '../utils/types';
 import { IControlAgent } from '#src/infra/control-agent/types';
 
@@ -56,14 +57,16 @@ export type ISPADeps = {
 
 export type ISPAServiceDeps = {
   logger: ILogger;
-  // todo: add axios instance here
+  // maybe, move httpRequest (axios instance) here?
 };
 
 export type HttpRequestOptions = {
+  httpsAgent: ProxyTlsAgent;
   url: string;
   method: string;
   headers: Headers;
   data?: unknown; // rename to payload?
+  // todo: add logger here
 };
 
 export type HttpRequest = (options: HttpRequestOptions) => Promise<ProxyHandlerResponse>;
@@ -74,13 +77,20 @@ export interface ILogger extends LogMethods {
 
 export type ServerState = {
   accessToken: string;
-  // httpsAgent: Agent | null;
+  httpsAgent: ProxyTlsAgent;
 };
+
+export type ServerStateEvent = Partial<{
+  accessToken: string;
+  certs: TlsOptions;
+}>;
+// todo: define that, at least, one of the fields should be present
 
 export interface IHttpServer {
   start: (proxyHandlerFn: ProxyHandlerFn) => Promise<boolean>;
   stop: () => Promise<boolean>;
-  emit: (event: typeof INTERNAL_EVENTS.state, data: Partial<ServerState>) => boolean;
+  emit: (event: typeof INTERNAL_EVENTS.state, data: ServerStateEvent) => boolean;
+  // todo: think, if it's better to emit separate events for each state change
   info: ServerInfo; // think, if we need this
   hapiServer: Readonly<Server>; // for testing purposes
 }

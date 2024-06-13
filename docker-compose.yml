@@ -15,13 +15,13 @@ services:
       context: ./
       dockerfile: Dockerfile
     command: npm start
-    restart: always
+    restart: on-failure
     env_file: .env
     volumes:
       - ./certs/:/opt/app/certs/
     ports:
-      - "${HTTP_PORT_A}:${HTTP_PORT_A}"
-      - "${HTTP_PORT_B}:${HTTP_PORT_A}"
+      - "${INBOUND_LISTEN_PORT_A}:${INBOUND_LISTEN_PORT_A}"
+      - "${INBOUND_LISTEN_PORT_B}:${INBOUND_LISTEN_PORT_B}"
 
   hub-a:
     <<: *HUB
