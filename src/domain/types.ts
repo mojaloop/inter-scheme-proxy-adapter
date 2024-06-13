@@ -2,6 +2,7 @@ import { URL } from 'node:url';
 import { ServerInfo, Server } from '@hapi/hapi';
 import { INTERNAL_EVENTS } from '../constants';
 import { LogMethods, LogContext } from '../utils/types';
+import { IControlAgent } from '#src/infra/control-agent/types';
 
 type Headers = Record<string, string>;
 
@@ -47,6 +48,8 @@ export type ISPADeps = {
   ispaService: ISPAServiceInterface;
   httpServerA: IHttpServer;
   httpServerB: IHttpServer;
+  controlAgentA: IControlAgent;
+  controlAgentB: IControlAgent;
   httpRequest: HttpRequest;
   logger: ILogger;
 };

@@ -24,6 +24,7 @@
 import config from './config';
 import { InterSchemeProxyAdapter, ISPAService } from './domain';
 import { createHttpServers, httpRequest } from './infra';
+import { createControlAgents } from './infra/control-agent/createControlAgents';
 import { startingProcess, loggerFactory } from './utils';
 
 let proxyAdapter: InterSchemeProxyAdapter;
@@ -31,12 +32,15 @@ let proxyAdapter: InterSchemeProxyAdapter;
 const start = async () => {
   const logger = loggerFactory(`ISPA-${config.get('DFSP_ID')}`);
   const { httpServerA, httpServerB } = await createHttpServers({ logger });
+  const { controlAgentA, controlAgentB } = await createControlAgents({ logger });
 
   const ispaService = new ISPAService({ logger });
   proxyAdapter = new InterSchemeProxyAdapter({
     ispaService,
     httpServerA,
     httpServerB,
+    controlAgentA,
+    controlAgentB,
     httpRequest,
     logger,
   });
