@@ -1,6 +1,6 @@
 {
   "name": "inter-scheme-proxy-adapter",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "description": "Schemes Proxy implementation (ISPA)",
   "author": "Eugen Klymniuk (geka-evk)",
@@ -14,6 +14,7 @@
     "start:build": "npm run build && npm start",
     "start:dev": "ts-node -r dotenv/config -P ./tsconfig.json src/index.ts",
     "start:tls": "ts-node -r dotenv/config -P ./tsconfig.json src/tlsExample.ts",
+    "start:token": "ts-node -r dotenv/config -P ./tsconfig.json src/getAccessToken.ts",
     "test": "npm run test:unit",
     "test:unit": "jest --testMatch='**/unit/**/*.test.ts'",
     "test:xunit": "JEST_JUNIT_OUTPUT_DIR=./test/reports/ JEST_JUNIT_OUTPUT_NAME=xunit.xml npm run test:unit -- --reporters=jest-junit",
