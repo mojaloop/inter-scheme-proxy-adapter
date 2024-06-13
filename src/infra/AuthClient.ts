@@ -21,15 +21,15 @@ export class AuthClient implements IAuthClient {
     return data;
   }
 
-  async startAccessTokenUpdates(emit: (token: string) => void) {
+  async startAccessTokenUpdates(emitNewToken: (token: string) => void) {
     const { access_token, expires_in = Infinity } = await this.getOidcToken();
-    emit(access_token);
+    emitNewToken(access_token);
 
     const { refreshSeconds, tokenEndpoint } = this.deps.authConfig;
     const updateTimeoutSec = Math.min(refreshSeconds, expires_in);
     this.deps.logger.verbose('accessToken updated, waiting for next updates...', { updateTimeoutSec, tokenEndpoint });
 
-    this.timer = setTimeout(this.startAccessTokenUpdates.bind(this, emit), refreshSeconds * 1000);
+    this.timer = setTimeout(this.startAccessTokenUpdates.bind(this, emitNewToken), updateTimeoutSec * 1000);
   }
 
   stopUpdates() {
