@@ -23,6 +23,7 @@
  --------------
  **********/
 
+import { GenericObject, ICACerts } from '#src/infra/control-agent/types';
 import { INTERNAL_EVENTS } from '../constants';
 import { IProxyAdapter, ISPADeps, IncomingRequestDetails, ServerState } from './types';
 
@@ -52,7 +53,6 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
   async start(): Promise<void> {
     // todo: get certs
     await this.getAccessTokens();
-
     await this.initControlAgents();
 
     const [isAStarted, isBStarted] = await Promise.all([
@@ -87,6 +87,14 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
   }
 
   private async initControlAgents() {
+    const { httpServerA, httpServerB  } = this.deps;
     
+    this.deps.controlAgentA.init({
+      onCert: (certs: ICACerts) => { httpServerA.emit(INTERNAL_EVENTS.state, { certs } as GenericObject); }
+    });
+
+    this.deps.controlAgentB.init({
+      onCert: (certs: ICACerts) => { httpServerB.emit(INTERNAL_EVENTS.state, { certs } as GenericObject); }
+    });
   }
 }
