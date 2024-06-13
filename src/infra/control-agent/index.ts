@@ -25,7 +25,7 @@
 import ws, { WebSocket } from 'ws';
 import { MESSAGE, VERB } from './constants';
 import { GenericObject, ICACallbacks, ICAParams, ICACerts, IControlAgent } from './types';
-import { ILogger } from '#src/domain';
+import { ILogger } from '../../domain';
 import { build, deserialise, serialise } from './mcm';
 
 /**************************************************************************
@@ -50,6 +50,7 @@ export class ControlAgent implements IControlAgent {
     this.address = params.address || 'localhost';
     this.port = params.port;
     this.logger = params.logger;
+    this.receive = this.receive.bind(this);
   }
 
   init (cbs: ICACallbacks){
@@ -69,7 +70,7 @@ export class ControlAgent implements IControlAgent {
         resolve();
       });
       this.ws.on('error', reject);
-      this.ws.on('message', this._handle);
+      this.ws.on('message', this._handle.bind(this));
     });
   }
 
@@ -88,6 +89,10 @@ export class ControlAgent implements IControlAgent {
       this.ws.close();
     });
   }
+
+  get build() {
+    return build;
+  } 
 
   send(msg: string | GenericObject) {
     const data = typeof msg === 'string' ? msg : serialise(msg);
@@ -111,7 +116,7 @@ export class ControlAgent implements IControlAgent {
     });
   }
 
-  private extractCerts(data: GenericObject): ICACerts {
+  static extractCerts(data: GenericObject): ICACerts {
     // todo: need to align with actual message format from mcm
     return {
       cert: data.cert,
@@ -136,7 +141,7 @@ export class ControlAgent implements IControlAgent {
           case VERB.NOTIFY: 
           case VERB.PATCH:
           {
-            this.callbackFns?.onCert(this.extractCerts(msg.data));
+            this.callbackFns?.onCert(ControlAgent.extractCerts(msg.data));
             break;
           }
           default:

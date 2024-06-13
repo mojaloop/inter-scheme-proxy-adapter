@@ -1,4 +1,4 @@
-import { ILogger } from '#src/types';
+import { ILogger } from '../../domain';
 import { ControlAgent } from './index';
 import { IControlAgent } from './types';
 import config from '../../config';

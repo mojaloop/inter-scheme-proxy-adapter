@@ -3,7 +3,7 @@ import { ServerInfo, Server } from '@hapi/hapi';
 import { INTERNAL_EVENTS } from '../constants';
 import { ProxyTlsAgent, TlsOptions } from '../infra/types';
 import { LogMethods, LogContext } from '../utils/types';
-import { IControlAgent } from '#src/infra/control-agent/types';
+import { IControlAgent } from '../infra/control-agent/types';
 
 type Headers = Record<string, string>;
 

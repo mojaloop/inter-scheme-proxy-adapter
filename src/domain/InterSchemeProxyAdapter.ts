@@ -23,13 +23,15 @@
  --------------
  **********/
 
-import { GenericObject, ICACerts } from '#src/infra/control-agent/types';
+import { GenericObject, ICACerts } from '../infra/control-agent/types';
 import { INTERNAL_EVENTS } from '../constants';
 import { IProxyAdapter, ISPADeps, IncomingRequestDetails, ServerState, ServerStateEvent } from './types';
 
 import { readCertsFromFile } from '../infra';
 // todo: remove it after menAPI integration is ready!
 import config from '../config';
+import { ControlAgent } from '../infra/control-agent';
+import { build, deserialise } from '../infra/control-agent/mcm';
 
 export const MOCK_TOKEN = 'noAccessTokenYet';
 
@@ -55,12 +57,14 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
   async start(): Promise<void> {
     await this.getCerts();
     await this.getAccessTokens();
-    await this.initControlAgents();
 
     const [isAStarted, isBStarted] = await Promise.all([
       this.deps.httpServerA.start(this.handleProxyRequest),
       this.deps.httpServerB.start(this.handleProxyRequest),
     ]);
+
+    await this.initControlAgents();
+    await this.loadInitialCerts();
 
     this.deps.logger.info('ISPA is started', { isAStarted, isBStarted });
   }
@@ -102,15 +106,30 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
   }
 
   private async initControlAgents() {
-    const { httpServerA, httpServerB  } = this.deps;
-    
-    return Promise.all([
-      this.deps.controlAgentA.init({
+    const { httpServerA, httpServerB, controlAgentA, controlAgentB  } = this.deps;
+
+    const res = await Promise.all([
+      controlAgentA.init({
         onCert: (certs: ICACerts) => { httpServerA.emit(INTERNAL_EVENTS.state, { certs } as GenericObject ); }
       }),
-      this.deps.controlAgentB.init({
+      controlAgentB.init({
         onCert: (certs: ICACerts) => { httpServerB.emit(INTERNAL_EVENTS.state, { certs } as GenericObject ); }
       }),
     ]);
+
+    return res;
   }
+
+  private async loadInitialCerts() {
+    const { httpServerA, httpServerB, controlAgentA, controlAgentB  } = this.deps;
+
+    await controlAgentA.send(build.CONFIGURATION.READ());
+    const resA = deserialise(await controlAgentA.receive());
+    httpServerA.emit(INTERNAL_EVENTS.state, { certs: ControlAgent.extractCerts(resA) } as GenericObject );
+
+    await controlAgentB.send(build.CONFIGURATION.READ());
+    const resB = deserialise(await controlAgentA.receive());
+    httpServerB.emit(INTERNAL_EVENTS.state, { certs: ControlAgent.extractCerts(resB) } as GenericObject );
+  }
+  
 }

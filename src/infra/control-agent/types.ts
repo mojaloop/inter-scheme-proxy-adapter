@@ -1,4 +1,4 @@
-import { ILogger } from '#src/types';
+import { ILogger } from '../../domain';
 
 /**************************************************************************
  * IControlAgent
@@ -15,7 +15,7 @@ export interface IControlAgent {
   init: (cbs: ICACallbacks) => void;
   open: () => Promise<void>;
   close: () => Promise<void>;
-  send: (verb: string, message: GenericObject) => void;
+  send: (message: string) => void;
   receive: () => Promise<string>;
 }
 
