@@ -80,20 +80,6 @@ const config = convict<AppConfig>({
       default: '0.0.0.0',
       env: 'INBOUND_HOST_A',
     },
-    mgmtApi: {
-      host: {
-        doc: 'Hostname or IP address where the management API listens for incoming requests',
-        format: String,
-        default: 'localhost',
-        env: 'MGMT_API_HOST_A',
-      },
-      port: {
-        doc: 'HTTP port to listen on for the management API',
-        format: 'port',
-        default: 4000,
-        env: 'MGMT_API_PORT_A',
-      },
-    },
   },
 
   serverBConfig: {
@@ -109,19 +95,35 @@ const config = convict<AppConfig>({
       default: '0.0.0.0',
       env: 'INBOUND_HOST_B',
     },
-    mgmtApi: {
-      host: {
-        doc: 'Hostname or IP address where the management API listens for incoming requests',
-        format: String,
-        default: 'localhost',
-        env: 'MGMT_API_HOST_B',
-      },
-      port: {
-        doc: 'HTTP port to listen on for the management API',
-        format: 'port',
-        default: 4000,
-        env: 'MGMT_API_PORT_B',
-      },
+  },
+
+  mgmtApiAConfig: {
+    host: {
+      doc: 'Hostname or IP address where the management API listens for incoming requests',
+      format: String,
+      default: 'localhost',
+      env: 'MGMT_API_HOST_A',
+    },
+    port: {
+      doc: 'HTTP port to listen on for the management API',
+      format: 'port',
+      default: 4000,
+      env: 'MGMT_API_PORT_A',
+    },
+  },
+
+  mgmtApiBConfig: {
+    host: {
+      doc: 'Hostname or IP address where the management API listens for incoming requests',
+      format: String,
+      default: 'localhost',
+      env: 'MGMT_API_HOST_B',
+    },
+    port: {
+      doc: 'HTTP port to listen on for the management API',
+      format: 'port',
+      default: 4000,
+      env: 'MGMT_API_PORT_B',
     },
   },
 

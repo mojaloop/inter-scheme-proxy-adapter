@@ -15,14 +15,14 @@ type createControlAgentsDeps = {
 export const createControlAgents = async (deps: createControlAgentsDeps): Promise<controlAgentsMap> => {
   const { logger } = deps;
   const controlAgentA = new ControlAgent({
-    address: config.get('serverAConfig').mgmtApi.host,
-    port: config.get('serverAConfig').mgmtApi.port,
+    address: config.get('mgmtApiAConfig').host,
+    port: config.get('mgmtApiAConfig').port,
     logger: logger.child('controlAgentA'),
   });
 
   const controlAgentB = new ControlAgent({
-    address: config.get('serverBConfig').mgmtApi.host,
-    port: config.get('serverBConfig').mgmtApi.port,
+    address: config.get('mgmtApiBConfig').host,
+    port: config.get('mgmtApiBConfig').port,
     logger: logger.child('controlAgentB'),
   });
 

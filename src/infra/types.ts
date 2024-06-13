@@ -11,6 +11,9 @@ export type AppConfig = {
   serverAConfig: ServerConfig;
   serverBConfig: ServerConfig;
 
+  mgmtApiAConfig: MgtAPiConfig;
+  mgmtApiBConfig: MgtAPiConfig;
+
   hubAConfig: HubConfig;
   hubBConfig: HubConfig;
 
@@ -25,7 +28,6 @@ type HubConfig = {
 type ServerConfig = {
   host: string;
   port: number;
-  mgmtApi: MgtAPiConfig;
 };
 
 export type MtlsConfig = {
