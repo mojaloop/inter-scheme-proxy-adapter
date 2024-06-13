@@ -8,6 +8,9 @@ export type AppConfig = {
   mtlsConfigA: MtlsConfig;
   mtlsConfigB: MtlsConfig;
 
+  authConfigA: AuthConfig;
+  authConfigB: AuthConfig;
+
   serverAConfig: ServerConfig;
   serverBConfig: ServerConfig;
 
@@ -32,6 +35,14 @@ export type MtlsConfig = {
   clientKeyPath: string;
 };
 
+export type AuthConfig = {
+  tokenEndpoint: string;
+  clientKey: string; // or rename it to clientId?
+  clientSecret: string;
+  refreshSeconds: number;
+  // think, if we need to add mTlsEnabled option
+};
+
 export type TlsOptions = Readonly<{
   ca: Buffer;
   cert: Buffer;
@@ -43,5 +54,11 @@ export type ProxyTlsAgent = Agent | null;
 export type HttpServerDeps = {
   serverConfig: ServerConfig;
   proxyDetails: ProxyDetails;
+  logger: ILogger;
+};
+
+export type AuthClientDeps = {
+  authConfig: AuthConfig;
+  // httpClient: HttpClient; // axios
   logger: ILogger;
 };
