@@ -17,76 +17,16 @@
  their names indented and be marked with a '-'. Email address can be added
  optionally within square brackets <email>.
  * Gates Foundation
- - Name Surname <name.surname@gatesfoundation.com>
-
- * Steven Oderayi <steven.oderayi@infitx.com>
- --------------
+ - Name Surname <name.surname@gatesfoundation.com> 
+ 
+  Steven Oderayi <steven.oderayi@infitx.com>
  **********/
 
-import ws from 'ws';
-import * as jsonPatch from 'fast-json-patch';
-import { generateSlug } from 'random-word-slugs';
-import _ from 'lodash';
-
-import { ERROR, EVENT, MESSAGE, VERB } from './constants';
+import ws, { WebSocket } from 'ws';
+import { MESSAGE, VERB } from './constants';
 import { GenericObject } from './types';
 import { ILogger } from '#src/domain';
-import { AppConfig } from '#src/infra';
-
-/**************************************************************************
- * Private convenience functions
- *************************************************************************/
-const serialise = JSON.stringify;
-const deserialise = (msg: string | ws.RawData) => {
-  //reviver function
-  return JSON.parse(msg.toString(), (k, v) => {
-    if (
-      v !== null &&
-      typeof v === 'object' &&
-      'type' in v &&
-      v.type === 'Buffer' &&
-      'data' in v &&
-      Array.isArray(v.data)
-    ) {
-      return new Buffer(v.data);
-    }
-    return v;
-  });
-};
-
-const buildMsg = (verb: VERB, msg: MESSAGE, data: jsonPatch.Operation[] | GenericObject | string, id = generateSlug(4)) =>
-  serialise({
-    verb,
-    msg,
-    data,
-    id,
-  });
-
-const buildPatchConfiguration = (oldConf: GenericObject, newConf: GenericObject, id: string) => {
-  const patches = jsonPatch.compare(oldConf, newConf);
-  return buildMsg(VERB.PATCH, MESSAGE.CONFIGURATION, patches, id);
-};
-
-/**************************************************************************
- * build
- *
- * Public object exposing an API to build valid protocol messages.
- * It is not the only way to build valid messages within the protocol.
- *************************************************************************/
-export const build = {
-  CONFIGURATION: {
-    PATCH: buildPatchConfiguration,
-    READ: (id?: string) => buildMsg(VERB.READ, MESSAGE.CONFIGURATION, {}, id),
-    NOTIFY: (config: GenericObject, id?: string) => buildMsg(VERB.NOTIFY, MESSAGE.CONFIGURATION, config, id),
-  },
-  ERROR: {
-    NOTIFY: {
-      UNSUPPORTED_MESSAGE: (id?: string) => buildMsg(VERB.NOTIFY, MESSAGE.ERROR, ERROR.UNSUPPORTED_MESSAGE, id),
-      UNSUPPORTED_VERB: (id?: string) => buildMsg(VERB.NOTIFY, MESSAGE.ERROR, ERROR.UNSUPPORTED_VERB, id),
-      JSON_PARSE_ERROR: (id?: string) => buildMsg(VERB.NOTIFY, MESSAGE.ERROR, ERROR.JSON_PARSE_ERROR, id),
-    },
-  },
-};
+import { build, deserialise, serialise } from './mcm';
 
 /**************************************************************************
  * IClientParams
@@ -96,13 +36,22 @@ export const build = {
  * address   - address of control server
  * port      - port of control server
  * logger    - Logger- see SDK logger used elsewhere
- * appConfig - the application configuration
  *************************************************************************/
 export interface IClientParams { 
   address?: string;
   port: number;
   logger: ILogger;
-  appConfig: AppConfig;
+}
+
+type IClientCerts = {
+  cert: string;
+  key: string;
+  ca: string;
+};
+
+export interface IClientCallbacks {
+  onCert: (certs: IClientCerts) => void;
+  onError: (err: Error) => void;
 }
 
 /**************************************************************************
@@ -115,83 +64,91 @@ export interface IClientParams {
  * address   - address of control server
  * port      - port of control server
  *************************************************************************/
-export class Client extends ws {
-  private _logger: ILogger;
-  private _appConfig: GenericObject;
-  /**
-   * Consider this a private constructor.
-   * `Client` instances outside of this class should be created via the `Create(...args)` static method.
-   */
-  constructor({ address = 'localhost', port, logger, appConfig }: IClientParams ) {
-    super(`ws://${address}:${port}`);
-    this._logger = logger;
-    this._appConfig = appConfig;
+export class Client {
+  private ws: WebSocket | null = null;
+  private logger: ILogger;
+  private address: string;
+  private port: number;
+  private callbacks: IClientCallbacks | null = null;
+
+  constructor(params: IClientParams) {
+    this.address = params.address || 'localhost';
+    this.port = params.port;
+    this.logger = params.logger;
   }
 
-  // Really only exposed so that a user can import only the client for convenience
-  get Build() {
-    return build;
+  init (cbs: IClientCallbacks){
+    this.callbacks = cbs;
   }
 
-  static Create(args: IClientParams): Promise<Client> {
+  open(): Promise<void> {
     return new Promise((resolve, reject) => {
-      const client = new Client(args);
-      client.on('open', () => resolve(client));
-      client.on('error', (err) => reject(err));
-      client.on('message', client._handle);
+      this.ws = new WebSocket(`ws://${this.address}:${this.port}`);
+
+      this.ws.on('open', resolve);
+      this.ws.on('error', reject);
+      this.ws.on('message', this._handle);
     });
   }
 
-  async sendMsg(msg: string | GenericObject) {
+  close(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.logger.info('Control client shutting down...');
+
+      if (!this.ws) {
+        reject(new Error('WebSocket is not open'));
+        return;
+      }
+
+      this.ws.on('close', resolve);
+      this.ws.on('error', reject);
+
+      this.ws.close();
+    });
+  }
+
+  send(msg: string | GenericObject) {
     const data = typeof msg === 'string' ? msg : serialise(msg);
-    this._logger.debug('Sending message', { data });
-    return new Promise((resolve) => super.send.call(this, data, {}, resolve));
+    this.logger.debug('Sending message', { data });
+    return new Promise((resolve) => this.ws?.send(data, resolve));
   }
 
   // Receive a single message
-  async receive() {
-    return new Promise((resolve) =>
-      this.once('message', (data) => {
+  receive(): Promise<string> {
+    return new Promise((resolve, reject) => {
+      if (!this.ws) {
+        reject(new Error('WebSocket is not open'));
+        return;
+      }
+
+      this.ws.once('message', (data) => {
         const msg = deserialise(data);
-        this._logger.debug('Received', { msg });
+        this.logger.debug('Received', { msg });
         resolve(msg);
-      }),
-    );
+      });
+    });
   }
 
-  // Close connection
-  async stop() {
-    this._logger.info('Control client shutting down...');
-    this.close();
-  }
 
   // Handle incoming message from the server.
-  _handle(data: ws.RawData | string) {
-    // TODO: json-schema validation of received message- should be pretty straight-forward
-    // and will allow better documentation of the API
+  private _handle(data: ws.RawData | string) {
     let msg;
     try {
       msg = deserialise(data);
     } catch (err) {
-      this._logger.error('Couldn\'t parse received message', { data });
+      this.logger.error('Couldn\'t parse received message', { data });
       this.send(build.ERROR.NOTIFY.JSON_PARSE_ERROR());
     }
-    this._logger.debug('Handling received message', { msg });
+    this.logger.debug('Handling received message', { msg });
     switch (msg.msg) {
       case MESSAGE.CONFIGURATION:
         switch (msg.verb) {
           case VERB.NOTIFY: {
-            const dup = JSON.parse(JSON.stringify(this._appConfig)); // fast-json-patch explicitly mutates
-            _.merge(dup, msg.data);
-            this._logger.debug('Emitting new configuration', { oldConf: this._appConfig, newConf: dup });
-            this.emit(EVENT.RECONFIGURE, dup);
+            this.callbacks?.onCert(msg.data);
             break;
           }
           case VERB.PATCH: {
-            const dup = JSON.parse(JSON.stringify(this._appConfig)); // fast-json-patch explicitly mutates
-            jsonPatch.applyPatch(dup, msg.data);
-            this._logger.debug('Emitting new configuration', { oldConf: this._appConfig, newConf: dup });
-            this.emit(EVENT.RECONFIGURE, dup);
+            this.callbacks?.onCert(msg.data);
             break;
           }
           default:

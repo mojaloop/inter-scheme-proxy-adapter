@@ -1,6 +1,5 @@
 import { type Agent } from 'node:https';
 import { ILogger, ProxyDetails } from '../domain/types';
-import { Client } from '#src/control-agent';
 
 export type AppConfig = {
   DFSP_ID: string;
@@ -53,5 +52,4 @@ export type HttpServerDeps = {
   proxyDetails: ProxyDetails;
   proxyTlsAgent: ProxyTlsAgent;
   logger: ILogger;
-  controlClient: Client | null;
 };

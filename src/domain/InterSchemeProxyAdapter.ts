@@ -53,6 +53,8 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
     // todo: get certs
     await this.getAccessTokens();
 
+    await this.initControlAgents();
+
     const [isAStarted, isBStarted] = await Promise.all([
       this.deps.httpServerA.start(this.handleProxyRequest),
       this.deps.httpServerB.start(this.handleProxyRequest),
@@ -82,5 +84,9 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
     this.deps.httpServerB.emit(INTERNAL_EVENTS.state, { accessToken: tokenB });
 
     return { tokenA, tokenB }; // think, if we need this
+  }
+
+  private async initControlAgents() {
+    
   }
 }
