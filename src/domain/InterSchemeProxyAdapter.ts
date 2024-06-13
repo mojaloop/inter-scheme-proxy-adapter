@@ -23,15 +23,11 @@
  --------------
  **********/
 
-import { GenericObject, ICACerts } from '../infra/control-agent/types';
 import { INTERNAL_EVENTS } from '../constants';
 import { IProxyAdapter, ISPADeps, IncomingRequestDetails, ServerState, ServerStateEvent } from './types';
-
-import { readCertsFromFile } from '../infra';
+import { ControlAgent, GenericObject, ICACerts, build, deserialise, readCertsFromFile } from '../infra';
 // todo: remove it after menAPI integration is ready!
 import config from '../config';
-import { ControlAgent } from '../infra/control-agent';
-import { build, deserialise } from '../infra/control-agent/mcm';
 
 export const MOCK_TOKEN = 'noAccessTokenYet';
 
@@ -108,7 +104,7 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
   private async initControlAgents() {
     const { httpServerA, httpServerB, controlAgentA, controlAgentB  } = this.deps;
 
-    const res = await Promise.all([
+    return await Promise.all([
       controlAgentA.init({
         onCert: (certs: ICACerts) => { httpServerA.emit(INTERNAL_EVENTS.state, { certs } as GenericObject ); }
       }),
@@ -116,8 +112,6 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
         onCert: (certs: ICACerts) => { httpServerB.emit(INTERNAL_EVENTS.state, { certs } as GenericObject ); }
       }),
     ]);
-
-    return res;
   }
 
   private async loadInitialCerts() {

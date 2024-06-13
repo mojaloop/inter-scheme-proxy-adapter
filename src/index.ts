@@ -23,8 +23,7 @@
 
 import config from './config';
 import { InterSchemeProxyAdapter, ISPAService } from './domain';
-import { createHttpServers, httpRequest } from './infra';
-import { createControlAgents } from './infra/control-agent/createControlAgents';
+import { createHttpServers, createControlAgents, httpRequest } from './infra';
 import { startingProcess, loggerFactory } from './utils';
 
 let proxyAdapter: InterSchemeProxyAdapter;
