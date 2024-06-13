@@ -57,7 +57,10 @@ export class ControlAgent implements IControlAgent {
 
   open(): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.ws = new WebSocket(`ws://${this.address}:${this.port}`);
+      const url = this.port ? `${this.address}:${this.port}` : this.address;
+      const protocol = this.address.includes('://') ? '' : 'ws://';
+      
+      this.ws = new WebSocket(`${protocol}${url}`);
 
       this.ws.on('open', resolve);
       this.ws.on('error', reject);
