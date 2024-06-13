@@ -38,7 +38,7 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
   }
 
   async handleProxyRequest(reqDetails: IncomingRequestDetails, serverState: ServerState) {
-    const { ispaService, httpRequest, logger } = this.deps;
+    const { ispaService, httpRequest } = this.deps;
     const { httpsAgent } = serverState;
     const proxyTarget = ispaService.getProxyTarget(reqDetails, serverState); // pass only accessToken
 
