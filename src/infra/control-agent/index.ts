@@ -39,12 +39,14 @@ import { build, deserialise, serialise } from './mcm';
  *************************************************************************/
 export class ControlAgent implements IControlAgent {
   private ws: WebSocket | null = null;
+  private id: string;
   private logger: ILogger;
   private address: string;
   private port: number;
   private callbackFns: ICACallbacks | null = null;
 
   constructor(params: ICAParams) {
+    this.id = params.id || 'ControlAgent';
     this.address = params.address || 'localhost';
     this.port = params.port;
     this.logger = params.logger;
@@ -62,7 +64,10 @@ export class ControlAgent implements IControlAgent {
       
       this.ws = new WebSocket(`${protocol}${url}`);
 
-      this.ws.on('open', resolve);
+      this.ws.on('open', () => {
+        this.logger.info(`${this.id} websocket connected`);
+        resolve();
+      });
       this.ws.on('error', reject);
       this.ws.on('message', this._handle);
     });
@@ -70,7 +75,7 @@ export class ControlAgent implements IControlAgent {
 
   close(): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.logger.info('Control client shutting down...');
+      this.logger.info(`${this.id} shutting down...`);
 
       if (!this.ws) {
         reject(new Error('WebSocket is not open'));
@@ -86,7 +91,7 @@ export class ControlAgent implements IControlAgent {
 
   send(msg: string | GenericObject) {
     const data = typeof msg === 'string' ? msg : serialise(msg);
-    this.logger.debug('Sending message', { data });
+    this.logger.debug(`${this.id} sending message`, { data });
     return new Promise((resolve) => this.ws?.send(data, resolve));
   }
 
@@ -119,11 +124,12 @@ export class ControlAgent implements IControlAgent {
     let msg;
     try {
       msg = deserialise(data);
+      this.logger.debug(`${this.id} received `, { msg });
     } catch (err) {
-      this.logger.error('Couldn\'t parse received message', { data });
+      this.logger.error(`${this.id} couldn't parse received message`, { data });
       this.send(build.ERROR.NOTIFY.JSON_PARSE_ERROR());
     }
-    this.logger.debug('Handling received message', { msg });
+    this.logger.debug(`${this.id} handling received message`, { msg });
     switch (msg.msg) {
       case MESSAGE.CONFIGURATION:
         switch (msg.verb) {

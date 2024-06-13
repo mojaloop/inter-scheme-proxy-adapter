@@ -40,6 +40,7 @@ export interface IControlAgentConstructor {
  * logger    - Logger- see SDK logger used elsewhere
  *************************************************************************/
 export interface ICAParams {
+  id?: string;
   address?: string;
   port: number;
   logger: ILogger;
