@@ -18,7 +18,6 @@ export class Logger implements ILogger {
   private readonly mlLogger = mlLogger;
   private readonly context: LogContext;
 
-  // todo: make context Json | string
   constructor(context: LogContext = null) {
     this.context = this.createContext(context);
   }

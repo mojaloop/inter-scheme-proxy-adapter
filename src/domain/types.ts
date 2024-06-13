@@ -1,7 +1,7 @@
 import { URL } from 'node:url';
 import { ServerInfo, Server } from '@hapi/hapi';
 import { INTERNAL_EVENTS } from '../constants';
-import { ProxyTlsAgent } from '../infra/types';
+import { ProxyTlsAgent, TlsOptions } from '../infra/types';
 import { LogMethods, LogContext } from '../utils/types';
 
 type Headers = Record<string, string>;
@@ -54,7 +54,7 @@ export type ISPADeps = {
 
 export type ISPAServiceDeps = {
   logger: ILogger;
-  // todo: add axios instance here
+  // maybe, move httpRequest (axios instance) here?
 };
 
 export type HttpRequestOptions = {
@@ -77,10 +77,17 @@ export type ServerState = {
   httpsAgent: ProxyTlsAgent;
 };
 
+export type ServerStateEvent = Partial<{
+  accessToken: string;
+  certs: TlsOptions;
+}>;
+// todo: define that, at least, one of the fields should be present
+
 export interface IHttpServer {
   start: (proxyHandlerFn: ProxyHandlerFn) => Promise<boolean>;
   stop: () => Promise<boolean>;
-  emit: (event: typeof INTERNAL_EVENTS.state, data: Partial<ServerState>) => boolean;
+  emit: (event: typeof INTERNAL_EVENTS.state, data: ServerStateEvent) => boolean;
+  // todo: think, if it's better to emit separate events for each state change
   info: ServerInfo; // think, if we need this
   hapiServer: Readonly<Server>; // for testing purposes
 }

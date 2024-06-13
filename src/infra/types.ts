@@ -43,6 +43,5 @@ export type ProxyTlsAgent = Agent | null;
 export type HttpServerDeps = {
   serverConfig: ServerConfig;
   proxyDetails: ProxyDetails;
-  proxyTlsAgent: ProxyTlsAgent; // todo: rename to httpsAgent
   logger: ILogger;
 };

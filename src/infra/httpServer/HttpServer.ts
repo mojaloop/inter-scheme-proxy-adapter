@@ -1,7 +1,8 @@
 import { EventEmitter } from 'node:events';
+import { Agent } from 'node:https';
 import Hapi from '@hapi/hapi';
 
-import { ProxyHandlerFn, IHttpServer, ServerState } from '../../domain/types';
+import { ProxyHandlerFn, IHttpServer, ServerState, ServerStateEvent } from '../../domain/types';
 import { INTERNAL_EVENTS } from '../../constants';
 import { HttpServerDeps } from '../types';
 import { loggingPlugin } from './plugins';
@@ -16,8 +17,6 @@ export class HttpServer extends EventEmitter implements IHttpServer {
   constructor(private readonly deps: HttpServerDeps) {
     super();
     this.server = new Hapi.Server(deps.serverConfig);
-    this.state.httpsAgent = deps.proxyTlsAgent;
-    // todo: add a separate method for state updates
     this.initInternalEvents();
   }
 
@@ -54,14 +53,9 @@ export class HttpServer extends EventEmitter implements IHttpServer {
       // add any other plugins here, e.g. error handling, etc.
     ];
     await this.server.register(plugins);
-
-    logger.debug('plugins registered');
-    return true;
   }
 
   private async registerProxy(proxyHandlerFn: ProxyHandlerFn) {
-    const { logger } = this.deps;
-
     this.server.route({
       method: '*',
       path: '/{any*}',
@@ -82,20 +76,26 @@ export class HttpServer extends EventEmitter implements IHttpServer {
         // todo: think how to handle headers
       },
     });
-
-    logger.debug('proxy route registered');
-    return true;
   }
 
   private initInternalEvents() {
     const { logger } = this.deps;
-    // todo: think better way to update tokens/certs
-    this.on(INTERNAL_EVENTS.state, (data: ServerState) => {
+
+    this.on(INTERNAL_EVENTS.state, (data: ServerStateEvent) => {
       if (!data) return;
+
       if (data.accessToken) {
         this.state.accessToken = data.accessToken;
         logger.debug('accessToken is updated', data.accessToken);
       }
+
+      if (data.certs) {
+        this.state.httpsAgent = new Agent(data.certs);
+        logger.debug('httpsAgent with new certs is created');
+      }
+      // todo: think, if it's better to have:
+      //   - a separate event for each state change
+      //   - a separate method for each state change
     });
   }
 }
