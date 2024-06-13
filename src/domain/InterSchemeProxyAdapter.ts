@@ -118,11 +118,11 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
     const { httpServerA, httpServerB, controlAgentA, controlAgentB  } = this.deps;
 
     await controlAgentA.send(build.CONFIGURATION.READ());
-    const resA = deserialise(await controlAgentA.receive());
+    const resA = await controlAgentA.receive();
     httpServerA.emit(INTERNAL_EVENTS.state, { certs: ControlAgent.extractCerts(resA) } as GenericObject );
 
     await controlAgentB.send(build.CONFIGURATION.READ());
-    const resB = deserialise(await controlAgentA.receive());
+    const resB = await controlAgentA.receive();
     httpServerB.emit(INTERNAL_EVENTS.state, { certs: ControlAgent.extractCerts(resB) } as GenericObject );
   }
   

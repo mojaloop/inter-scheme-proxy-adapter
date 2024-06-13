@@ -16,7 +16,7 @@ export interface IControlAgent {
   open: () => Promise<void>;
   close: () => Promise<void>;
   send: (message: string) => Promise<unknown>;
-  receive: () => Promise<string>;
+  receive: () => Promise<unknown>;
 }
 
 /**************************************************************************
@@ -70,6 +70,18 @@ export type ICACerts = {
  *************************************************************************/
 export interface ICACallbacks {
   onCert: (certs: ICACerts) => void;
+}
+
+export interface IMCMCertData {
+  outbound?: {
+    tls?: {
+      creds?: {
+        cert: string;
+        key: string;
+        ca: string;
+      };
+    };
+  };
 }
 
 /**************************************************************************

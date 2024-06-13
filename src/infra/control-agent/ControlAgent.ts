@@ -24,7 +24,7 @@
 
 import ws, { WebSocket } from 'ws';
 import { MESSAGE, VERB } from './constants';
-import { GenericObject, ICACallbacks, ICAParams, ICACerts, IControlAgent } from './types';
+import { GenericObject, ICACallbacks, ICAParams, ICACerts, IControlAgent, IMCMCertData } from './types';
 import { ILogger } from '../../domain';
 import { build, deserialise, serialise } from './mcm';
 
@@ -101,7 +101,7 @@ export class ControlAgent implements IControlAgent {
   }
 
   // Receive a single message
-  receive(): Promise<string> {
+  receive() {
     return new Promise((resolve, reject) => {
       if (!this.ws) {
         reject(new Error('WebSocket is not open'));
@@ -116,13 +116,8 @@ export class ControlAgent implements IControlAgent {
     });
   }
 
-  static extractCerts(data: GenericObject): ICACerts {
-    // todo: need to align with actual message format from mcm
-    return {
-      cert: data.cert,
-      key: data.key,
-      ca: data.ca,
-    } as ICACerts;
+  static extractCerts(data: IMCMCertData | unknown): ICACerts {
+    return (data as IMCMCertData).outbound?.tls?.creds as ICACerts;
   }
 
   private _handle(data: ws.RawData | string) {
@@ -140,7 +135,10 @@ export class ControlAgent implements IControlAgent {
         switch (msg.verb) {
           case VERB.NOTIFY:
           case VERB.PATCH: {
-            this.callbackFns?.onCert(ControlAgent.extractCerts(msg.data));
+            const certs = ControlAgent.extractCerts(msg.data);
+            if (certs) {
+              this.callbackFns?.onCert(certs);
+            }
             break;
           }
           default:
