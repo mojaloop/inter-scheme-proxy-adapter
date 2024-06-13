@@ -25,7 +25,7 @@
 
 import { INTERNAL_EVENTS } from '../constants';
 import { IProxyAdapter, ISPADeps, IncomingRequestDetails, ServerState, ServerStateEvent } from './types';
-import { ControlAgent, GenericObject, ICACerts, build, deserialise, readCertsFromFile } from '../infra';
+import { ControlAgent, GenericObject, ICACerts, build, readCertsFromFile } from '../infra';
 // todo: remove it after menAPI integration is ready!
 import config from '../config';
 
