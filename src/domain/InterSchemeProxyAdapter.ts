@@ -90,11 +90,11 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
     const { httpServerA, httpServerB  } = this.deps;
     
     this.deps.controlAgentA.init({
-      onCert: (certs: ICACerts) => { httpServerA.emit(INTERNAL_EVENTS.state, { certs } as GenericObject); }
+      onCert: (certs: ICACerts) => { httpServerA.emit(INTERNAL_EVENTS.state, { certs } as GenericObject ); }
     });
 
     this.deps.controlAgentB.init({
-      onCert: (certs: ICACerts) => { httpServerB.emit(INTERNAL_EVENTS.state, { certs } as GenericObject); }
+      onCert: (certs: ICACerts) => { httpServerB.emit(INTERNAL_EVENTS.state, { certs } as GenericObject ); }
     });
   }
 }
