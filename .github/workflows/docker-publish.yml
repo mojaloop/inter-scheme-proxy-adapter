@@ -2,7 +2,7 @@ name: Docker Publish
 
 on:
   push:
-    branches: [ main, task/csi-141 ] # todo: only publish on main branch
+#    branches: [ main, task/csi-141 ] # todo: only publish on main branch
     tags: [ 'v*' ]
 #  pull_request:
 #    branches: [ main ]
