@@ -49,7 +49,7 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
   }
 
   async start(): Promise<void> {
-    //await this.getAccessTokens();
+    await this.getAccessTokens();
     await this.initControlAgents();
     await this.loadInitialCerts();
 
