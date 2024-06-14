@@ -56,26 +56,36 @@ export class HttpServer extends EventEmitter implements IHttpServer {
   }
 
   private async registerProxy(proxyHandlerFn: ProxyHandlerFn) {
-    this.server.route({
-      method: '*',
-      path: '/{any*}',
-      handler: async (request: Hapi.Request, h: Hapi.ResponseToolkit) => {
-        const { proxyDetails } = this.deps;
-        const { url, method, headers, payload } = request;
-
-        const reqDetails = {
-          proxyDetails, // todo: move it to serverState
-          url,
-          method,
-          headers,
-          payload,
-        };
-        const response = await proxyHandlerFn(reqDetails, this.state); // or better { ...this.state }?
-
-        return h.response(response.data || undefined).code(response.status);
-        // todo: think how to handle headers
+    this.server.route([
+      {
+        method: 'GET',
+        path: '/health',
+        handler: async (request: Hapi.Request, h: Hapi.ResponseToolkit) => {
+          // todo: think about healthCheck logic
+          return h.response({ success: true }).code(200);
+        },
       },
-    });
+      {
+        method: '*',
+        path: '/{any*}',
+        handler: async (request: Hapi.Request, h: Hapi.ResponseToolkit) => {
+          const { proxyDetails } = this.deps;
+          const { url, method, headers, payload } = request;
+
+          const reqDetails = {
+            proxyDetails, // todo: move it to serverState
+            url,
+            method,
+            headers,
+            payload,
+          };
+          const response = await proxyHandlerFn(reqDetails, this.state); // or better { ...this.state }?
+
+          return h.response(response.data || undefined).code(response.status);
+          // todo: think how to handle headers
+        },
+      },
+    ]);
   }
 
   private initInternalEvents() {
