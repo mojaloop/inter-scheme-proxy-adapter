@@ -12,7 +12,7 @@ type createControlAgentsDeps = {
   logger: ILogger;
 };
 
-export const createControlAgents = async (deps: createControlAgentsDeps): Promise<controlAgentsMap> => {
+export const createControlAgents = (deps: createControlAgentsDeps): controlAgentsMap => {
   const { logger } = deps;
   const controlAgentA = new ControlAgent({
     id: 'ControlAgentA',

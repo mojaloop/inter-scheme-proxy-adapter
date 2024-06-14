@@ -11,7 +11,7 @@ type createHttpServersDeps = {
   logger: ILogger;
 };
 
-export const createHttpServers = async (deps: createHttpServersDeps): Promise<httpServersMap> => {
+export const createHttpServers = (deps: createHttpServersDeps): httpServersMap => {
   const { logger } = deps;
   const httpServerA = new HttpServer({
     serverConfig: config.get('serverAConfig'),

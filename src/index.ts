@@ -31,8 +31,8 @@ let proxyAdapter: InterSchemeProxyAdapter;
 const start = async () => {
   const { PROXY_ID, authConfigA, authConfigB } = config.get();
   const logger = loggerFactory(`ISPA-${PROXY_ID}`);
-  const { httpServerA, httpServerB } = await createHttpServers({ logger });
-  const { controlAgentA, controlAgentB } = await createControlAgents({ logger });
+  const { httpServerA, httpServerB } = createHttpServers({ logger });
+  const { controlAgentA, controlAgentB } = createControlAgents({ logger });
 
   const authClientA = new AuthClient({ logger, authConfig: authConfigB });
   const authClientB = new AuthClient({ logger, authConfig: authConfigA });
