@@ -12,11 +12,12 @@ import { ILogger } from '../../domain';
  * receive- receives a message
  *************************************************************************/
 export interface IControlAgent {
+  id: string;
   init: (cbs: ICACallbacks) => Promise<void>;
   open: () => Promise<void>;
   close: () => Promise<void>;
   send: (message: string) => Promise<unknown>;
-  receive: () => Promise<unknown>;
+  receive: () => Promise<GenericObject>;
 }
 
 /**************************************************************************

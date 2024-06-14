@@ -25,7 +25,7 @@
 
 import { INTERNAL_EVENTS } from '../constants';
 import { IProxyAdapter, ISPADeps, IncomingRequestDetails, ServerState, ServerStateEvent } from './types';
-import { ControlAgent, GenericObject, ICACerts, build, readCertsFromFile } from '../infra';
+import { ControlAgent, GenericObject, ICACerts, MESSAGE, VERB, build, readCertsFromFile } from '../infra';
 // todo: remove it after menAPI integration is ready!
 import config from '../config';
 
@@ -52,7 +52,7 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
 
   async start(): Promise<void> {
     await this.getCerts();
-    await this.getAccessTokens();
+    //await this.getAccessTokens();
 
     const [isAStarted, isBStarted] = await Promise.all([
       this.deps.httpServerA.start(this.handleProxyRequest),
@@ -122,11 +122,16 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
 
     await controlAgentA.send(build.CONFIGURATION.READ());
     const resA = await controlAgentA.receive();
+    if (resA?.verb !== VERB.NOTIFY || resA?.msg !== MESSAGE.CONFIGURATION) {
+      throw new Error(`Failed to read initial certs from ${controlAgentA.id}`);
+    }
     httpServerA.emit(INTERNAL_EVENTS.serverState, { certs: ControlAgent.extractCerts(resA) } as GenericObject );
 
     await controlAgentB.send(build.CONFIGURATION.READ());
     const resB = await controlAgentA.receive();
+    if (resB?.verb !== VERB.NOTIFY || resB?.msg !== MESSAGE.CONFIGURATION) {
+      throw new Error(`Failed to read initial certs from ${controlAgentB.id}`);
+    }
     httpServerB.emit(INTERNAL_EVENTS.serverState, { certs: ControlAgent.extractCerts(resB) } as GenericObject );
   }
-  
 }

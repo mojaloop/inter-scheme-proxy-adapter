@@ -38,55 +38,59 @@ import { build, deserialise, serialise } from './mcm';
  * port      - port of control server
  *************************************************************************/
 export class ControlAgent implements IControlAgent {
-  private ws: WebSocket | null = null;
-  private id: string;
-  private logger: ILogger;
-  private address: string;
-  private port: number;
-  private callbackFns: ICACallbacks | null = null;
+  private _ws: WebSocket | null = null;
+  private _id: string;
+  private _logger: ILogger;
+  private _address: string;
+  private _port: number;
+  private _callbackFns: ICACallbacks | null = null;
 
   constructor(params: ICAParams) {
-    this.id = params.id || 'ControlAgent';
-    this.address = params.address || 'localhost';
-    this.port = params.port;
-    this.logger = params.logger;
+    this._id = params.id || 'ControlAgent';
+    this._address = params.address || 'localhost';
+    this._port = params.port;
+    this._logger = params.logger;
     this.receive = this.receive.bind(this);
   }
 
+  get id() {
+    return this._id;
+  }
+
   init(cbs: ICACallbacks) {
-    this.callbackFns = cbs;
+    this._callbackFns = cbs;
     return this.open();
   }
 
   open(): Promise<void> {
     return new Promise((resolve, reject) => {
-      const url = this.port ? `${this.address}:${this.port}` : this.address;
-      const protocol = this.address.includes('://') ? '' : 'ws://';
+      const url = this._port ? `${this._address}:${this._port}` : this._address;
+      const protocol = this._address.includes('://') ? '' : 'ws://';
 
-      this.ws = new WebSocket(`${protocol}${url}`);
+      this._ws = new WebSocket(`${protocol}${url}`);
 
-      this.ws.on('open', () => {
-        this.logger.info(`${this.id} websocket connected`);
+      this._ws.on('open', () => {
+        this._logger.info(`${this.id} websocket connected`);
         resolve();
       });
-      this.ws.on('error', reject);
-      this.ws.on('message', this._handle.bind(this));
+      this._ws.on('error', reject);
+      this._ws.on('message', this._handle.bind(this));
     });
   }
 
   close(): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.logger.info(`${this.id} shutting down...`);
+      this._logger.info(`${this.id} shutting down...`);
 
-      if (!this.ws) {
+      if (!this._ws) {
         reject(new Error('WebSocket is not open'));
         return;
       }
 
-      this.ws.on('close', resolve);
-      this.ws.on('error', reject);
+      this._ws.on('close', resolve);
+      this._ws.on('error', reject);
 
-      this.ws.close();
+      this._ws.close();
     });
   }
 
@@ -96,27 +100,29 @@ export class ControlAgent implements IControlAgent {
 
   send(msg: string | GenericObject) {
     const data = typeof msg === 'string' ? msg : serialise(msg);
-    this.logger.debug(`${this.id} sending message`, { data });
-    return new Promise((resolve) => this.ws?.send(data, resolve));
+    this._logger.debug(`${this.id} sending message`, { data });
+    return new Promise((resolve) => this._ws?.send(data, resolve));
   }
 
   // Receive a single message
-  receive() {
+  receive(): Promise<GenericObject> {
     return new Promise((resolve, reject) => {
-      if (!this.ws) {
+      if (!this._ws) {
         reject(new Error('WebSocket is not open'));
         return;
       }
 
-      this.ws.once('message', (data) => {
+      this._ws.once('message', (data) => {
         const msg = deserialise(data);
-        this.logger.debug('Received', { msg });
+        this._logger.debug('Received', { msg });
         resolve(msg);
       });
     });
   }
 
   static extractCerts(data: IMCMCertData | unknown): ICACerts {
+    // todo: figure out the shape of the realtime data when the control agent receives config changes message for certs
+    // current implementation is for the initial certs load
     return (data as IMCMCertData).outbound?.tls?.creds as ICACerts;
   }
 
@@ -124,21 +130,19 @@ export class ControlAgent implements IControlAgent {
     let msg;
     try {
       msg = deserialise(data);
-      this.logger.debug(`${this.id} received `, { msg });
+      this._logger.debug(`${this.id} received `, { msg });
     } catch (err) {
-      this.logger.error(`${this.id} couldn't parse received message`, { data });
+      this._logger.error(`${this.id} couldn't parse received message`, { data });
       this.send(build.ERROR.NOTIFY.JSON_PARSE_ERROR());
     }
-    this.logger.debug(`${this.id} handling received message`, { msg });
+    this._logger.debug(`${this.id} handling received message`, { msg });
     switch (msg.msg) {
       case MESSAGE.CONFIGURATION:
         switch (msg.verb) {
           case VERB.NOTIFY:
           case VERB.PATCH: {
             const certs = ControlAgent.extractCerts(msg.data);
-            if (certs) {
-              this.callbackFns?.onCert(certs);
-            }
+            certs && this._callbackFns?.onCert(certs);
             break;
           }
           default:
