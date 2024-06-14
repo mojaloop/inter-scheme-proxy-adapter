@@ -49,7 +49,7 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
   }
 
   async start(): Promise<void> {
-    await this.getAccessTokens();
+    // await this.getAccessTokens();
     await this.initControlAgents();
     await this.loadInitialCerts();
 
@@ -114,7 +114,7 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
     httpServerA.emit(INTERNAL_EVENTS.serverState, { certs: ControlAgent.extractCerts(resA) } as GenericObject );
 
     await controlAgentB.send(build.CONFIGURATION.READ());
-    const resB = await controlAgentA.receive();
+    const resB = await controlAgentB.receive();
     if (resB?.verb !== VERB.NOTIFY || resB?.msg !== MESSAGE.CONFIGURATION) {
       throw new Error(`Failed to read initial certs from ${controlAgentB.id}`);
     }

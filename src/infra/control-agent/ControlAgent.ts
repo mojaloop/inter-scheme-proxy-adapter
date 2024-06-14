@@ -44,12 +44,14 @@ export class ControlAgent implements IControlAgent {
   private _address: string;
   private _port: number;
   private _callbackFns: ICACallbacks | null = null;
+  private _timeout: number;
 
   constructor(params: ICAParams) {
     this._id = params.id || 'ControlAgent';
     this._address = params.address || 'localhost';
     this._port = params.port;
     this._logger = params.logger;
+    this._timeout = params.timeout || 5000;
     this.receive = this.receive.bind(this);
   }
 
@@ -112,10 +114,16 @@ export class ControlAgent implements IControlAgent {
         return;
       }
 
-      this._ws.once('message', (data) => {
-        const msg = deserialise(data);
-        this._logger.debug('Received', { msg });
-        resolve(msg);
+      return new Promise((resolve, reject) => {
+        this._ws?.once('message', (data) => {
+          const msg = deserialise(data);
+          this._logger.debug('Received', { msg });
+          resolve(msg);
+        });
+      
+        setTimeout(() => {
+          reject(new Error(`${this.id} timed out waiting for message`));
+        }, this._timeout);
       });
     });
   }

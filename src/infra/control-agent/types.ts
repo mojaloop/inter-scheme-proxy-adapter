@@ -44,6 +44,7 @@ export interface ICAParams {
   id?: string;
   address?: string;
   port: number;
+  timeout?: number;
   logger: ILogger;
 }
 

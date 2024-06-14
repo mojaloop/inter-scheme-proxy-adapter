@@ -17,6 +17,8 @@ export type AppConfig = {
   hubAConfig: HubConfig;
   hubBConfig: HubConfig;
 
+  controlAgentConfig: ControlAgentConfig;
+
   pm4mlEnabled: boolean;
 };
 
@@ -33,6 +35,10 @@ type ServerConfig = {
 type MgtAPiConfig = {
   host: string;
   port: number;
+}
+
+type ControlAgentConfig = {
+  timeout: number;
 }
 
 export type AuthConfig = {

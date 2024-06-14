@@ -125,6 +125,15 @@ const config = convict<AppConfig>({
     },
   },
 
+  controlAgentConfig: {
+    timeout: {
+      doc: 'Timeout for control agents',
+      format: Number,
+      default: 5000,
+      env: 'CONTROL_AGENT_TIMEOUT',
+    },
+  },
+
   hubAConfig: {
     baseUrl: {
       doc: 'Base URL on hub A',
