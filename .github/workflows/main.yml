@@ -8,7 +8,7 @@ on:
     types:
       - opened
       - reopened
-#      - synchronize
+      - synchronize
 
 jobs:
   install-and-cache:
