@@ -2,19 +2,15 @@ name: Docker Publish
 
 on:
   push:
-#    branches: [ main, task/csi-141 ] # todo: only publish on main branch
     tags: [ 'v*' ]
-#  pull_request:
-#    branches: [ main ]
-#    types: [ closed ]
 
 jobs:
-#  lint-and-test:
-#    uses: infitx-org/inter-scheme-proxy-adapter/.github/workflows/main.yml@main
+  lint-and-test:
+    uses: infitx-org/inter-scheme-proxy-adapter/.github/workflows/main.yml@main
 
   build-and-push-image:
     runs-on: ubuntu-latest
-#    needs: lint-and-test
+    needs: lint-and-test
 
     steps:
       - uses: actions/checkout@v4
@@ -36,8 +32,6 @@ jobs:
       - name: Build
         shell: bash
         run: npm run build
-        # env:
-        #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build image
         run: docker build . --file Dockerfile --tag ${GITHUB_REPOSITORY#*/}
@@ -66,37 +60,3 @@ jobs:
 
           docker tag ${GITHUB_REPOSITORY#*/} $IMAGE_ID:$VERSION
           docker push $IMAGE_ID:$VERSION
-
-#      - name: Version
-#        shell: bash
-#        run: npx nx affected --base=last-release --target version --push --parallel=1
-#        # env:
-#        #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#
-#      - name: Tag last-release
-#        run: |
-#          git tag -f last-release
-#          git push origin last-release --force
-#
-#      - name: Extract Tag Parts
-#        id: tag
-#        run: |
-#          read -r gtag_module_name gtag_module_version <<< "$(sed -E 's/app_(.*)_([0-9]+\.[0-9]+\.[0-9]+)/\1 \2/' <<< "$GITHUB_REF_NAME")"
-#          echo "gtag_module_name=$gtag_module_name" >> $GITHUB_ENV
-#          echo "gtag_module_version=$gtag_module_version" >> $GITHUB_ENV
-#
-#      - name: Build docker
-#        shell: bash
-#        run: npx nx run ${gtag_module_name}:docker-build
-#
-#      - name: Push Docker Image
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        run: |
-#          DOCKER_IMAGE_NAME=inter-scheme-proxy-adapter_${gtag_module_name}
-#          DOCKER_IMAGE_VERSION=$gtag_module_version
-#          DOCKER_IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$DOCKER_IMAGE_NAME
-#          DOCKER_IMAGE_ID=$(echo $DOCKER_IMAGE_ID | tr '[A-Z]' '[a-z]')
-#          docker tag ${gtag_module_name}:local $DOCKER_IMAGE_ID:$DOCKER_IMAGE_VERSION
-#          echo "$GITHUB_TOKEN" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-#          docker push $DOCKER_IMAGE_ID:$DOCKER_IMAGE_VERSION
