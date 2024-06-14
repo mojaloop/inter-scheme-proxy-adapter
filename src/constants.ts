@@ -6,5 +6,5 @@ export const PROXY_HEADER = 'FSPIOP-Proxy';
 export const AUTH_HEADER = 'Authorization';
 
 export const INTERNAL_EVENTS = {
-  state: 'state',
+  serverState: 'serverState',
 } as const;

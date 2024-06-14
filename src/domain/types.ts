@@ -47,6 +47,8 @@ export interface ISPAServiceInterface {
 
 export type ISPADeps = {
   ispaService: ISPAServiceInterface;
+  authClientA: IAuthClient; // todo: think, if it should be part of httpServers
+  authClientB: IAuthClient;
   httpServerA: IHttpServer;
   httpServerB: IHttpServer;
   controlAgentA: IControlAgent;
@@ -89,8 +91,22 @@ export type ServerStateEvent = Partial<{
 export interface IHttpServer {
   start: (proxyHandlerFn: ProxyHandlerFn) => Promise<boolean>;
   stop: () => Promise<boolean>;
-  emit: (event: typeof INTERNAL_EVENTS.state, data: ServerStateEvent) => boolean;
+  emit: (event: typeof INTERNAL_EVENTS.serverState, data: ServerStateEvent) => boolean;
   // todo: think, if it's better to emit separate events for each state change
   info: ServerInfo; // think, if we need this
   hapiServer: Readonly<Server>; // for testing purposes
 }
+
+export interface IAuthClient {
+  startAccessTokenUpdates: (cb: (token: string) => void) => void;
+  stopUpdates: () => void;
+  getOidcToken: () => Promise<OIDCToken>;
+}
+
+export type OIDCToken = {
+  access_token: string;
+  expires_in: number;
+  token_type: string;
+  scope: string;
+  [key: string]: unknown;
+};

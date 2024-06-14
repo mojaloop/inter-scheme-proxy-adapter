@@ -81,7 +81,7 @@ export class HttpServer extends EventEmitter implements IHttpServer {
   private initInternalEvents() {
     const { logger } = this.deps;
 
-    this.on(INTERNAL_EVENTS.state, (data: ServerStateEvent) => {
+    this.on(INTERNAL_EVENTS.serverState, (data: ServerStateEvent) => {
       if (!data) return;
 
       if (data.accessToken) {

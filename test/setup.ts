@@ -13,4 +13,14 @@ Object.assign(process.env, {
   OUT_CA_CERT_PATH_B: 'ca-cert.pem',
   OUT_CLIENT_CERT_PATH_B: 'client-cert.pem',
   OUT_CLIENT_KEY_PATH_B: 'client-key.pem',
+
+  OAUTH_TOKEN_ENDPOINT_A:
+    'https://keycloak.dev.devbaremetal.moja-onprem.net/realms/dfsps/protocol/openid-connect/token',
+  OAUTH_CLIENT_KEY_A: 'dfsp-jwt',
+  OAUTH_CLIENT_SECRET_A: 'secretA',
+
+  OAUTH_TOKEN_ENDPOINT_B:
+    'https://keycloak.dev.devbaremetal.moja-onprem.net/realms/dfsps/protocol/openid-connect/token',
+  OAUTH_CLIENT_KEY_B: 'dfsp-jwt',
+  OAUTH_CLIENT_SECRET_B: 'secretB',
 });
