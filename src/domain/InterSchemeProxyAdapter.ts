@@ -52,6 +52,7 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
     await this.getAccessTokens();
     await this.initControlAgents();
     await this.loadInitialCerts();
+    this.deps.logger.debug('certs and token are ready, starting httpServers...');
 
     const [isAStarted, isBStarted] = await Promise.all([
       this.deps.httpServerA.start(this.handleProxyRequest),
@@ -91,33 +92,41 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
   }
 
   private async initControlAgents() {
-    const { httpServerA, httpServerB, controlAgentA, controlAgentB  } = this.deps;
+    const { httpServerA, httpServerB, controlAgentA, controlAgentB } = this.deps;
 
     return await Promise.all([
       controlAgentA.init({
-        onCert: (certs: ICACerts) => { httpServerA.emit(INTERNAL_EVENTS.serverState, { certs } as GenericObject ); }
+        onCert: (certs: ICACerts) => {
+          httpServerA.emit(INTERNAL_EVENTS.serverState, { certs } as GenericObject);
+        },
       }),
       controlAgentB.init({
-        onCert: (certs: ICACerts) => { httpServerB.emit(INTERNAL_EVENTS.serverState, { certs } as GenericObject ); }
+        onCert: (certs: ICACerts) => {
+          httpServerB.emit(INTERNAL_EVENTS.serverState, { certs } as GenericObject);
+        },
       }),
     ]);
   }
 
   private async loadInitialCerts() {
-    const { httpServerA, httpServerB, controlAgentA, controlAgentB  } = this.deps;
+    const { httpServerA, httpServerB, controlAgentA, controlAgentB } = this.deps;
 
     await controlAgentA.send(build.CONFIGURATION.READ());
     const resA = await controlAgentA.receive();
+    this.deps.logger.verbose('ws resA is received');
+
     if (resA?.verb !== VERB.NOTIFY || resA?.msg !== MESSAGE.CONFIGURATION) {
       throw new Error(`Failed to read initial certs from ${controlAgentA.id}`);
     }
-    httpServerA.emit(INTERNAL_EVENTS.serverState, { certs: ControlAgent.extractCerts(resA) } as GenericObject );
+    httpServerA.emit(INTERNAL_EVENTS.serverState, { certs: ControlAgent.extractCerts(resA) } as GenericObject);
 
     await controlAgentB.send(build.CONFIGURATION.READ());
-    const resB = await controlAgentA.receive();
+    const resB = await controlAgentB.receive();
+    this.deps.logger.verbose('ws resB is received');
+
     if (resB?.verb !== VERB.NOTIFY || resB?.msg !== MESSAGE.CONFIGURATION) {
       throw new Error(`Failed to read initial certs from ${controlAgentB.id}`);
     }
-    httpServerB.emit(INTERNAL_EVENTS.serverState, { certs: ControlAgent.extractCerts(resB) } as GenericObject );
+    httpServerB.emit(INTERNAL_EVENTS.serverState, { certs: ControlAgent.extractCerts(resB) } as GenericObject);
   }
 }
