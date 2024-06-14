@@ -73,14 +73,19 @@ export interface ICACallbacks {
   onCert: (certs: ICACerts) => void;
 }
 
+/**************************************************************************
+ * IMCMCertData
+ *
+ * Interface for the MCM certificate data
+ *
+ * outbound - outbound data
+ * tls      - tls data
+ * creds    - credentials
+ *************************************************************************/
 export interface IMCMCertData {
   outbound?: {
     tls?: {
-      creds?: {
-        cert: string;
-        key: string;
-        ca: string;
-      };
+      creds?: ICACerts
     };
   };
 }
