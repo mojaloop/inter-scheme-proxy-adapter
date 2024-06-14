@@ -26,10 +26,15 @@
 import { ISPAService, ISPAServiceInterface } from '#src/domain';
 import { PROXY_HEADER, AUTH_HEADER } from '#src/constants';
 import { loggerFactory } from '#src/utils';
-import config from '#src/config';
 
 import * as fixtures from '#test/fixtures';
 import { proxyDetailsDto, requestDetailsDto } from '#test/fixtures';
+
+// set required environment variables
+process.env.MGMT_API_WS_URL_A = 'localhost';
+process.env.MGMT_API_WS_URL_B = 'localhost';
+
+import config from '#src/config';
 
 describe('ISPAService Tests -->', () => {
   const logger = loggerFactory('test');
