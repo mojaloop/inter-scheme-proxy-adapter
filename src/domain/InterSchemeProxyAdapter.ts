@@ -25,9 +25,7 @@
 
 import { INTERNAL_EVENTS } from '../constants';
 import { IProxyAdapter, ISPADeps, IncomingRequestDetails, ServerState, ServerStateEvent } from './types';
-import { ControlAgent, GenericObject, ICACerts, MESSAGE, VERB, build, readCertsFromFile } from '../infra';
-// todo: remove it after menAPI integration is ready!
-import config from '../config';
+import { ControlAgent, GenericObject, ICACerts, MESSAGE, VERB, build } from '../infra';
 
 export const MOCK_TOKEN = 'noAccessTokenYet';
 
@@ -51,8 +49,7 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
   }
 
   async start(): Promise<void> {
-    await this.getCerts();
-    //await this.getAccessTokens();
+    await this.getAccessTokens();
 
     const [isAStarted, isBStarted] = await Promise.all([
       this.deps.httpServerA.start(this.handleProxyRequest),
@@ -84,16 +81,6 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
       this.deps.authClientA.startAccessTokenUpdates(emitNewTokenA),
       this.deps.authClientB.startAccessTokenUpdates(emitNewTokenB),
     ]);
-  }
-
-  private async getCerts() {
-    // todo: use MenAPI instead
-    const { mtlsConfigA, mtlsConfigB } = config.get();
-    const certsA = readCertsFromFile(mtlsConfigA);
-    const certsB = readCertsFromFile(mtlsConfigB);
-
-    this.emitStateEventServerA({ certs: certsB });
-    this.emitStateEventServerB({ certs: certsA });
   }
 
   private emitStateEventServerA(event: ServerStateEvent) {

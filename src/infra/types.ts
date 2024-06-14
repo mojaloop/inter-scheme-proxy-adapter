@@ -5,9 +5,6 @@ export type AppConfig = {
   PROXY_ID: string;
   LOG_LEVEL: string; // todo: use LogLevel type
 
-  mtlsConfigA: MtlsConfig;
-  mtlsConfigB: MtlsConfig;
-
   authConfigA: AuthConfig;
   authConfigB: AuthConfig;
 
@@ -31,13 +28,6 @@ type HubConfig = {
 type ServerConfig = {
   host: string;
   port: number;
-};
-
-export type MtlsConfig = {
-  enabled: boolean;
-  caCertPath: string;
-  clientCertPath: string;
-  clientKeyPath: string;
 };
 
 type MgtAPiConfig = {

@@ -57,6 +57,10 @@ export class ControlAgent implements IControlAgent {
     return this._id;
   }
 
+  get build() {
+    return build;
+  }
+
   init(cbs: ICACallbacks) {
     this._callbackFns = cbs;
     return this.open();
@@ -92,10 +96,6 @@ export class ControlAgent implements IControlAgent {
 
       this._ws.close();
     });
-  }
-
-  get build() {
-    return build;
   }
 
   send(msg: string | GenericObject) {
