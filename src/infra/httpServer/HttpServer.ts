@@ -24,6 +24,7 @@ export class HttpServer extends EventEmitter implements IHttpServer {
     const { logger } = this.deps;
     await this.registerPlugins();
     await this.registerProxy(proxyHandler);
+    this.deps.logger.debug('plugins and routes are registered');
     await this.server.start();
     logger.verbose('http-server is listening', this.server.info);
     return true;
