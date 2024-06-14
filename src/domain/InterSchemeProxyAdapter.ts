@@ -66,6 +66,8 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
   }
 
   async stop(): Promise<void> {
+    this.deps.authClientA.stopUpdates();
+    this.deps.authClientB.stopUpdates();
     // prettier-ignore
     const [isAStopped, isBStopped] = await Promise.all([
       this.deps.httpServerA.stop(),
@@ -75,12 +77,13 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
   }
 
   private async getAccessTokens() {
-    // todo: add logic to obtain access tokens [CSI-126]
-    const tokenA = MOCK_TOKEN;
-    const tokenB = MOCK_TOKEN;
+    const emitNewTokenA = (accessToken: string) => this.emitStateEventServerA({ accessToken });
+    const emitNewTokenB = (accessToken: string) => this.emitStateEventServerB({ accessToken });
 
-    this.emitStateEventServerA({ accessToken: tokenA });
-    this.emitStateEventServerB({ accessToken: tokenB });
+    await Promise.all([
+      this.deps.authClientA.startAccessTokenUpdates(emitNewTokenA),
+      this.deps.authClientB.startAccessTokenUpdates(emitNewTokenB),
+    ]);
   }
 
   private async getCerts() {
@@ -107,10 +110,10 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
   }
 
   private emitStateEventServerA(event: ServerStateEvent) {
-    this.deps.httpServerA.emit(INTERNAL_EVENTS.state, event);
+    this.deps.httpServerA.emit(INTERNAL_EVENTS.serverState, event);
   }
 
   private emitStateEventServerB(event: ServerStateEvent) {
-    this.deps.httpServerB.emit(INTERNAL_EVENTS.state, event);
+    this.deps.httpServerB.emit(INTERNAL_EVENTS.serverState, event);
   }
 }

@@ -23,18 +23,25 @@
 
 import config from './config';
 import { InterSchemeProxyAdapter, ISPAService } from './domain';
-import { createHttpServers, httpRequest } from './infra';
+import { AuthClient, createHttpServers, httpRequest } from './infra';
 import { startingProcess, loggerFactory } from './utils';
 
 let proxyAdapter: InterSchemeProxyAdapter;
 
 const start = async () => {
-  const logger = loggerFactory(`ISPA-${config.get('PROXY_ID')}`);
+  const { PROXY_ID, authConfigA, authConfigB } = config.get();
+  const logger = loggerFactory(`ISPA-${PROXY_ID}`);
+
   const { httpServerA, httpServerB } = createHttpServers({ logger });
 
+  const authClientA = new AuthClient({ logger, authConfig: authConfigB });
+  const authClientB = new AuthClient({ logger, authConfig: authConfigA });
   const ispaService = new ISPAService({ logger });
+
   proxyAdapter = new InterSchemeProxyAdapter({
     ispaService,
+    authClientA,
+    authClientB,
     httpServerA,
     httpServerB,
     httpRequest,

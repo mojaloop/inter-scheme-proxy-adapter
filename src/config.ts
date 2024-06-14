@@ -67,6 +67,62 @@ const config = convict<AppConfig>({
     },
   },
 
+  authConfigA: {
+    tokenEndpoint: {
+      doc: 'Endpoint to get access token on hub A',
+      format: String,
+      default: null,
+      env: 'OAUTH_TOKEN_ENDPOINT_A',
+    },
+    clientKey: {
+      doc: 'Client key on hub A',
+      format: String,
+      default: null,
+      env: 'OAUTH_CLIENT_KEY_A',
+    },
+    clientSecret: {
+      doc: 'Client secret to get token on hub A',
+      format: String,
+      default: null,
+      sensitive: true,
+      env: 'OAUTH_CLIENT_SECRET_A',
+    },
+    refreshSeconds: {
+      doc: 'Time interval (in sec) to update access token on hub A',
+      format: Number,
+      default: 60,
+      env: 'OAUTH_REFRESH_SECONDS_A',
+    },
+  },
+
+  authConfigB: {
+    tokenEndpoint: {
+      doc: 'Endpoint to get access token on hub B',
+      format: String,
+      default: null,
+      env: 'OAUTH_TOKEN_ENDPOINT_B',
+    },
+    clientKey: {
+      doc: 'Client key on hub B',
+      format: String,
+      default: null,
+      env: 'OAUTH_CLIENT_KEY_B',
+    },
+    clientSecret: {
+      doc: 'Client secret to get token on hub B',
+      format: String,
+      default: null,
+      sensitive: true,
+      env: 'OAUTH_CLIENT_SECRET_B',
+    },
+    refreshSeconds: {
+      doc: 'Time interval (in sec) to update access token on hub B',
+      format: Number,
+      default: 60,
+      env: 'OAUTH_REFRESH_SECONDS_B',
+    },
+  },
+
   serverAConfig: {
     port: {
       doc: 'HTTP port to listen on for serverA',
