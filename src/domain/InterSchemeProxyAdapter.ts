@@ -103,14 +103,13 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
   }
 
   // todo: refactor this method
-  //  - controlAgent.send -> receive -> extractCerts should be inside controlAgent logic, only one method here
+  //  - controlAgent.send -> receive -> check verb/msg -> extractCerts  should be inside controlAgent logic, only one method here
   private async loadInitialCerts() {
     const { controlAgentA, controlAgentB } = this.deps;
 
     // todo: think, if we can get both certs in parallel
     await controlAgentA.send(build.CONFIGURATION.READ());
     const resA = await controlAgentA.receive();
-    this.deps.logger.verbose('ws resA is received');
 
     if (resA?.verb !== VERB.NOTIFY || resA?.msg !== MESSAGE.CONFIGURATION) {
       throw new Error(`Failed to read initial certs from ${controlAgentA.id}`);
@@ -119,7 +118,6 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
 
     await controlAgentB.send(build.CONFIGURATION.READ());
     const resB = await controlAgentB.receive();
-    this.deps.logger.verbose('ws resB is received');
 
     if (resB?.verb !== VERB.NOTIFY || resB?.msg !== MESSAGE.CONFIGURATION) {
       throw new Error(`Failed to read initial certs from ${controlAgentB.id}`);

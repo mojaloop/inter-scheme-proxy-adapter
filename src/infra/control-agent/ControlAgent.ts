@@ -17,8 +17,8 @@
  their names indented and be marked with a '-'. Email address can be added
  optionally within square brackets <email>.
  * Gates Foundation
- - Name Surname <name.surname@gatesfoundation.com> 
- 
+ - Name Surname <name.surname@gatesfoundation.com>
+
   Steven Oderayi <steven.oderayi@infitx.com>
  **********/
 
@@ -116,7 +116,7 @@ export class ControlAgent implements IControlAgent {
 
       this._ws?.once('message', (data) => {
         const msg = deserialise(data);
-        this._logger.debug('Received', { msg });
+        this._logger.verbose('Received', { msg });
         resolve(msg);
       });
 

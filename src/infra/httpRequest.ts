@@ -1,4 +1,3 @@
-// import https from 'node:https';
 import axios from 'axios';
 import { HttpRequestOptions, ProxyHandlerResponse } from '../domain/types';
 import { loggerFactory } from '../utils';
