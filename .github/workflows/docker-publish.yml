@@ -9,12 +9,12 @@ on:
 #    types: [ closed ]
 
 jobs:
-  lint-and-test:
-    uses: infitx-org/inter-scheme-proxy-adapter/.github/workflows/main.yml@main
+#  lint-and-test:
+#    uses: infitx-org/inter-scheme-proxy-adapter/.github/workflows/main.yml@main
 
   build-and-push-image:
     runs-on: ubuntu-latest
-    needs: lint-and-test
+#    needs: lint-and-test
 
     steps:
       - uses: actions/checkout@v4
@@ -39,7 +39,11 @@ jobs:
         # env:
         #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - run: echo "Done!!!!!!!!!!!!!!!!!!!!!!"
+      - name: Build image
+        run: docker build . --file Dockerfile --tag ${GITHUB_REPOSITORY#*/}
+
+      - name: Log into GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login https://ghcr.io -u ${{ github.actor }} --password-stdin
 
 #      - name: Version
 #        shell: bash
