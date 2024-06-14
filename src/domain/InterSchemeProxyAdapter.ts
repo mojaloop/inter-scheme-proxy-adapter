@@ -25,9 +25,7 @@
 
 import { INTERNAL_EVENTS } from '../constants';
 import { IProxyAdapter, ISPADeps, IncomingRequestDetails, ServerState, ServerStateEvent } from './types';
-import { ControlAgent, GenericObject, ICACerts, MESSAGE, VERB, build } from '../infra';
-
-export const MOCK_TOKEN = 'noAccessTokenYet';
+import { ControlAgent, ICACerts, MESSAGE, VERB, build } from '../infra';
 
 export class InterSchemeProxyAdapter implements IProxyAdapter {
   constructor(private readonly deps: ISPADeps) {
@@ -73,6 +71,14 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
     this.deps.logger.info('ISPA is stopped', { isAStopped, isBStopped });
   }
 
+  private emitStateEventServerA(event: ServerStateEvent) {
+    this.deps.httpServerA.emit(INTERNAL_EVENTS.serverState, event);
+  }
+
+  private emitStateEventServerB(event: ServerStateEvent) {
+    this.deps.httpServerB.emit(INTERNAL_EVENTS.serverState, event);
+  }
+
   private async getAccessTokens() {
     const emitNewTokenA = (accessToken: string) => this.emitStateEventServerA({ accessToken });
     const emitNewTokenB = (accessToken: string) => this.emitStateEventServerB({ accessToken });
@@ -83,34 +89,25 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
     ]);
   }
 
-  private emitStateEventServerA(event: ServerStateEvent) {
-    this.deps.httpServerA.emit(INTERNAL_EVENTS.serverState, event);
-  }
-
-  private emitStateEventServerB(event: ServerStateEvent) {
-    this.deps.httpServerB.emit(INTERNAL_EVENTS.serverState, event);
-  }
-
   private async initControlAgents() {
-    const { httpServerA, httpServerB, controlAgentA, controlAgentB } = this.deps;
+    const { controlAgentA, controlAgentB } = this.deps;
 
-    return await Promise.all([
+    await Promise.all([
       controlAgentA.init({
-        onCert: (certs: ICACerts) => {
-          httpServerA.emit(INTERNAL_EVENTS.serverState, { certs } as GenericObject);
-        },
+        onCert: (certs: ICACerts) => this.emitStateEventServerB({ certs }),
       }),
       controlAgentB.init({
-        onCert: (certs: ICACerts) => {
-          httpServerB.emit(INTERNAL_EVENTS.serverState, { certs } as GenericObject);
-        },
+        onCert: (certs: ICACerts) => this.emitStateEventServerA({ certs }),
       }),
     ]);
   }
 
+  // todo: refactor this method
+  //  - controlAgent.send -> receive -> extractCerts should be inside controlAgent logic, only one method here
   private async loadInitialCerts() {
-    const { httpServerA, httpServerB, controlAgentA, controlAgentB } = this.deps;
+    const { controlAgentA, controlAgentB } = this.deps;
 
+    // todo: think, if we can get both certs in parallel
     await controlAgentA.send(build.CONFIGURATION.READ());
     const resA = await controlAgentA.receive();
     this.deps.logger.verbose('ws resA is received');
@@ -118,7 +115,7 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
     if (resA?.verb !== VERB.NOTIFY || resA?.msg !== MESSAGE.CONFIGURATION) {
       throw new Error(`Failed to read initial certs from ${controlAgentA.id}`);
     }
-    httpServerA.emit(INTERNAL_EVENTS.serverState, { certs: ControlAgent.extractCerts(resA) } as GenericObject);
+    this.emitStateEventServerB({ certs: ControlAgent.extractCerts(resA) });
 
     await controlAgentB.send(build.CONFIGURATION.READ());
     const resB = await controlAgentB.receive();
@@ -127,6 +124,6 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
     if (resB?.verb !== VERB.NOTIFY || resB?.msg !== MESSAGE.CONFIGURATION) {
       throw new Error(`Failed to read initial certs from ${controlAgentB.id}`);
     }
-    httpServerB.emit(INTERNAL_EVENTS.serverState, { certs: ControlAgent.extractCerts(resB) } as GenericObject);
+    this.emitStateEventServerA({ certs: ControlAgent.extractCerts(resB) });
   }
 }

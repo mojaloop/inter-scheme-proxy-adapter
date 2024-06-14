@@ -35,7 +35,7 @@ type ServerConfig = {
 type MgtAPiConfig = {
   host: string;
   port: number;
-}
+};
 
 type ControlAgentConfig = {
   timeout: number;
@@ -50,10 +50,11 @@ export type AuthConfig = {
 };
 
 export type TlsOptions = Readonly<{
-  ca: Buffer;
-  cert: Buffer;
-  key: Buffer;
+  ca: string | Buffer;
+  cert: string | Buffer;
+  key: string | Buffer;
 }>;
+// think, if we need to leave only string?
 
 export type ProxyTlsAgent = Agent | null;
 

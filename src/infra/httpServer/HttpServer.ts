@@ -102,7 +102,7 @@ export class HttpServer extends EventEmitter implements IHttpServer {
 
       if (data.certs) {
         this.state.httpsAgent = new Agent(data.certs);
-        logger.debug('httpsAgent with new certs is created');
+        logger.verbose('httpsAgent with new certs is created');
       }
       // todo: think, if it's better to have:
       //   - a separate event for each state change
