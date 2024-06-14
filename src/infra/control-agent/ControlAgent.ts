@@ -114,17 +114,15 @@ export class ControlAgent implements IControlAgent {
         return;
       }
 
-      return new Promise((resolve, reject) => {
-        this._ws?.once('message', (data) => {
-          const msg = deserialise(data);
-          this._logger.debug('Received', { msg });
-          resolve(msg);
-        });
-      
-        setTimeout(() => {
-          reject(new Error(`${this.id} timed out waiting for message`));
-        }, this._timeout);
+      this._ws?.once('message', (data) => {
+        const msg = deserialise(data);
+        this._logger.debug('Received', { msg });
+        resolve(msg);
       });
+
+      setTimeout(() => {
+        reject(new Error(`${this.id} timed out waiting for message`));
+      }, this._timeout);
     });
   }
 
