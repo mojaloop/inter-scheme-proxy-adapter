@@ -7,11 +7,11 @@ on:
 jobs:
   lint-and-test:
     uses: infitx-org/inter-scheme-proxy-adapter/.github/workflows/main.yml@main
-    if: false
 
   build-and-push-image:
-    runs-on: ubuntu-latest
     needs: lint-and-test
+    # todo: clarify why lint-and-test job runs twice!
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
