@@ -105,7 +105,7 @@ const config = convict<AppConfig>({
     port: {
       doc: 'HTTP port to listen on for the management API',
       format: 'port',
-      default: 4000,
+      default: null,
       env: 'MGMT_API_WS_PORT_A',
     },
   },
@@ -120,7 +120,7 @@ const config = convict<AppConfig>({
     port: {
       doc: 'HTTP port to listen on for the management API',
       format: 'port',
-      default: 4000,
+      default: null,
       env: 'MGMT_API_WS_PORT_B',
     },
   },
