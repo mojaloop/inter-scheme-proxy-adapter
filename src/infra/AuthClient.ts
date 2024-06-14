@@ -1,4 +1,3 @@
-import { Agent } from 'node:https';
 import axios from 'axios';
 import { IAuthClient, OIDCToken } from '../domain/types';
 import { AuthClientDeps } from './types';
@@ -46,7 +45,6 @@ export class AuthClient implements IAuthClient {
 
     return Object.freeze({
       url: tokenEndpoint,
-      httpsAgent: new Agent(), // think, if we need mTLS or http
       method: 'POST',
       data: {
         grant_type: 'client_credentials',
@@ -55,6 +53,7 @@ export class AuthClient implements IAuthClient {
         Authorization: `Basic ${basicToken}`,
         'Content-Type': 'application/x-www-form-urlencoded',
       },
+      // add httpsAgent, if we need mTLS
     });
   }
 }

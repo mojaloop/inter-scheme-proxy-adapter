@@ -4,8 +4,8 @@ import { HttpRequestOptions, ProxyHandlerResponse } from '../domain/types';
 import { loggerFactory } from '../utils';
 
 const logger = loggerFactory('httpRequest');
-// todo: pass logger through HttpRequestOptions
 
+// todo: rename to proxyRequest
 export const httpRequest = async (options: HttpRequestOptions): Promise<ProxyHandlerResponse> => {
   const { httpsAgent, ...restOptions } = options;
 
