@@ -49,15 +49,14 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
   }
 
   async start(): Promise<void> {
-    await this.getAccessTokens();
+    //await this.getAccessTokens();
+    await this.initControlAgents();
+    await this.loadInitialCerts();
 
     const [isAStarted, isBStarted] = await Promise.all([
       this.deps.httpServerA.start(this.handleProxyRequest),
       this.deps.httpServerB.start(this.handleProxyRequest),
     ]);
-
-    await this.initControlAgents();
-    await this.loadInitialCerts();
 
     this.deps.logger.info('ISPA is started', { isAStarted, isBStarted });
   }

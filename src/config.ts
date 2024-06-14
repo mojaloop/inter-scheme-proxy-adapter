@@ -99,7 +99,7 @@ const config = convict<AppConfig>({
     host: {
       doc: 'Hostname or IP address where the management API listens for incoming requests',
       format: String,
-      default: 'localhost',
+      default: null,
       env: 'MGMT_API_WS_URL_A',
     },
     port: {
@@ -114,7 +114,7 @@ const config = convict<AppConfig>({
     host: {
       doc: 'Hostname or IP address where the management API listens for incoming requests',
       format: String,
-      default: 'localhost',
+      default: null,
       env: 'MGMT_API_WS_URL_B',
     },
     port: {
