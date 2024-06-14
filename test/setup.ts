@@ -4,16 +4,6 @@ Object.assign(process.env, {
   PEER_ENDPOINT_A: 'https://localhost:11443',
   PEER_ENDPOINT_B: 'https://localhost:22443',
 
-  OUTBOUND_MUTUAL_TLS_ENABLED_A: true,
-  OUT_CA_CERT_PATH_A: 'ca-cert.pem',
-  OUT_CLIENT_CERT_PATH_A: 'client-cert.pem',
-  OUT_CLIENT_KEY_PATH_A: 'client-key.pem',
-
-  OUTBOUND_MUTUAL_TLS_ENABLED_B: true,
-  OUT_CA_CERT_PATH_B: 'ca-cert.pem',
-  OUT_CLIENT_CERT_PATH_B: 'client-cert.pem',
-  OUT_CLIENT_KEY_PATH_B: 'client-key.pem',
-
   OAUTH_TOKEN_ENDPOINT_A:
     'https://keycloak.dev.devbaremetal.moja-onprem.net/realms/dfsps/protocol/openid-connect/token',
   OAUTH_CLIENT_KEY_A: 'dfsp-jwt',
@@ -23,4 +13,7 @@ Object.assign(process.env, {
     'https://keycloak.dev.devbaremetal.moja-onprem.net/realms/dfsps/protocol/openid-connect/token',
   OAUTH_CLIENT_KEY_B: 'dfsp-jwt',
   OAUTH_CLIENT_SECRET_B: 'secretB',
+
+  MGMT_API_WS_URL_A: 'localhost',
+  MGMT_API_WS_URL_B: 'localhost'
 });

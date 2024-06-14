@@ -29,11 +29,6 @@ import { loggerFactory } from '#src/utils';
 
 import * as fixtures from '#test/fixtures';
 import { proxyDetailsDto, requestDetailsDto } from '#test/fixtures';
-
-// set required environment variables
-process.env.MGMT_API_WS_URL_A = 'localhost';
-process.env.MGMT_API_WS_URL_B = 'localhost';
-
 import config from '#src/config';
 
 describe('ISPAService Tests -->', () => {
