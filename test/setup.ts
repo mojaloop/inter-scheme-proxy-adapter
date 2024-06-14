@@ -15,5 +15,8 @@ Object.assign(process.env, {
   OAUTH_CLIENT_SECRET_B: 'secretB',
 
   MGMT_API_WS_URL_A: 'localhost',
-  MGMT_API_WS_URL_B: 'localhost'
+  MGMT_API_WS_PORT_A: 4000,
+  MGMT_API_WS_URL_B: 'localhost',
+  MGMT_API_WS_PORT_B: 4000
+
 });
