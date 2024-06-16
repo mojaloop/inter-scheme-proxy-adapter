@@ -95,42 +95,45 @@ const config = convict<AppConfig>({
     },
   },
 
-  mgmtApiAConfig: {
-    host: {
+  controlAgentAConfig: {
+    wsHost: {
       doc: 'Hostname or IP address where the management API listens for incoming requests',
       format: String,
       default: null,
       env: 'MGMT_API_WS_URL_A',
     },
-    port: {
+    wsPort: {
       doc: 'HTTP port to listen on for the management API',
       format: 'port',
       default: null,
       env: 'MGMT_API_WS_PORT_A',
     },
+    timeout: {
+      doc: 'Timeout for control agent on hub A',
+      format: Number,
+      default: 5000,
+      env: 'MGMT_API_WS_TIMEOUT_A',
+    },
   },
 
-  mgmtApiBConfig: {
-    host: {
+  controlAgentBConfig: {
+    wsHost: {
       doc: 'Hostname or IP address where the management API listens for incoming requests',
       format: String,
       default: null,
       env: 'MGMT_API_WS_URL_B',
     },
-    port: {
+    wsPort: {
       doc: 'HTTP port to listen on for the management API',
       format: 'port',
       default: null,
       env: 'MGMT_API_WS_PORT_B',
     },
-  },
-
-  controlAgentConfig: {
     timeout: {
-      doc: 'Timeout for control agents',
+      doc: 'Timeout for control agent on hub B',
       format: Number,
       default: 5000,
-      env: 'CONTROL_AGENT_TIMEOUT',
+      env: 'MGMT_API_WS_TIMEOUT_B',
     },
   },
 

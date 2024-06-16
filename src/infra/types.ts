@@ -1,6 +1,8 @@
 import { type Agent } from 'node:https';
 import { ILogger, ProxyDetails } from '../domain/types';
 
+export * from './controlAgent/types';
+
 export type AppConfig = {
   PROXY_ID: string;
   LOG_LEVEL: string; // todo: use LogLevel type
@@ -11,35 +13,31 @@ export type AppConfig = {
   serverAConfig: ServerConfig;
   serverBConfig: ServerConfig;
 
-  mgmtApiAConfig: MgtAPiConfig;
-  mgmtApiBConfig: MgtAPiConfig;
-
   hubAConfig: HubConfig;
   hubBConfig: HubConfig;
 
-  controlAgentConfig: ControlAgentConfig;
+  controlAgentAConfig: ControlAgentConfig;
+  controlAgentBConfig: ControlAgentConfig;
 
   pm4mlEnabled: boolean;
 };
 
 type HubConfig = {
-  // todo: think, if we need separate endpoints for ALS, QuotingService and ML-API-Adapter
+  // todo: move to ServerConfig
   baseUrl: string;
 };
 
 type ServerConfig = {
-  host: string;
-  port: number;
-};
-
-type MgtAPiConfig = {
+  // todo: rename to ProxyServerConfig
   host: string;
   port: number;
 };
 
 type ControlAgentConfig = {
+  wsHost: string;
+  wsPort: number;
   timeout: number;
-}
+};
 
 export type AuthConfig = {
   tokenEndpoint: string;
@@ -66,6 +64,6 @@ export type HttpServerDeps = {
 
 export type AuthClientDeps = {
   authConfig: AuthConfig;
-  // httpClient: HttpClient; // axios
   logger: ILogger;
+  // httpClient: HttpClient; // axios
 };

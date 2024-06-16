@@ -23,9 +23,9 @@
  **********/
 
 import ws, { WebSocket } from 'ws';
+import { ILogger } from '../../domain';
 import { MESSAGE, VERB } from './constants';
 import { GenericObject, ICACallbacks, ICAParams, ICACerts, IControlAgent, IMCMCertData } from './types';
-import { ILogger } from '../../domain';
 import { build, deserialise, serialise } from './mcm';
 
 /**************************************************************************
@@ -51,7 +51,7 @@ export class ControlAgent implements IControlAgent {
     this._address = params.address || 'localhost';
     this._port = params.port;
     this._logger = params.logger;
-    this._timeout = params.timeout || 5000;
+    this._timeout = params.timeout;
     this.receive = this.receive.bind(this);
   }
 
@@ -63,7 +63,7 @@ export class ControlAgent implements IControlAgent {
     return build;
   }
 
-  init(cbs: ICACallbacks) {
+  async init(cbs: ICACallbacks) {
     this._callbackFns = cbs;
     return this.open();
   }
@@ -76,7 +76,7 @@ export class ControlAgent implements IControlAgent {
       this._ws = new WebSocket(`${protocol}${url}`);
 
       this._ws.on('open', () => {
-        this._logger.info(`${this.id} websocket connected`);
+        this._logger.info(`${this.id} websocket connected`, { url, protocol });
         resolve();
       });
       this._ws.on('error', reject);
@@ -104,6 +104,7 @@ export class ControlAgent implements IControlAgent {
     const data = typeof msg === 'string' ? msg : serialise(msg);
     this._logger.debug(`${this.id} sending message`, { data });
     return new Promise((resolve) => this._ws?.send(data, resolve));
+    // todo: clarify, why we need to return a promise here
   }
 
   // Receive a single message
@@ -124,6 +125,18 @@ export class ControlAgent implements IControlAgent {
         reject(new Error(`${this.id} timed out waiting for message`));
       }, this._timeout);
     });
+  }
+
+  async loadCerts(): Promise<ICACerts> {
+    await this.send(build.CONFIGURATION.READ());
+    const res = await this.receive();
+
+    if (res?.verb !== VERB.NOTIFY || res?.msg !== MESSAGE.CONFIGURATION) {
+      this._logger.warn('wrong verb or message in ws response', { res });
+      throw new Error(`Failed to read initial certs from ${this.id}`);
+    }
+
+    return ControlAgent.extractCerts(res);
   }
 
   static extractCerts(data: IMCMCertData | unknown): ICACerts {

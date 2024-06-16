@@ -25,7 +25,7 @@
     "lint:fix": "npm run lint -- --fix",
     "build": "tsc",
     "watch": "tsc -w",
-    "script:token": "ts-node -r dotenv/config -P ./tsconfig.json ./scripts/getToken.ts",
+    "script:token": "ts-node -r dotenv/config -P ./tsconfig.test.json ./test/scripts/getToken.ts",
     "audit:resolve": "npx resolve-audit --production",
     "audit:check": "npx check-audit --production",
     "dep:check": "npx --no-install ncu -e 2",

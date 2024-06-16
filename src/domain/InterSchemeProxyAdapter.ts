@@ -25,7 +25,7 @@
 
 import { INTERNAL_EVENTS } from '../constants';
 import { IProxyAdapter, ISPADeps, IncomingRequestDetails, ServerState, ServerStateEvent } from './types';
-import { ControlAgent, ICACerts, MESSAGE, VERB, build } from '../infra';
+import { ICACerts } from '../infra';
 
 export class InterSchemeProxyAdapter implements IProxyAdapter {
   constructor(private readonly deps: ISPADeps) {
@@ -94,34 +94,21 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
 
     await Promise.all([
       controlAgentA.init({
-        onCert: (certs: ICACerts) => this.emitStateEventServerB({ certs }),
+        onCert: (certs: ICACerts) => this.emitStateEventServerA({ certs }),
       }),
       controlAgentB.init({
-        onCert: (certs: ICACerts) => this.emitStateEventServerA({ certs }),
+        onCert: (certs: ICACerts) => this.emitStateEventServerB({ certs }),
       }),
     ]);
   }
 
-  // todo: refactor this method
-  //  - controlAgent.send -> receive -> check verb/msg -> extractCerts  should be inside controlAgent logic, only one method here
   private async loadInitialCerts() {
-    const { controlAgentA, controlAgentB } = this.deps;
+    const [certsA, certsB] = await Promise.all([
+      this.deps.controlAgentA.loadCerts(),
+      this.deps.controlAgentB.loadCerts(),
+    ]);
 
-    // todo: think, if we can get both certs in parallel
-    await controlAgentA.send(build.CONFIGURATION.READ());
-    const resA = await controlAgentA.receive();
-
-    if (resA?.verb !== VERB.NOTIFY || resA?.msg !== MESSAGE.CONFIGURATION) {
-      throw new Error(`Failed to read initial certs from ${controlAgentA.id}`);
-    }
-    this.emitStateEventServerB({ certs: ControlAgent.extractCerts(resA) });
-
-    await controlAgentB.send(build.CONFIGURATION.READ());
-    const resB = await controlAgentB.receive();
-
-    if (resB?.verb !== VERB.NOTIFY || resB?.msg !== MESSAGE.CONFIGURATION) {
-      throw new Error(`Failed to read initial certs from ${controlAgentB.id}`);
-    }
-    this.emitStateEventServerA({ certs: ControlAgent.extractCerts(resB) });
+    this.emitStateEventServerA({ certs: certsA });
+    this.emitStateEventServerB({ certs: certsB });
   }
 }

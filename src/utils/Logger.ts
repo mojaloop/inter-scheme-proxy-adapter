@@ -85,7 +85,7 @@ export class Logger implements ILogger {
     // prettier-ignore
     return !context
       ? null
-      : typeof context === 'object' ? context : {context};
+      : typeof context === 'object' ? context : { context };
   }
 
   // the next is{Level}Enabled props are to be able to follow the same logic: log.isDebugEnabled && log.debug(`some log message: ${data}`)

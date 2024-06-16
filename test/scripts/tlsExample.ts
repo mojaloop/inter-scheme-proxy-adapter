@@ -2,7 +2,7 @@ import https from 'node:https';
 import * as console from 'node:console';
 import axios from 'axios';
 
-const httpsAgent = new https.Agent({ ca, cert, key });
+const httpsAgent = new https.Agent(/*{ ca, cert, key }*/);
 
 async function httpsGet(url: string) {
   try {
