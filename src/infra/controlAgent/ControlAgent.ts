@@ -25,8 +25,18 @@
 import ws, { WebSocket } from 'ws';
 import { ILogger } from '../../domain';
 import { MESSAGE, VERB } from './constants';
-import { GenericObject, ICACallbacks, ICAParams, ICACerts, IControlAgent, IMCMCertData } from './types';
 import { build, deserialise, serialise } from './mcm';
+import {
+  GenericObject,
+  ICACallbacks,
+  ICAParams,
+  ICACerts,
+  IControlAgent,
+  IMCMCertData,
+  WsPayload,
+  isWsPayload,
+  isCertsPayload,
+} from './types';
 
 /**************************************************************************
  * Client
@@ -104,45 +114,52 @@ export class ControlAgent implements IControlAgent {
 
   send(msg: string | GenericObject) {
     this._checkSocketState();
-    
+
     const data = typeof msg === 'string' ? msg : serialise(msg);
     this._logger.debug(`${this.id} sending message`, { data });
-    
+
     this._ws?.send(data);
   }
 
   // Receive a single message
-  receive(): Promise<GenericObject> {
+  receive(): Promise<WsPayload> {
     return new Promise((resolve, reject) => {
       this._checkSocketState();
+
+      const timer = setTimeout(() => {
+        reject(new Error(`${this.id} timed out waiting for message`));
+      }, this._timeout);
+
       this._ws?.once('message', (data) => {
         const msg = deserialise(data);
         this._logger.verbose('Received', { msg });
-        resolve(msg);
+        const isValid = isWsPayload(msg);
+        if (!isValid) {
+          reject(new TypeError('Invalid WS response format'));
+        } else {
+          resolve(msg);
+        }
+        clearTimeout(timer);
       });
-
-      setTimeout(() => {
-        reject(new Error(`${this.id} timed out waiting for message`));
-      }, this._timeout);
     });
   }
 
   async loadCerts(): Promise<ICACerts> {
-    await this.send(build.CONFIGURATION.READ());
+    this.send(build.CONFIGURATION.READ());
     const res = await this.receive();
 
-    if (res?.verb !== VERB.NOTIFY || res?.msg !== MESSAGE.CONFIGURATION) {
+    const isCreds = isCertsPayload(res);
+    if (!isCreds) {
       this._logger.warn('wrong verb or message in ws response', { res });
-      throw new Error(`Failed to read initial certs from ${this.id}`);
+      throw new TypeError(`Failed to read initial certs from ${this.id}`);
     }
-
-    return ControlAgent.extractCerts(res);
+    return ControlAgent.extractCerts(res.data);
   }
 
-  static extractCerts(data: IMCMCertData | unknown): ICACerts {
-    // todo: figure out the shape of the realtime data when the control agent receives config changes message for certs
+  static extractCerts(data: IMCMCertData): ICACerts {
     // current implementation is for the initial certs load
-    return (data as IMCMCertData).outbound?.tls?.creds as ICACerts;
+    return data.outbound.tls.creds;
+    // todo: think, if it's make sense to add isCertsPayload here
   }
 
   private _checkSocketState() {
@@ -166,8 +183,10 @@ export class ControlAgent implements IControlAgent {
         switch (msg.verb) {
           case VERB.NOTIFY:
           case VERB.PATCH: {
-            const certs = ControlAgent.extractCerts(msg.data);
-            certs && this._callbackFns?.onCert(certs);
+            if (isCertsPayload(msg)) {
+              const certs = ControlAgent.extractCerts(msg.data);
+              this._callbackFns?.onCert(certs);
+            }
             break;
           }
           default:
