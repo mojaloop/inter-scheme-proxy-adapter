@@ -63,7 +63,7 @@ export class ControlAgent implements IControlAgent {
     return build;
   }
 
-  init(cbs: ICACallbacks) {
+  init(cbs: ICACallbacks): Promise<void> {
     this._callbackFns = cbs;
     return this.open();
   }
