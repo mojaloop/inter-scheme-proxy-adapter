@@ -1,4 +1,5 @@
-import { ILogger } from '../../domain';
+import { ILogger } from '../../domain/types';
+import { MESSAGE, VERB } from './constants';
 
 /**************************************************************************
  * IControlAgent
@@ -74,9 +75,9 @@ export interface ICACallbacks {
  * creds    - credentials
  *************************************************************************/
 export interface IMCMCertData {
-  outbound?: {
-    tls?: {
-      creds?: ICACerts;
+  outbound: {
+    tls: {
+      creds: ICACerts;
     };
   };
 }
@@ -87,3 +88,40 @@ export interface IMCMCertData {
  * Interface for a generic object
  *************************************************************************/
 export type GenericObject = Record<string, unknown>;
+
+type GenericWsData = unknown; // todo: define the shape of the data
+
+export type WsPayload = {
+  verb: VERB;
+  msg: MESSAGE;
+  data: GenericWsData;
+  id: string;
+};
+
+export type CertsWsPayload = WsPayload & {
+  verb: VERB.NOTIFY;
+  msg: MESSAGE.CONFIGURATION;
+  data: IMCMCertData;
+};
+
+/**************************************************************************
+ * Type Guards
+ *************************************************************************/
+export const isWsPayload = (payload: unknown): payload is WsPayload => {
+  if (!payload || typeof payload !== 'object') {
+    return false;
+  }
+  const p = payload as WsPayload;
+  // prettier-ignore
+  return Object.values(VERB).includes(p.verb)
+    && Object.values(MESSAGE).includes(p.msg)
+    && Object.hasOwn(payload, 'data');
+};
+
+export const isCertsPayload = (payload: WsPayload): payload is CertsWsPayload => {
+  const p = payload as CertsWsPayload;
+  // prettier-ignore
+  return p.verb === VERB.NOTIFY
+    && p.msg === MESSAGE.CONFIGURATION
+    && Boolean(p.data?.outbound?.tls?.creds);
+};
