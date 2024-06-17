@@ -1,5 +1,6 @@
 import ws from 'ws';
 import * as jsonPatch from 'fast-json-patch';
+import stringify from 'fast-safe-stringify';
 import { generateSlug } from 'random-word-slugs';
 import { ERROR, MESSAGE, VERB } from './constants';
 import { GenericObject } from './types';
@@ -8,7 +9,7 @@ import { GenericObject } from './types';
  * MCM protocol support functions
  *************************************************************************/
 
-export const serialise = JSON.stringify;
+export const serialise = stringify;
 
 export const deserialise = (msg: string | ws.RawData) => {
   //reviver function

@@ -70,6 +70,11 @@ export class ControlAgent implements IControlAgent {
 
   open(): Promise<void> {
     return new Promise((resolve, reject) => {
+      if (this._ws && this._ws.readyState === WebSocket.OPEN) {
+        reject(new Error('WebSocket is already open'));
+        return;
+      }
+
       const url = this._port ? `${this._address}:${this._port}` : this._address;
       const protocol = this._address.includes('://') ? '' : 'ws://';
 
@@ -88,33 +93,28 @@ export class ControlAgent implements IControlAgent {
     return new Promise((resolve, reject) => {
       this._logger.info(`${this.id} shutting down...`);
 
-      if (!this._ws) {
-        reject(new Error('WebSocket is not open'));
-        return;
-      }
+      this._checkSocketState();
 
-      this._ws.on('close', resolve);
-      this._ws.on('error', reject);
+      this._ws?.on('close', resolve);
+      this._ws?.on('error', reject);
 
-      this._ws.close();
+      this._ws?.close();
     });
   }
 
   send(msg: string | GenericObject) {
+    this._checkSocketState();
+    
     const data = typeof msg === 'string' ? msg : serialise(msg);
     this._logger.debug(`${this.id} sending message`, { data });
-    return new Promise((resolve) => this._ws?.send(data, resolve));
-    // todo: clarify, why we need to return a promise here
+    
+    this._ws?.send(data);
   }
 
   // Receive a single message
   receive(): Promise<GenericObject> {
     return new Promise((resolve, reject) => {
-      if (!this._ws) {
-        reject(new Error('WebSocket is not open'));
-        return;
-      }
-
+      this._checkSocketState();
       this._ws?.once('message', (data) => {
         const msg = deserialise(data);
         this._logger.verbose('Received', { msg });
@@ -143,6 +143,12 @@ export class ControlAgent implements IControlAgent {
     // todo: figure out the shape of the realtime data when the control agent receives config changes message for certs
     // current implementation is for the initial certs load
     return (data as IMCMCertData).outbound?.tls?.creds as ICACerts;
+  }
+
+  private _checkSocketState() {
+    if (!this._ws || this._ws.readyState !== WebSocket.OPEN) {
+      throw new Error(`${this.id} WebSocket is not open`);
+    }
   }
 
   private _handle(data: ws.RawData | string) {

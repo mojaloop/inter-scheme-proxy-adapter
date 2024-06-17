@@ -16,20 +16,9 @@ export interface IControlAgent {
   init: (cbs: ICACallbacks) => Promise<void>;
   open: () => Promise<void>;
   close: () => Promise<void>;
-  send: (message: string) => Promise<unknown>;
+  send: (message: string) => void;
   receive: () => Promise<GenericObject>;
   loadCerts: () => Promise<ICACerts>;
-}
-
-/**************************************************************************
- * IControlAgentConstructor
- *
- * Interface for the constructor of the Control Agent
- *
- * params - parameters required to create the control agent
- *************************************************************************/
-export interface IControlAgentConstructor {
-  new (params: ICAParams): IControlAgent;
 }
 
 /**************************************************************************
