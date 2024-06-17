@@ -10,22 +10,28 @@ type controlAgentsMap = Readonly<{
 
 type createControlAgentsDeps = {
   logger: ILogger;
+  // think, if it's better to pass config here
 };
 
 export const createControlAgents = (deps: createControlAgentsDeps): controlAgentsMap => {
-  const { logger } = deps;
+  const { controlAgentAConfig, controlAgentBConfig } = config.get();
+
+  const idA = 'ControlAgentA';
   const controlAgentA = new ControlAgent({
-    id: 'ControlAgentA',
-    address: config.get('mgmtApiAConfig').host,
-    port: config.get('mgmtApiAConfig').port,
-    logger: logger.child('controlAgentA'),
+    id: idA,
+    address: controlAgentAConfig.wsHost,
+    port: controlAgentAConfig.wsPort,
+    timeout: controlAgentAConfig.timeout,
+    logger: deps.logger.child(idA),
   });
 
+  const idB = 'ControlAgentB';
   const controlAgentB = new ControlAgent({
-    id: 'ControlAgentB',
-    address: config.get('mgmtApiBConfig').host,
-    port: config.get('mgmtApiBConfig').port,
-    logger: logger.child('controlAgentB'),
+    id: idB,
+    address: controlAgentBConfig.wsHost,
+    port: controlAgentBConfig.wsPort,
+    timeout: controlAgentBConfig.timeout,
+    logger: deps.logger.child(idB),
   });
 
   return Object.freeze({

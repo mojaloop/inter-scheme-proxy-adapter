@@ -26,10 +26,9 @@
 import { ISPAService, ISPAServiceInterface } from '#src/domain';
 import { PROXY_HEADER, AUTH_HEADER } from '#src/constants';
 import { loggerFactory } from '#src/utils';
+import config from '#src/config';
 
 import * as fixtures from '#test/fixtures';
-import { proxyDetailsDto, requestDetailsDto } from '#test/fixtures';
-import config from '#src/config';
 
 describe('ISPAService Tests -->', () => {
   const logger = loggerFactory('test');
@@ -44,7 +43,7 @@ describe('ISPAService Tests -->', () => {
     const query = 'query=test';
     const headers = { h1: 'test' };
     const proxyDetails = fixtures.proxyDetailsDto();
-    const reqDetails = requestDetailsDto({
+    const reqDetails = fixtures.requestDetailsDto({
       path,
       query,
       headers,

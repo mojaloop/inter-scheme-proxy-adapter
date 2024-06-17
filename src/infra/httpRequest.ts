@@ -19,6 +19,7 @@ export const httpRequest = async (options: HttpRequestOptions): Promise<ProxyHan
     return { data, status, headers };
   } catch (err: unknown) {
     logger.error('proxy response error:', err);
-    return { data: null, status: 502 }; // think, if we need to provide headers
+    // todo: think, how to handle error. Do we need retries?
+    return { data: null, status: 502 };
   }
 };

@@ -2,17 +2,17 @@ import axios from 'axios';
 import { IAuthClient, OIDCToken } from '../domain/types';
 import { AuthClientDeps } from './types';
 
+type OIDCTokenResponse = axios.AxiosResponse<OIDCToken>;
+
 export class AuthClient implements IAuthClient {
   private timer: NodeJS.Timeout | null = null;
 
   constructor(private readonly deps: AuthClientDeps) {}
 
   async getOidcToken() {
-    const httpOptions = this.createHttpOptions();
-    const { data, status }: axios.AxiosResponse<OIDCToken> = await axios(httpOptions);
-    // todo: think, if it's better to add abstraction on top of axios lib, and pass it through deps
-
+    const { data, status }: OIDCTokenResponse = await this.sendRequest();
     this.deps.logger.debug('oidc token received:', { data, status });
+
     if (!data.access_token || !data.expires_in) {
       throw new Error('Invalid response from token endpoint');
       // todo: think if we need to throw an error OR just log it and return null
@@ -37,6 +37,12 @@ export class AuthClient implements IAuthClient {
       this.timer = null;
       this.deps.logger.debug('accessToken updates stopped');
     }
+  }
+
+  private sendRequest(): Promise<OIDCTokenResponse> {
+    const httpOptions = this.createHttpOptions();
+    return axios(httpOptions);
+    // todo: think, if it's better to add abstraction on top of axios lib, and pass it through deps
   }
 
   private createHttpOptions() {

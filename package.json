@@ -1,6 +1,6 @@
 {
   "name": "inter-scheme-proxy-adapter",
-  "version": "0.3.3-snapshot.0",
+  "version": "0.3.3-snapshot.1",
   "private": true,
   "description": "Schemes Proxy implementation (ISPA)",
   "author": "Eugen Klymniuk (geka-evk)",
@@ -25,7 +25,7 @@
     "lint:fix": "npm run lint -- --fix",
     "build": "tsc",
     "watch": "tsc -w",
-    "script:token": "ts-node -r dotenv/config -P ./tsconfig.json ./scripts/getToken.ts",
+    "script:token": "ts-node -r dotenv/config -P ./tsconfig.test.json ./test/scripts/getToken.ts",
     "audit:resolve": "npx resolve-audit --production",
     "audit:check": "npx check-audit --production",
     "dep:check": "npx --no-install ncu -e 2",
@@ -43,7 +43,7 @@
     "fast-json-patch": "^3.1.1",
     "fast-safe-stringify": "^2.1.1",
     "random-word-slugs": "^0.1.7",
-    "ws": "^8.17.0"
+    "ws": "^8.17.1"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.3.0",
@@ -68,7 +68,7 @@
     "prettier": "3.3.2",
     "replace": "^1.2.2",
     "standard-version": "^9.5.0",
-    "ts-jest": "29.1.4",
+    "ts-jest": "29.1.5",
     "ts-node": "10.9.2",
     "typescript": "5.4.5"
   },
