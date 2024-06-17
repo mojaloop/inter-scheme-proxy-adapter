@@ -16,7 +16,7 @@ export class HttpServer extends EventEmitter implements IHttpServer {
 
   constructor(private readonly deps: HttpServerDeps) {
     super();
-    this.server = new Hapi.Server(deps.serverConfig);
+    this.server = this.createServer();
     this.initInternalEvents();
   }
 
@@ -108,5 +108,9 @@ export class HttpServer extends EventEmitter implements IHttpServer {
       //   - a separate event for each state change
       //   - a separate method for each state change
     });
+  }
+
+  private createServer() {
+    return new Hapi.Server(this.deps.serverConfig);
   }
 }

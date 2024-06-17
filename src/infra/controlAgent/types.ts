@@ -18,6 +18,7 @@ export interface IControlAgent {
   close: () => Promise<void>;
   send: (message: string) => Promise<unknown>;
   receive: () => Promise<GenericObject>;
+  loadCerts: () => Promise<ICACerts>;
 }
 
 /**************************************************************************
@@ -44,7 +45,7 @@ export interface ICAParams {
   id?: string;
   address?: string;
   port: number;
-  timeout?: number;
+  timeout: number;
   logger: ILogger;
 }
 
@@ -86,7 +87,7 @@ export interface ICACallbacks {
 export interface IMCMCertData {
   outbound?: {
     tls?: {
-      creds?: ICACerts
+      creds?: ICACerts;
     };
   };
 }
