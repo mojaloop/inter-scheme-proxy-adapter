@@ -1,10 +1,10 @@
 import { URL } from 'node:url';
 import { ServerInfo, Server } from '@hapi/hapi';
 import { INTERNAL_EVENTS } from '../constants';
-import { ProxyTlsAgent, TlsOptions } from '../infra/types';
+import { ProxyTlsAgent, IControlAgent, TlsOptions } from '../infra/types';
 import { LogMethods, LogContext } from '../utils/types';
 
-type Headers = Record<string, string>;
+type Headers = Record<string, string>; // check, why it doesn't work with Json
 
 export type ProxyDetails = {
   baseUrl: string;
@@ -50,6 +50,8 @@ export type ISPADeps = {
   authClientB: IAuthClient;
   httpServerA: IHttpServer;
   httpServerB: IHttpServer;
+  controlAgentA: IControlAgent;
+  controlAgentB: IControlAgent;
   httpRequest: HttpRequest;
   logger: ILogger;
 };
@@ -89,7 +91,7 @@ export interface IHttpServer {
   start: (proxyHandlerFn: ProxyHandlerFn) => Promise<boolean>;
   stop: () => Promise<boolean>;
   emit: (event: typeof INTERNAL_EVENTS.serverState, data: ServerStateEvent) => boolean;
-  // todo: think, if it's better to emit separate events for each state change
+  // think, if it's better to emit separate events for each state change
   info: ServerInfo; // think, if we need this
   hapiServer: Readonly<Server>; // for testing purposes
 }

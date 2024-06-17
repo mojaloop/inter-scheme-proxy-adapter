@@ -1,12 +1,11 @@
 import { type Agent } from 'node:https';
 import { ILogger, ProxyDetails } from '../domain/types';
 
+export * from './controlAgent/types';
+
 export type AppConfig = {
   PROXY_ID: string;
   LOG_LEVEL: string; // todo: use LogLevel type
-
-  mtlsConfigA: MtlsConfig;
-  mtlsConfigB: MtlsConfig;
 
   authConfigA: AuthConfig;
   authConfigB: AuthConfig;
@@ -16,23 +15,28 @@ export type AppConfig = {
 
   hubAConfig: HubConfig;
   hubBConfig: HubConfig;
+
+  controlAgentAConfig: ControlAgentConfig;
+  controlAgentBConfig: ControlAgentConfig;
+
+  pm4mlEnabled: boolean;
 };
 
 type HubConfig = {
-  // todo: think, if we need separate endpoints for ALS, QuotingService and ML-API-Adapter
+  // todo: move to ServerConfig
   baseUrl: string;
 };
 
 type ServerConfig = {
+  // todo: rename to ProxyServerConfig
   host: string;
   port: number;
 };
 
-export type MtlsConfig = {
-  enabled: boolean;
-  caCertPath: string;
-  clientCertPath: string;
-  clientKeyPath: string;
+type ControlAgentConfig = {
+  wsHost: string;
+  wsPort: number;
+  timeout: number;
 };
 
 export type AuthConfig = {
@@ -44,10 +48,11 @@ export type AuthConfig = {
 };
 
 export type TlsOptions = Readonly<{
-  ca: Buffer;
-  cert: Buffer;
-  key: Buffer;
+  ca: string | Buffer;
+  cert: string | Buffer;
+  key: string | Buffer;
 }>;
+// think, if we need to leave only string?
 
 export type ProxyTlsAgent = Agent | null;
 
@@ -59,6 +64,6 @@ export type HttpServerDeps = {
 
 export type AuthClientDeps = {
   authConfig: AuthConfig;
-  // httpClient: HttpClient; // axios
   logger: ILogger;
+  // httpClient: HttpClient; // axios
 };

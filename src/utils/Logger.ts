@@ -6,7 +6,12 @@ import mlLogger from '@mojaloop/central-services-logger';
   2. Impl. has isPerfEnabled/perf, isAuditEnabled/audit, isTraceEnabled/trace methods, which don't exist on WinstonLogger type.
  */
 import { ILogger } from '../domain';
-import { LogContext, LogMeta } from './types';
+import { LogContext, LogMeta, Json } from './types';
+
+interface AnyError extends Error {
+  code?: string;
+  cause?: Error;
+}
 
 const makeLogString = (message: string, metaData?: unknown) => {
   return metaData ? `${message} - ${stringify(metaData)}` : message;
@@ -70,7 +75,7 @@ export class Logger implements ILogger {
     if (!meta && !this.context) return makeLogString(message);
     // prettier-ignore
     const metaData = meta instanceof Error
-      ? { error: meta.stack }
+      ? Logger.formatError(meta as AnyError)
       : typeof meta === 'object' ? meta : { meta };
     // try to add requestId from req (using AsyncLocalStorage)
     return makeLogString(message, Object.assign({}, metaData, this.context));
@@ -111,4 +116,15 @@ export class Logger implements ILogger {
 
   // @ts-expect-error TS2339: Property isPerfEnabled does not exist on type Logger
   isPerfEnabled: boolean = this.mlLogger.isPerfEnabled;
+
+  static formatError(error: AnyError): Json {
+    const { message, stack, code, cause } = error;
+
+    return {
+      message,
+      ...(stack && { stack }),
+      ...(code && { code }),
+      ...(cause instanceof Error && { cause: Logger.formatError(cause as AnyError) }),
+    };
+  }
 }

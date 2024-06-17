@@ -25,12 +25,7 @@
 
 import { INTERNAL_EVENTS } from '../constants';
 import { IProxyAdapter, ISPADeps, IncomingRequestDetails, ServerState, ServerStateEvent } from './types';
-
-import { readCertsFromFile } from '../infra';
-// todo: remove it after menAPI integration is ready!
-import config from '../config';
-
-export const MOCK_TOKEN = 'noAccessTokenYet';
+import { ICACerts } from '../infra';
 
 export class InterSchemeProxyAdapter implements IProxyAdapter {
   constructor(private readonly deps: ISPADeps) {
@@ -52,10 +47,10 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
   }
 
   async start(): Promise<void> {
-    await this.getCerts();
     await this.getAccessTokens();
-    await this.initWSConnections();
-    // maybe, Promise.all?
+    await this.initControlAgents();
+    await this.loadInitialCerts();
+    this.deps.logger.debug('certs and token are ready, starting httpServers...');
 
     const [isAStarted, isBStarted] = await Promise.all([
       this.deps.httpServerA.start(this.handleProxyRequest),
@@ -76,6 +71,14 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
     this.deps.logger.info('ISPA is stopped', { isAStopped, isBStopped });
   }
 
+  private emitStateEventServerA(event: ServerStateEvent) {
+    this.deps.httpServerA.emit(INTERNAL_EVENTS.serverState, event);
+  }
+
+  private emitStateEventServerB(event: ServerStateEvent) {
+    this.deps.httpServerB.emit(INTERNAL_EVENTS.serverState, event);
+  }
+
   private async getAccessTokens() {
     const emitNewTokenA = (accessToken: string) => this.emitStateEventServerA({ accessToken });
     const emitNewTokenB = (accessToken: string) => this.emitStateEventServerB({ accessToken });
@@ -86,34 +89,26 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
     ]);
   }
 
-  private async getCerts() {
-    // todo: use MenAPI instead
-    const { mtlsConfigA, mtlsConfigB } = config.get();
-    const certsA = readCertsFromFile(mtlsConfigA);
-    const certsB = readCertsFromFile(mtlsConfigB);
+  private async initControlAgents() {
+    const { controlAgentA, controlAgentB } = this.deps;
 
-    this.emitStateEventServerA({ certs: certsB });
-    this.emitStateEventServerB({ certs: certsA });
+    await Promise.all([
+      controlAgentA.init({
+        onCert: (certs: ICACerts) => this.emitStateEventServerA({ certs }),
+      }),
+      controlAgentB.init({
+        onCert: (certs: ICACerts) => this.emitStateEventServerB({ certs }),
+      }),
+    ]);
   }
 
-  async initWSConnections() {
-    // const { httpServerA, httpServerB } = this.deps;
-    //
-    // this.wsAgentA.init({
-    //   config: (certs) => this.emitStateEventServerA({ certs }),
-    //   error: () => {}, // todo: clarify how to react on this event
-    // });
-    // this.wsAgentB.init({
-    //   config: (certs) => this.emitStateEventServerB({ certs }),
-    //   error: () => {}, // todo: clarify how to react on this event
-    // });
-  }
+  private async loadInitialCerts() {
+    const [certsA, certsB] = await Promise.all([
+      this.deps.controlAgentA.loadCerts(),
+      this.deps.controlAgentB.loadCerts(),
+    ]);
 
-  private emitStateEventServerA(event: ServerStateEvent) {
-    this.deps.httpServerA.emit(INTERNAL_EVENTS.serverState, event);
-  }
-
-  private emitStateEventServerB(event: ServerStateEvent) {
-    this.deps.httpServerB.emit(INTERNAL_EVENTS.serverState, event);
+    this.emitStateEventServerA({ certs: certsA });
+    this.emitStateEventServerB({ certs: certsB });
   }
 }

@@ -9,64 +9,6 @@ const config = convict<AppConfig>({
     env: 'PROXY_ID',
   },
 
-  mtlsConfigA: {
-    enabled: {
-      doc: 'Defines if mTLS is enabled on hub A',
-      format: Boolean,
-      default: true,
-      env: 'OUTBOUND_MUTUAL_TLS_ENABLED_A',
-    },
-    // todo: think, how to make caCertPath, clientCertPath, clientKeyPath NOT required if mTLS is disabled
-    caCertPath: {
-      doc: 'CA cert file location for hub A',
-      format: String,
-      default: null,
-      env: 'OUT_CA_CERT_PATH_A',
-    },
-    clientCertPath: {
-      doc: 'Client cert file location for hub A',
-      format: String,
-      default: null,
-      env: 'OUT_CLIENT_CERT_PATH_A',
-    },
-    clientKeyPath: {
-      doc: 'Client private key file location for hub A',
-      format: String,
-      default: null,
-      sensitive: true,
-      env: 'OUT_CLIENT_KEY_PATH_A',
-    },
-  },
-
-  mtlsConfigB: {
-    enabled: {
-      doc: 'Defines if mTLS is enabled on hub B',
-      format: Boolean,
-      default: true,
-      env: 'OUTBOUND_MUTUAL_TLS_ENABLED_B',
-    },
-    // think, how to make caCertPath, clientCertPath, clientKeyPath NOT required if mTLS is disabled
-    caCertPath: {
-      doc: 'CA cert file location',
-      format: String,
-      default: null,
-      env: 'OUT_CA_CERT_PATH_B',
-    },
-    clientCertPath: {
-      doc: 'Client cert file location',
-      format: String,
-      default: null,
-      env: 'OUT_CLIENT_CERT_PATH_B',
-    },
-    clientKeyPath: {
-      doc: 'Client private key file location',
-      format: String,
-      default: null,
-      sensitive: true,
-      env: 'OUT_CLIENT_KEY_PATH_B',
-    },
-  },
-
   authConfigA: {
     tokenEndpoint: {
       doc: 'Endpoint to get access token on hub A',
@@ -153,6 +95,48 @@ const config = convict<AppConfig>({
     },
   },
 
+  controlAgentAConfig: {
+    wsHost: {
+      doc: 'Hostname or IP address where the management API listens for incoming requests',
+      format: String,
+      default: null,
+      env: 'MGMT_API_WS_URL_A',
+    },
+    wsPort: {
+      doc: 'HTTP port to listen on for the management API',
+      format: 'port',
+      default: null,
+      env: 'MGMT_API_WS_PORT_A',
+    },
+    timeout: {
+      doc: 'Timeout for control agent on hub A',
+      format: Number,
+      default: 5000,
+      env: 'MGMT_API_WS_TIMEOUT_A',
+    },
+  },
+
+  controlAgentBConfig: {
+    wsHost: {
+      doc: 'Hostname or IP address where the management API listens for incoming requests',
+      format: String,
+      default: null,
+      env: 'MGMT_API_WS_URL_B',
+    },
+    wsPort: {
+      doc: 'HTTP port to listen on for the management API',
+      format: 'port',
+      default: null,
+      env: 'MGMT_API_WS_PORT_B',
+    },
+    timeout: {
+      doc: 'Timeout for control agent on hub B',
+      format: Number,
+      default: 5000,
+      env: 'MGMT_API_WS_TIMEOUT_B',
+    },
+  },
+
   hubAConfig: {
     baseUrl: {
       doc: 'Base URL on hub A',
@@ -176,6 +160,13 @@ const config = convict<AppConfig>({
     format: String, // todo: use LogLevel type
     default: 'info',
     env: 'LOG_LEVEL',
+  },
+
+  pm4mlEnabled: {
+    doc: 'Defines if pm4ml is enabled',
+    format: Boolean,
+    default: false,
+    env: 'PM4ML_ENABLED',
   },
 });
 

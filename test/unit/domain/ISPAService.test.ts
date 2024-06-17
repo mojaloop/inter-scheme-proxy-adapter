@@ -29,7 +29,6 @@ import { loggerFactory } from '#src/utils';
 import config from '#src/config';
 
 import * as fixtures from '#test/fixtures';
-import { proxyDetailsDto, requestDetailsDto } from '#test/fixtures';
 
 describe('ISPAService Tests -->', () => {
   const logger = loggerFactory('test');
@@ -44,7 +43,7 @@ describe('ISPAService Tests -->', () => {
     const query = 'query=test';
     const headers = { h1: 'test' };
     const proxyDetails = fixtures.proxyDetailsDto();
-    const reqDetails = requestDetailsDto({
+    const reqDetails = fixtures.requestDetailsDto({
       path,
       query,
       headers,

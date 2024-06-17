@@ -5,6 +5,7 @@
  The Mojaloop files are made available by the Bill & Melinda Gates Foundation under the Apache License, Version 2.0 (the "License") and you may not use these files except in compliance with the License. You may obtain a copy of the License at
  http://www.apache.org/licenses/LICENSE-2.0
  Unless required by applicable law or agreed to in writing, the Mojaloop files are distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+
  Contributors
  --------------
  This is the official list of the Mojaloop project contributors for this file.
@@ -18,30 +19,33 @@
  * Gates Foundation
  - Name Surname <name.surname@gatesfoundation.com>
 
+ * Eugen Klymniuk <eugen.klymniuk@infitx.com>
  --------------
- ******/
+ **********/
 
 import config from './config';
 import { InterSchemeProxyAdapter, ISPAService } from './domain';
-import { AuthClient, createHttpServers, httpRequest } from './infra';
-import { startingProcess, loggerFactory } from './utils';
+import { AuthClient, createControlAgents, createHttpServers, httpRequest } from './infra';
+import { loggerFactory, startingProcess } from './utils';
 
 let proxyAdapter: InterSchemeProxyAdapter;
 
 const start = async () => {
   const { PROXY_ID, authConfigA, authConfigB } = config.get();
   const logger = loggerFactory(`ISPA-${PROXY_ID}`);
-
   const { httpServerA, httpServerB } = createHttpServers({ logger });
+  const { controlAgentA, controlAgentB } = createControlAgents({ logger });
 
-  const authClientA = new AuthClient({ logger, authConfig: authConfigB });
-  const authClientB = new AuthClient({ logger, authConfig: authConfigA });
+  const authClientA = new AuthClient({ logger, authConfig: authConfigA });
+  const authClientB = new AuthClient({ logger, authConfig: authConfigB });
   const ispaService = new ISPAService({ logger });
 
   proxyAdapter = new InterSchemeProxyAdapter({
     ispaService,
     authClientA,
     authClientB,
+    controlAgentA,
+    controlAgentB,
     httpServerA,
     httpServerB,
     httpRequest,

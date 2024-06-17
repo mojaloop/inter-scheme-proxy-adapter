@@ -1,11 +1,12 @@
 {
   "name": "inter-scheme-proxy-adapter",
-  "version": "0.3.1-snapshot.5",
+  "version": "0.3.3-snapshot.1",
   "private": true,
   "description": "Schemes Proxy implementation (ISPA)",
   "author": "Eugen Klymniuk (geka-evk)",
   "contributors": [
-    "Eugen Klymniuk <eugen.klymniuk@infitx.com>"
+    "Eugen Klymniuk <eugen.klymniuk@infitx.com>",
+    "Steven Oderayi <steven.oderayi@infitx.com>"
   ],
   "license": "Apache-2.0",
   "main": "dist/index.js",
@@ -24,7 +25,7 @@
     "lint:fix": "npm run lint -- --fix",
     "build": "tsc",
     "watch": "tsc -w",
-    "script:token": "ts-node -r dotenv/config -P ./tsconfig.json ./scripts/getToken.ts",
+    "script:token": "ts-node -r dotenv/config -P ./tsconfig.test.json ./test/scripts/getToken.ts",
     "audit:resolve": "npx resolve-audit --production",
     "audit:check": "npx check-audit --production",
     "dep:check": "npx --no-install ncu -e 2",
@@ -39,14 +40,19 @@
     "@mojaloop/sdk-standard-components": "^18.2.0",
     "axios": "^1.7.2",
     "convict": "^6.2.4",
-    "fast-safe-stringify": "^2.1.1"
+    "fast-json-patch": "^3.1.1",
+    "fast-safe-stringify": "^2.1.1",
+    "random-word-slugs": "^0.1.7",
+    "ws": "^8.17.1"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.3.0",
     "@commitlint/config-conventional": "^19.2.2",
     "@types/convict": "^6.1.6",
     "@types/jest": "^29.5.12",
+    "@types/lodash": "^4.17.5",
     "@types/node": "^20.14.2",
+    "@types/ws": "^8.5.10",
     "@typescript-eslint/eslint-plugin": "7.13.0",
     "@typescript-eslint/parser": "7.13.0",
     "dotenv": "^16.4.5",
@@ -62,7 +68,7 @@
     "prettier": "3.3.2",
     "replace": "^1.2.2",
     "standard-version": "^9.5.0",
-    "ts-jest": "29.1.4",
+    "ts-jest": "29.1.5",
     "ts-node": "10.9.2",
     "typescript": "5.4.5"
   },
