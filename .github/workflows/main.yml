@@ -51,6 +51,6 @@ jobs:
       - name: Run integration tests
         run: |
           docker compose build
-          docker compose up -d
+          docker compose up
           npm run test:int
           docker compose down -v  
