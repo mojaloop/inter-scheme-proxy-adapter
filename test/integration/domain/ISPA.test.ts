@@ -23,12 +23,15 @@
  --------------
  **********/
 
+import https from 'node:https';
 import axios from 'axios'; // todo: add wrapper
 import config from '#src/config';
 import { PROXY_HEADER, AUTH_HEADER } from '#src/constants';
 
+import certs from '#test/certs.json';
+
 const PROXY_HOST = 'http://localhost';
-const { serverAConfig, PROXY_ID } = config.get();
+const { serverAConfig, hubAConfig, PROXY_ID } = config.get();
 
 const checkProxyServiceHeaders = (headers: Record<string, unknown>) => {
   expect(headers[PROXY_HEADER.toLowerCase()]).toBe(PROXY_ID);
@@ -56,5 +59,33 @@ describe('ISPA Integration Tests -->', () => {
     expect(data.body).toEqual(payload);
     expect(data.headers.h1).toBe(headers.h1);
   });
-  // todo: add negative scenario with wrong certs and auth token
+
+  describe('mTLS hub (peer-endpoint) Tests -->', () => {
+    const url = `${hubAConfig.baseUrl}/int-test`;
+    const sendGetRequest = async (options: axios.AxiosRequestConfig) =>
+      axios
+        .request({
+          ...options,
+          method: 'GET',
+        })
+        .catch((err) => err);
+
+    test('should fail when connect to https hub (peer-endpoint) without certs', async () => {
+      const httpsAgent = new https.Agent({ rejectUnauthorized: false });
+      const response = await sendGetRequest({ url, httpsAgent });
+      expect(response).toBeInstanceOf(Error);
+      expect(response.message).toMatch(/routines:ssl3_read_bytes:tlsv13 alert certificate required/);
+    });
+
+    test('should fail when connect to https hub (peer-endpoint) with wrong certs', async () => {
+      const httpsAgent = new https.Agent({
+        ...certs.wrongClient,
+        rejectUnauthorized: false,
+      });
+      const response = await sendGetRequest({ url, httpsAgent });
+      expect(response).toBeInstanceOf(Error);
+      expect(response.message).toBe('socket hang up');
+    });
+  });
+  // todo: add negative scenario with wrong auth token
 });

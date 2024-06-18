@@ -52,6 +52,6 @@ jobs:
         run: |
           docker compose build
           docker compose up -d
-          sleep 15
+          echo "waiting for 10sec before tests run..." && sleep 10
           npm run test:int
           docker compose down -v  

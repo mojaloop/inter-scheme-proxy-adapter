@@ -27,7 +27,7 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
-    command: /bin/sh -c "sleep 15 && npm start" # todo: use better approach instead of sleep 15
+    command: /bin/sh -c "sleep 10 && npm start" # todo: use better approach instead of sleep 10
     restart: on-failure
     env_file: .env
     environment:
