@@ -42,6 +42,12 @@ const checkProxyServiceHeaders = (headers: Record<string, unknown>) => {
   // todo: add possibility to validate token value
 };
 
+const sendRequest = async (options: axios.AxiosRequestConfig) =>
+  axios.request(options).catch((err) => {
+    logger.warn('error on sending mTLS request', err);
+    return err;
+  });
+
 describe('ISPA Integration Tests -->', () => {
   test('e2e positive flow with POST call to hub A', async () => {
     const path = '/api/int-test';
@@ -50,7 +56,7 @@ describe('ISPA Integration Tests -->', () => {
     const url = `${PROXY_HOST}:${serverAConfig.port}${path}`;
 
     // data is "echo" of initial request
-    const { status, data } = await axios.request({
+    const { status, data } = await sendRequest({
       method: 'POST',
       url,
       headers,
@@ -65,20 +71,16 @@ describe('ISPA Integration Tests -->', () => {
 
   describe('mTLS hub (peer-endpoint) Tests -->', () => {
     const url = `${hubAConfig.baseUrl}/int-test`;
-    const sendGetRequest = async (options: axios.AxiosRequestConfig) =>
-      axios
-        .request({
-          ...options,
-          method: 'GET',
-        })
-        .catch((err) => {
-          logger.warn(`error on sending mTLS request:`, err);
-          return err;
-        });
+    // prettier-ignore
+    const sendGetRequest = (options: axios.AxiosRequestConfig) => sendRequest({
+      ...options,
+      method: 'GET',
+      url
+    });
 
     test('should fail when connect to https hub (peer-endpoint) without certs', async () => {
       const httpsAgent = new https.Agent({ rejectUnauthorized: false });
-      const response = await sendGetRequest({ url, httpsAgent });
+      const response = await sendGetRequest({ httpsAgent });
       expect(response).toBeInstanceOf(Error);
       expect(response.message).toMatch(/routines:ssl3_read_bytes:tlsv13 alert certificate required/);
     });
@@ -90,7 +92,7 @@ describe('ISPA Integration Tests -->', () => {
         keepAlive: true,
         timeout: 5000,
       });
-      const response = await sendGetRequest({ url, httpsAgent });
+      const response = await sendGetRequest({ httpsAgent });
       expect(response).toBeInstanceOf(Error);
       // expect(response.message).toBe('socket hang up');
       // todo: clarify, why the error message is different
