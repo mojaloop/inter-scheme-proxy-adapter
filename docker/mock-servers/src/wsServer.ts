@@ -5,10 +5,13 @@ import { WebSocketServer, WebSocket } from 'ws';
 import certs from '../certs/certs.json';
 import { WS_PORT } from './config';
 
-const wss = new WebSocketServer({ port: WS_PORT });
-
-let CERTS = { ...certs.client };
+const CLIENT_CERTS_FIELD = 'client-hub-a'; // todo: make configurable
+const getCerts = () => ({
+  ...certs[CLIENT_CERTS_FIELD],
+});
 // todo: add possibility to change certs
+
+const wss = new WebSocketServer({ port: WS_PORT });
 
 const credsMessageDto = (id: string) => ({
   id,
@@ -17,7 +20,7 @@ const credsMessageDto = (id: string) => ({
   data: {
     outbound: {
       tls: {
-        creds: CERTS,
+        creds: getCerts(),
       },
     },
   },
