@@ -18,11 +18,13 @@ export const httpRequest = async (options: HttpRequestOptions): Promise<ProxyHan
 
     return { data, status, headers };
   } catch (err: unknown) {
-    return prepareErrorResponse(err);
+    const errResponse = prepareErrorResponse(err);
+    logger.warn('errResponse details:', errResponse);
+    return errResponse;
   }
 };
 
-function prepareErrorResponse(err: unknown) {
+function prepareErrorResponse(err: unknown): ProxyHandlerResponse {
   logger.error('proxy response error:', err);
 
   if (axios.isAxiosError(err)) {

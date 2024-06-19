@@ -35,9 +35,6 @@ export const loggingPlugin: Plugin<PluginOptions> = {
         const responseTimeSec = ((Date.now() - context.received) / 1000).toFixed(3);
 
         const statusCode = response instanceof Error ? response.output.statusCode : response.statusCode;
-        if (statusCode >= 300) {
-          logger.warn('bad response:', response);
-        }
         logger.info(`[<== ${statusCode}][${responseTimeSec} s] ${method.toUpperCase()} ${path}`, context);
 
         return h.continue;
