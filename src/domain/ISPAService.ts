@@ -15,8 +15,12 @@ export class ISPAService implements ISPAServiceInterface {
     const { pathname, search } = reqDetails.url;
     const { baseUrl } = reqDetails.proxyDetails;
 
+    // todo: remove sensitive and hopByHop headers
     delete reqDetails.headers['content-length'];
     // todo: clarify, why without removing content-length header request just stuck
+    delete reqDetails.headers['host'];
+    // todo: clarify, why without removing "host" header request failed with error:
+    //  "Client network socket disconnected before secure TLS connection was established"
 
     const proxyTarget = {
       url: `${baseUrl}${pathname}${search}`,

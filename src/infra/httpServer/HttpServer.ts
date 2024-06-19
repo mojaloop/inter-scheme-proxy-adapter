@@ -85,6 +85,12 @@ export class HttpServer extends EventEmitter implements IHttpServer {
           return h.response(response.data || undefined).code(response.status);
           // todo: think how to handle headers
         },
+        options: {
+          payload: {
+            output: 'data',
+            parse: false,
+          },
+        },
       },
     ]);
   }

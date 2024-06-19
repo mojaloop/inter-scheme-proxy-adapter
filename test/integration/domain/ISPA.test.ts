@@ -95,9 +95,8 @@ describe('ISPA Integration Tests -->', () => {
       const response = await sendGetRequest({ httpsAgent });
       expect(response).toBeInstanceOf(Error);
       // expect(response.message).toBe('socket hang up');
-      // todo: clarify, why the error message is different
-      //  - locally (and in Postman): "socket hang up"
-      //  - on ci/cd (GH Actions): "Client network socket disconnected before secure TLS connection was established"
+      // todo: clarify, why the error message sometimes is different on ci/cd:
+      //  - "Client network socket disconnected before secure TLS connection was established"
     });
   });
   // todo: add negative scenario with wrong auth token

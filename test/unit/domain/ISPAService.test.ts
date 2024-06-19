@@ -60,4 +60,19 @@ describe('ISPAService Tests -->', () => {
       [AUTH_HEADER]: `Bearer ${serverState.accessToken}`,
     });
   });
+
+  test('should remove some specific headers', () => {
+    const headers = {
+      host: 'test-host',
+      'content-length': '1234',
+    } as any; // todo: add typings for requestDetailsDto, and remove "as any"
+    const reqDetails = fixtures.requestDetailsDto({
+      headers,
+      proxyDetails: fixtures.proxyDetailsDto(),
+    });
+    const proxyTarget = service.getProxyTarget(reqDetails, fixtures.serverStateDto());
+
+    expect(proxyTarget.headers.host).toBeUndefined();
+    expect(proxyTarget.headers['content-length']).toBeUndefined();
+  });
 });
