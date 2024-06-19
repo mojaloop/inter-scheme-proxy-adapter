@@ -72,6 +72,7 @@ describe('ISPA Integration Tests -->', () => {
 
   describe('mTLS hub (peer-endpoint) Tests -->', () => {
     const url = `${SCHEME}://${hubAConfig.baseUrl}/int-test`;
+    logger.info('URL!!!!!!!', { url });
     // prettier-ignore
     const sendGetRequest = (options: axios.AxiosRequestConfig) => sendRequest({
       ...options,
