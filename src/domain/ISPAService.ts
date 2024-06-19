@@ -2,7 +2,7 @@ import config from '../config';
 import { PROXY_HEADER, AUTH_HEADER, SCHEME } from '../constants';
 import { ISPAServiceInterface, ISPAServiceDeps, IncomingRequestDetails, ServerState, ILogger } from './types';
 
-const { PROXY_ID } = config.get(); // or pass it as a parameter in ctor?
+const { PROXY_ID, incomingHeadersRemoval } = config.get(); // or pass it as a parameter in ctor?
 
 export class ISPAService implements ISPAServiceInterface {
   private readonly log: ILogger;
@@ -32,6 +32,7 @@ export class ISPAService implements ISPAServiceInterface {
 
     // todo: remove sensitive and hopByHop headers
     [
+      ...incomingHeadersRemoval,
       'host',
       'content-length', // todo: clarify, why without removing content-length header request just stuck
       'user-agent',

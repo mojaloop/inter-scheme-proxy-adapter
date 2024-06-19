@@ -168,6 +168,13 @@ const config = convict<AppConfig>({
     default: false,
     env: 'PM4ML_ENABLED',
   },
+
+  incomingHeadersRemoval: {
+    doc: 'List of headers to remove from incoming requests before proxying',
+    format: Array,
+    default: [],
+    env: 'INCOMING_HEADERS_REMOVAL',
+  },
 });
 
 config.validate({ allowed: 'strict' });

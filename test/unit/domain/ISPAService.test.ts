@@ -75,4 +75,20 @@ describe('ISPAService Tests -->', () => {
     expect(proxyTarget.headers.host).toBeUndefined();
     expect(proxyTarget.headers['content-length']).toBeUndefined();
   });
+
+  test('should remove headers, specified through env var', () => {
+    const h1 = config.get('incomingHeadersRemoval')[0] as string;
+    expect(typeof h1).toBe('string');
+
+    const headers = {
+      [h1]: 'test-host',
+    } as any; // todo: add typings for requestDetailsDto, and remove "as any"
+    const reqDetails = fixtures.requestDetailsDto({
+      headers,
+      proxyDetails: fixtures.proxyDetailsDto(),
+    });
+    const proxyTarget = service.getProxyTarget(reqDetails, fixtures.serverStateDto());
+
+    expect(proxyTarget.headers[h1]).toBeUndefined();
+  });
 });

@@ -20,6 +20,7 @@ export type AppConfig = {
   controlAgentBConfig: ControlAgentConfig;
 
   pm4mlEnabled: boolean;
+  incomingHeadersRemoval: string[];
 };
 
 type HubConfig = {
