@@ -15,20 +15,44 @@ export class ISPAService implements ISPAServiceInterface {
     const { pathname, search } = reqDetails.url;
     const { baseUrl } = reqDetails.proxyDetails;
 
-    // todo: remove sensitive and hopByHop headers
-    delete reqDetails.headers['content-length'];
-    // todo: clarify, why without removing content-length header request just stuck
-    delete reqDetails.headers['host'];
-
     const proxyTarget = {
       url: `${SCHEME}://${baseUrl}${pathname}${search}`,
       headers: {
-        ...reqDetails.headers,
+        ...this.cleanupIncomingHeaders(reqDetails.headers),
         [PROXY_HEADER]: PROXY_ID,
         [AUTH_HEADER]: `Bearer ${state.accessToken}`,
       },
     };
     this.log.verbose('proxyTarget: ', proxyTarget);
     return proxyTarget;
+  }
+
+  private cleanupIncomingHeaders(headers: Record<string, string>) {
+    const cleanedHeaders = { ...headers };
+
+    // todo: remove sensitive and hopByHop headers
+    [
+      'host',
+      'content-length', // todo: clarify, why without removing content-length header request just stuck
+      'user-agent',
+      'accept-encoding',
+      'x-forwarded-proto',
+      'x-request-id',
+      'x-envoy-attempt-count',
+      'x-forwarded-for',
+      'x-forwarded-client-cert',
+      'x-envoy-external-address',
+      'x-envoy-decorator-operation',
+      'x-envoy-peer-metadata',
+      'x-envoy-peer-metadata-id',
+      'x-b3-traceid',
+      'x-b3-spanid',
+      'x-b3-parentspanid',
+      'x-b3-sampled',
+    ].forEach((header) => {
+      delete cleanedHeaders[header];
+    });
+
+    return cleanedHeaders;
   }
 }

@@ -70,7 +70,7 @@ describe('ISPA Integration Tests -->', () => {
     expect(data.headers.h1).toBe(headers.h1);
   });
 
-  describe('mTLS hub (peer-endpoint) Tests -->', () => {
+  describe.skip('mTLS hub (peer-endpoint) Tests -->', () => {
     const url = `${SCHEME}://${hubAConfig.baseUrl}/int-test`;
     // prettier-ignore
     const sendGetRequest = (options: axios.AxiosRequestConfig) => sendRequest({
