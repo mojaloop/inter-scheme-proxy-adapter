@@ -4,9 +4,9 @@ import express, { Request, Response, NextFunction } from 'express';
 import bodyParser from 'body-parser';
 
 import { MTLS_PORT, DELAY_MS } from './config';
-import { readCerds } from './utils';
+import { createTlsServerOptions } from './utils';
 
-const tlsOpts = readCerds();
+const tlsOpts = createTlsServerOptions();
 
 const app = express();
 app.use(bodyParser.json());

@@ -1,15 +1,7 @@
 import * as console from 'node:console';
 import { randomUUID } from 'node:crypto';
 import { WebSocketServer, WebSocket } from 'ws';
-
-import certs from '../certs/certs.json';
-import { WS_PORT } from './config';
-
-const CLIENT_CERTS_FIELD = 'client-hub-a'; // todo: make configurable
-const getCerts = () => ({
-  ...certs[CLIENT_CERTS_FIELD],
-});
-// todo: add possibility to change certs
+import { WS_PORT, clientCerts } from './config';
 
 const wss = new WebSocketServer({ port: WS_PORT });
 
@@ -20,7 +12,7 @@ const credsMessageDto = (id: string) => ({
   data: {
     outbound: {
       tls: {
-        creds: getCerts(),
+        creds: { ...clientCerts },
       },
     },
   },

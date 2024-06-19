@@ -50,21 +50,29 @@ services:
 
   hub-a:
     <<: *HUB
+    environment:
+      - SERVER_CERTS_FIELD=server-hub-a
     ports:
       - "6443:6443"
 
   hub-b:
     <<: *HUB
+    environment:
+      - SERVER_CERTS_FIELD=server-hub-b
     ports:
       - "26443:6443"
 
   men-api-a:
     <<: *MEN_API
+    environment:
+      - CLIENT_CERTS_FIELD=client-hub-a
     ports:
       - "${MGMT_API_WS_PORT_A}:4005"
 
   men-api-b:
     <<: *MEN_API
+    environment:
+      - CLIENT_CERTS_FIELD=client-hub-b
     ports:
       - "24005:4005"
 
@@ -77,4 +85,3 @@ services:
     <<: *OIDC_SERVER
     ports:
       - "28080:8080"
-

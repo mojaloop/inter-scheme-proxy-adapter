@@ -1,9 +1,8 @@
 import https from 'node:https';
-import certs from '../certs/certs.json';
-// import { SERVER_CERTS_FIELD } from './config';
+import { serverCerts } from './config';
 
-export const readCerds = () => {
-  const { ca, cert, key } = certs['server-hub-a']; // todo: use SERVER_CERTS_FIELD
+export const createTlsServerOptions = () => {
+  const { ca, cert, key } = serverCerts;
 
   const options: https.ServerOptions = {
     ca,
