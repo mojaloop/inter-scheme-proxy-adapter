@@ -24,7 +24,7 @@
  **********/
 
 import { ISPAService, ISPAServiceInterface } from '#src/domain';
-import { PROXY_HEADER, AUTH_HEADER } from '#src/constants';
+import { PROXY_HEADER, AUTH_HEADER, SCHEME } from '#src/constants';
 import { loggerFactory } from '#src/utils';
 import config from '#src/config';
 
@@ -53,7 +53,7 @@ describe('ISPAService Tests -->', () => {
 
     const proxyTarget = service.getProxyTarget(reqDetails, serverState);
 
-    expect(proxyTarget.url).toBe(`${proxyDetails.baseUrl}/${path}?${query}`);
+    expect(proxyTarget.url).toBe(`${SCHEME}://${proxyDetails.baseUrl}/${path}?${query}`);
     expect(proxyTarget.headers).toEqual({
       ...headers,
       [PROXY_HEADER]: config.get('PROXY_ID'),

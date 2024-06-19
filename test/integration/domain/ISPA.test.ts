@@ -26,7 +26,7 @@
 import https from 'node:https';
 import axios from 'axios'; // todo: add wrapper
 import config from '#src/config';
-import { PROXY_HEADER, AUTH_HEADER } from '#src/constants';
+import { PROXY_HEADER, AUTH_HEADER, SCHEME } from '#src/constants';
 import { loggerFactory } from '#src/utils';
 
 import certs from '#test/certs.json';
@@ -49,7 +49,7 @@ const sendRequest = async (options: axios.AxiosRequestConfig) =>
   });
 
 describe('ISPA Integration Tests -->', () => {
-  test.skip('e2e positive flow with POST call to hub A', async () => {
+  test('e2e positive flow with POST call to hub A', async () => {
     const path = '/api/int-test';
     const payload = { value: 'testA' };
     const headers = { h1: 'testA' };
@@ -71,7 +71,7 @@ describe('ISPA Integration Tests -->', () => {
   });
 
   describe('mTLS hub (peer-endpoint) Tests -->', () => {
-    const url = `${hubAConfig.baseUrl}/int-test`;
+    const url = `${SCHEME}://${hubAConfig.baseUrl}/int-test`;
     // prettier-ignore
     const sendGetRequest = (options: axios.AxiosRequestConfig) => sendRequest({
       ...options,

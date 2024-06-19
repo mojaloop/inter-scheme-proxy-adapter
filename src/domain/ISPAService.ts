@@ -1,5 +1,5 @@
 import config from '../config';
-import { PROXY_HEADER, AUTH_HEADER } from '../constants';
+import { PROXY_HEADER, AUTH_HEADER, SCHEME } from '../constants';
 import { ISPAServiceInterface, ISPAServiceDeps, IncomingRequestDetails, ServerState, ILogger } from './types';
 
 const { PROXY_ID } = config.get(); // or pass it as a parameter in ctor?
@@ -21,7 +21,7 @@ export class ISPAService implements ISPAServiceInterface {
     delete reqDetails.headers['host'];
 
     const proxyTarget = {
-      url: `${baseUrl}${pathname}${search}`,
+      url: `${SCHEME}://${baseUrl}${pathname}${search}`,
       headers: {
         ...reqDetails.headers,
         [PROXY_HEADER]: PROXY_ID,

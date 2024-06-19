@@ -31,8 +31,8 @@ services:
     restart: on-failure
     env_file: .env
     environment:
-      - PEER_ENDPOINT_A=https://hub-a:6443
-      - PEER_ENDPOINT_B=https://hub-b:6443
+      - PEER_ENDPOINT_A=hub-a:6443
+      - PEER_ENDPOINT_B=hub-b:6443
       - MGMT_API_WS_URL_A=men-api-a
       - MGMT_API_WS_URL_B=men-api-b
       - OAUTH_TOKEN_ENDPOINT_A=http://oidc-server-a:8080/openid-connect/token

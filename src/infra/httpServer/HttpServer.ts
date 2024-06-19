@@ -57,6 +57,8 @@ export class HttpServer extends EventEmitter implements IHttpServer {
   }
 
   private async registerProxy(proxyHandlerFn: ProxyHandlerFn) {
+    const { logger } = this.deps;
+
     this.server.route([
       {
         method: 'GET',
@@ -72,7 +74,6 @@ export class HttpServer extends EventEmitter implements IHttpServer {
         handler: async (request: Hapi.Request, h: Hapi.ResponseToolkit) => {
           const { proxyDetails } = this.deps;
           const { url, method, headers, payload } = request;
-
           const reqDetails = {
             proxyDetails, // todo: move it to serverState
             url,
@@ -80,6 +81,8 @@ export class HttpServer extends EventEmitter implements IHttpServer {
             headers,
             payload,
           };
+          logger.debug('incoming request details', reqDetails);
+
           const response = await proxyHandlerFn(reqDetails, this.state); // or better { ...this.state }?
 
           return h.response(response.data || undefined).code(response.status);
