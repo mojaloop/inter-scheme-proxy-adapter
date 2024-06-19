@@ -29,7 +29,7 @@ import config from '#src/config';
 import { PROXY_HEADER, AUTH_HEADER, SCHEME } from '#src/constants';
 import { loggerFactory } from '#src/utils';
 
-import certs from '#test/certs.json';
+import { certsDto } from '#test/fixtures';
 
 const PROXY_HOST = 'http://localhost';
 const { serverAConfig, hubAConfig, PROXY_ID } = config.get();
@@ -72,7 +72,7 @@ describe('ISPA Integration Tests -->', () => {
 
   describe('mTLS hub (peer-endpoint) Tests -->', () => {
     const url = `${SCHEME}://${hubAConfig.baseUrl}/int-test`;
-    logger.info('URL!!!!!!!', { url });
+    logger.info('mTLS URL', { url });
     // prettier-ignore
     const sendGetRequest = (options: axios.AxiosRequestConfig) => sendRequest({
       ...options,
@@ -89,16 +89,16 @@ describe('ISPA Integration Tests -->', () => {
 
     test('should fail when connect to https hub (peer-endpoint) with wrong certs', async () => {
       const httpsAgent = new https.Agent({
-        ...certs.wrongClient,
+        ...certsDto(),
         rejectUnauthorized: false,
-        keepAlive: true,
-        timeout: 5000,
+        // keepAlive: true,
+        // timeout: 5000,
       });
       const response = await sendGetRequest({ httpsAgent });
       expect(response).toBeInstanceOf(Error);
-      // expect(response.message).toBe('socket hang up');
-      // todo: clarify, why the error message sometimes is different on ci/cd:
-      //  - "Client network socket disconnected before secure TLS connection was established"
+      expect(response.message).toBe('socket hang up');
+      // sometimes the error message is different on ci/cd:
+      //  "Client network socket disconnected before secure TLS connection was established"
     });
   });
   // todo: add negative scenario with wrong auth token
