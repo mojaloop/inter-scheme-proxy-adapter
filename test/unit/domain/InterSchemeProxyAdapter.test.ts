@@ -19,8 +19,9 @@ describe('InterSchemeProxyAdapter Tests -->', () => {
     mockAxios.reset();
   });
 
-  afterAll(async () => {
+  afterEach(async () => {
     await proxyAdapter?.stop();
+    // on ci/cd sometimes Jest did not exit one second after the test run has completed
   });
 
   test('should proxy incoming request with proper headers', async () => {
