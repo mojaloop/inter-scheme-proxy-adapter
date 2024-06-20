@@ -2,7 +2,7 @@ name: Docker Publish
 
 on:
   push:
-    tags: [ 'v*' ]
+    tags: [ 'v*' ] # todo: clarify, why it doesn't work with release (only snapshot)
 
 jobs:
   lint-and-test:
