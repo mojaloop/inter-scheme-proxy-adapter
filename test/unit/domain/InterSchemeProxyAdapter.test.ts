@@ -1,4 +1,5 @@
 jest.mock('ws');
+jest.setTimeout(10_000);
 
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
@@ -21,31 +22,28 @@ describe('InterSchemeProxyAdapter Tests -->', () => {
 
   afterEach(async () => {
     await proxyAdapter?.stop();
-    // on ci/cd sometimes Jest did not exit one second after the test run has completed
   });
 
   test('should proxy incoming request with proper headers', async () => {
     const oidcToken = fixtures.oidcTokenDto();
     mockAxios.onPost(`/${config.get('authConfigA').tokenEndpoint}`).reply(200, oidcToken);
 
-    const proxyAdapter = createProxyAdapter(config);
+    proxyAdapter = createProxyAdapter(config);
     const deps = proxyAdapter['deps'];
     expect(deps).toBeTruthy();
     deps.controlAgentA['open'] = async () => {};
     deps.controlAgentB['open'] = async () => {};
-    deps.controlAgentA['close'] = async () => {};
-    deps.controlAgentB['close'] = async () => {};
-    deps.controlAgentA['loadCerts'] = async () => fixtures.certsDto();
-    deps.controlAgentB['loadCerts'] = async () => fixtures.certsDto();
+    deps.controlAgentA['loadCerts'] = async () => ({ ...fixtures.certsJson.wrong }); //  fixtures.certsDto();
+    deps.controlAgentB['loadCerts'] = async () => ({ ...fixtures.certsJson.wrong });
     // todo: find a better way to mock MenAPI (ws) functionality
 
     await proxyAdapter.start();
     // todo: think, if we need to avoid actual port listening in tests
 
-    const headers = { test: 'x-test' };
+    const headers = { test: 'incoming header' };
     const mockHubResponse = { data: 'from hub A' };
 
-    // todo: try to trigger it only on /test-route request, instead of onAny()
+    // todo: try to intercept only on /test-route requests, instead of onAny()
     mockAxios.onAny().reply(async (reqOptions: axios.AxiosRequestConfig) => {
       deps.logger.info('incoming hub request headers:', reqOptions.headers);
       if (!reqOptions?.headers) throw new Error('No headers in request');
@@ -62,7 +60,6 @@ describe('InterSchemeProxyAdapter Tests -->', () => {
       method: 'GET',
       headers,
     });
-
     expect(response.statusCode).toBe(200);
     expect(response.result).toEqual(mockHubResponse);
   });

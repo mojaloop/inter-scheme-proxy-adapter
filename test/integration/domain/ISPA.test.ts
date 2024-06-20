@@ -29,7 +29,7 @@ import config from '#src/config';
 import { PROXY_HEADER, AUTH_HEADER, SCHEME } from '#src/constants';
 import { loggerFactory } from '#src/utils';
 
-import { certsDto } from '#test/fixtures';
+import { certsJson } from '#test/fixtures';
 
 const PROXY_HOST = 'http://localhost';
 const { serverAConfig, hubAConfig, PROXY_ID } = config.get();
@@ -89,10 +89,8 @@ describe('ISPA Integration Tests -->', () => {
 
     test('should fail when connect to https hub (peer-endpoint) with wrong certs', async () => {
       const httpsAgent = new https.Agent({
-        ...certsDto(),
+        ...certsJson.wrong,
         rejectUnauthorized: false,
-        // keepAlive: true,
-        // timeout: 5000,
       });
       const response = await sendGetRequest({ httpsAgent });
       expect(response).toBeInstanceOf(Error);

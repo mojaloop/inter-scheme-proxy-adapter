@@ -15,7 +15,7 @@
     "start:build": "npm run build && npm start",
     "start:dev": "ts-node -r dotenv/config -P ./tsconfig.json src/index.ts",
     "test": "npm run test:unit",
-    "test:unit": "jest --testMatch='**/unit/**/*.test.ts' --forceExit",
+    "test:unit": "jest --testMatch='**/unit/**/*.test.ts'",
     "test:xunit": "JEST_JUNIT_OUTPUT_DIR=./test/reports/ JEST_JUNIT_OUTPUT_NAME=xunit.xml npm run test:unit -- --reporters=jest-junit",
     "test:coverage": "npm run test:unit -- --coverage --coverageThreshold='{}'",
     "test:coverage-check": "npm run test:unit -- --coverage",
