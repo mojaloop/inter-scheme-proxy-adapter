@@ -29,27 +29,12 @@ export class ISPAService implements ISPAServiceInterface {
 
   private cleanupIncomingHeaders(headers: Record<string, string>) {
     const cleanedHeaders = { ...headers };
-
-    // todo: remove sensitive and hopByHop headers
+    // prettier-ignore
     [
-      ...incomingHeadersRemoval,
-      'host',
-      'content-length', // todo: clarify, why without removing content-length header request just stuck
-      'user-agent',
-      'accept-encoding',
-      'x-forwarded-proto',
-      'x-request-id',
-      'x-envoy-attempt-count',
-      'x-forwarded-for',
-      'x-forwarded-client-cert',
-      'x-envoy-external-address',
-      'x-envoy-decorator-operation',
-      'x-envoy-peer-metadata',
-      'x-envoy-peer-metadata-id',
-      'x-b3-traceid',
-      'x-b3-spanid',
-      'x-b3-parentspanid',
-      'x-b3-sampled',
+      ...sensitiveHeaders,
+      ...hopByHopHeaders,
+      ...xHeaders,
+      ...incomingHeadersRemoval
     ].forEach((header) => {
       delete cleanedHeaders[header];
     });
@@ -57,3 +42,41 @@ export class ISPAService implements ISPAServiceInterface {
     return cleanedHeaders;
   }
 }
+
+export const sensitiveHeaders = [
+  'authorization',
+  'cookie',
+  'set-cookie',
+  'host', // without removing host header request proxy fails with error: "Client network socket disconnected before secure TLS connection was established"
+  'content-length', // without removing content-length header request just stuck
+  'accept-encoding',
+  'user-agent',
+] as const;
+
+export const hopByHopHeaders = [
+  'connection',
+  'proxy-connection',
+  'proxy-authenticate',
+  'proxy-authorization',
+  'te',
+  'trailer',
+  'transfer-encoding',
+  'upgrade',
+  'keep-alive',
+] as const;
+
+export const xHeaders = [
+  'x-forwarded-proto',
+  'x-request-id',
+  'x-envoy-attempt-count',
+  'x-forwarded-for',
+  'x-forwarded-client-cert',
+  'x-envoy-external-address',
+  'x-envoy-decorator-operation',
+  'x-envoy-peer-metadata',
+  'x-envoy-peer-metadata-id',
+  'x-b3-traceid',
+  'x-b3-spanid',
+  'x-b3-parentspanid',
+  'x-b3-sampled',
+] as const;

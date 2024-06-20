@@ -10,7 +10,6 @@ ws.on('open', () => {
   ws.send('Hello, Server!');
 });
 
-// Handle incoming messages from the server
 ws.on('message', (message: string) => {
   console.log(`Received message`, message.toString());
 });
