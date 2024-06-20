@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.3](https://github.com/infitx-org/inter-scheme-proxy-adapter/compare/v0.4.2...v0.4.3) (2024-06-20)
+
 ### [0.4.2](https://github.com/infitx-org/inter-scheme-proxy-adapter/compare/v0.4.2-snapshot.5...v0.4.2) (2024-06-20)
 
 
