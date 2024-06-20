@@ -41,7 +41,7 @@ export const startingProcess = (startFn: AsyncFn, stopFn: AsyncFn, logger: ILogg
 
   startFn()
     .then((info) => {
-      const startDurationSec = Math.round((Date.now() - startTime) / 1000);
+      const startDurationSec = (Date.now() - startTime) / 1000;
       logger.info(`${SERVICE_NAME} is started  [start duration, sec: ${startDurationSec.toFixed(1)}]`, {
         info,
         startDurationSec,
