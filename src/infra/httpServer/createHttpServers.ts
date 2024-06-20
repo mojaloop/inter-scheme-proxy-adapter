@@ -15,7 +15,7 @@ export const createHttpServers = (deps: createHttpServersDeps): httpServersMap =
   const httpServerA = new HttpServer({
     serverConfig: config.get('serverAConfig'),
     proxyDetails: {
-      baseUrl: config.get('hubBConfig').baseUrl,
+      baseUrl: config.get('hubAConfig').baseUrl, // todo: rename to peerEndpoint
     },
     logger: deps.logger.child('serverA'),
   });
@@ -23,7 +23,7 @@ export const createHttpServers = (deps: createHttpServersDeps): httpServersMap =
   const httpServerB = new HttpServer({
     serverConfig: config.get('serverBConfig'),
     proxyDetails: {
-      baseUrl: config.get('hubAConfig').baseUrl,
+      baseUrl: config.get('hubBConfig').baseUrl, // todo: rename to peerEndpoint
     },
     logger: deps.logger.child('serverB'),
   });

@@ -4,6 +4,7 @@ on:
   workflow_call:
   pull_request:
     branches:
+      - feat/csi-48 # todo: remove this
       - main
     types:
       - opened
@@ -46,3 +47,11 @@ jobs:
       - run: npm run build
       - run: npm run lint
       - run: npm run test
+
+      - name: Run integration tests
+        run: |
+          docker compose build
+          docker compose up -d
+          echo "waiting for 15sec before tests run..." && sleep 15
+          npm run test:int
+          docker compose down -v  

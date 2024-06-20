@@ -57,9 +57,8 @@ dist/
 # Yarn Integrity file
 .yarn-integrity
 
-#----- todo: ignore .env and /certs folder before merging to main -----#
 # .env
-# certs/
+certs/
 
 # next.js build output
 .next

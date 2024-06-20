@@ -1,5 +1,7 @@
-import { ServerState, IncomingRequestDetails, ProxyDetails } from '#src/domain/types';
+import { ServerState, IncomingRequestDetails, ProxyDetails, OIDCToken } from '#src/domain/types';
 import config from '#src/config';
+
+export { default as certsJson } from '../docker/mock-servers/certs/certs.json';
 
 // prettier-ignore
 export const serverStateDto = ({
@@ -31,4 +33,16 @@ export const requestDetailsDto = ({
   method,
   headers,
   proxyDetails,
+});
+
+export const oidcTokenDto = ({
+  access_token = 'accessToken',
+  expires_in = Date.now() + 60 * 60,
+  token_type = 'tokenType',
+  scope = 'email',
+} = {}): OIDCToken => ({
+  access_token,
+  expires_in,
+  token_type,
+  scope,
 });

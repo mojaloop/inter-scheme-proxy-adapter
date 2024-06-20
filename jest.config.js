@@ -3,7 +3,6 @@ module.exports = {
   testEnvironment: 'node',
   verbose: true,
   clearMocks: true,
-  collectCoverage: true,
   moduleNameMapper: {
     '^#src/(.*)$': '<rootDir>/src/$1',
     '^#test/(.*)$': '<rootDir>/test/$1',
@@ -12,4 +11,10 @@ module.exports = {
   transform: {
     '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.test.json' }],
   },
+  collectCoverage: true,
+  coveragePathIgnorePatterns: [
+    '<rootDir>/src/utils/Logger.ts',
+    '<rootDir>/src/utils/startingProcess.ts',
+    // move these files to a separate project, and push to npm-registry
+  ],
 };

@@ -1,8 +1,8 @@
 import config from '../config';
-import { PROXY_HEADER, AUTH_HEADER } from '../constants';
+import { PROXY_HEADER, AUTH_HEADER, SCHEME } from '../constants';
 import { ISPAServiceInterface, ISPAServiceDeps, IncomingRequestDetails, ServerState, ILogger } from './types';
 
-const { PROXY_ID } = config.get(); // or pass it as a parameter in ctor?
+const { PROXY_ID, incomingHeadersRemoval } = config.get(); // or pass it as a parameter in ctor?
 
 export class ISPAService implements ISPAServiceInterface {
   private readonly log: ILogger;
@@ -15,13 +15,10 @@ export class ISPAService implements ISPAServiceInterface {
     const { pathname, search } = reqDetails.url;
     const { baseUrl } = reqDetails.proxyDetails;
 
-    delete reqDetails.headers['content-length'];
-    // todo: clarify, why without removing content-length header request just stuck
-
     const proxyTarget = {
-      url: `${baseUrl}${pathname}${search}`,
+      url: `${SCHEME}://${baseUrl}${pathname}${search}`,
       headers: {
-        ...reqDetails.headers,
+        ...this.cleanupIncomingHeaders(reqDetails.headers),
         [PROXY_HEADER]: PROXY_ID,
         [AUTH_HEADER]: `Bearer ${state.accessToken}`,
       },
@@ -29,4 +26,57 @@ export class ISPAService implements ISPAServiceInterface {
     this.log.verbose('proxyTarget: ', proxyTarget);
     return proxyTarget;
   }
+
+  private cleanupIncomingHeaders(headers: Record<string, string>) {
+    const cleanedHeaders = { ...headers };
+    // prettier-ignore
+    [
+      ...sensitiveHeaders,
+      ...hopByHopHeaders,
+      ...xHeaders,
+      ...incomingHeadersRemoval
+    ].forEach((header) => {
+      delete cleanedHeaders[header];
+    });
+
+    return cleanedHeaders;
+  }
 }
+
+export const sensitiveHeaders = [
+  'authorization',
+  'cookie',
+  'set-cookie',
+  'host', // without removing host header request proxy fails with error: "Client network socket disconnected before secure TLS connection was established"
+  'content-length', // without removing content-length header request just stuck
+  'accept-encoding',
+  'user-agent',
+] as const;
+
+export const hopByHopHeaders = [
+  'connection',
+  'proxy-connection',
+  'proxy-authenticate',
+  'proxy-authorization',
+  'te',
+  'trailer',
+  'transfer-encoding',
+  'upgrade',
+  'keep-alive',
+] as const;
+
+export const xHeaders = [
+  'x-forwarded-proto',
+  'x-request-id',
+  'x-envoy-attempt-count',
+  'x-forwarded-for',
+  'x-forwarded-client-cert',
+  'x-envoy-external-address',
+  'x-envoy-decorator-operation',
+  'x-envoy-peer-metadata',
+  'x-envoy-peer-metadata-id',
+  'x-b3-traceid',
+  'x-b3-spanid',
+  'x-b3-parentspanid',
+  'x-b3-sampled',
+] as const;
