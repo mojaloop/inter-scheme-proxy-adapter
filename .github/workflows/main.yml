@@ -4,7 +4,6 @@ on:
   workflow_call:
   pull_request:
     branches:
-      - feat/csi-48 # todo: remove this
       - main
     types:
       - opened
