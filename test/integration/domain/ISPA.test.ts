@@ -29,7 +29,7 @@ import config from '#src/config';
 import { PROXY_HEADER, AUTH_HEADER, SCHEME } from '#src/constants';
 import { loggerFactory } from '#src/utils';
 
-import { certsJson } from '#test/fixtures';
+import * as fixtures from '#test/fixtures';
 
 const PROXY_HOST = 'http://localhost';
 const { serverAConfig, hubAConfig, PROXY_ID } = config.get();
@@ -51,23 +51,32 @@ const sendRequest = async (options: axios.AxiosRequestConfig) =>
 describe('ISPA Integration Tests -->', () => {
   test('e2e positive flow with POST call to hub A', async () => {
     const path = '/api/int-test';
-    const payload = { value: 'testA' };
-    const headers = { h1: 'testA' };
+    const payload = { value: 'test1' };
+    const headerName = 'test-header'; // (!) headers in response are always lowercased
+    const headers = { [headerName]: 'test2' };
     const url = `${PROXY_HOST}:${serverAConfig.port}${path}`;
 
-    // data is "echo" of initial request
-    const { status, data } = await sendRequest({
+    // data is "echo" of initial request details: method, path, body, headers, query
+    const {
+      status,
+      data,
+      headers: responseHeaders,
+    } = await sendRequest({
       method: 'POST',
       url,
       headers,
       data: payload,
     });
-    logger.info('e2e positive flow response data:', { status, data });
+    logger.info('e2e positive flow response data:', { status, data, responseHeaders });
     expect(status).toBe(200);
     checkProxyServiceHeaders(data.headers);
     expect(data.path).toBe(path);
     expect(data.body).toEqual(payload);
-    expect(data.headers.h1).toBe(headers.h1);
+    expect(data.headers[headerName]).toBe(headers[headerName]);
+
+    Object.entries(fixtures.HUB_HEADERS).forEach(([header, value]) => {
+      expect(responseHeaders[header]).toBe(value);
+    });
   });
 
   describe('mTLS hub (peer-endpoint) Tests -->', () => {
@@ -89,7 +98,7 @@ describe('ISPA Integration Tests -->', () => {
 
     test('should fail when connect to https hub (peer-endpoint) with wrong certs', async () => {
       const httpsAgent = new https.Agent({
-        ...certsJson.wrong,
+        ...fixtures.certsJson.wrong,
         rejectUnauthorized: false,
       });
       const response = await sendGetRequest({ httpsAgent });

@@ -3,7 +3,7 @@ import * as console from 'node:console';
 import express, { Request, Response, NextFunction } from 'express';
 import bodyParser from 'body-parser';
 
-import { MTLS_PORT, DELAY_MS } from './config';
+import { MTLS_PORT, DELAY_MS, HUB_HEADERS } from './config';
 import { createTlsServerOptions } from './utils';
 
 const tlsOpts = createTlsServerOptions();
@@ -39,7 +39,7 @@ app.all('*', async (req: Request, res: Response) => {
   console.log('incoming request...', input);
   await new Promise((resolve) => setTimeout(resolve, DELAY_MS));
 
-  res.json(input);
+  res.set(HUB_HEADERS).json(input);
 });
 
 const httpsServer = https.createServer(tlsOpts, app);

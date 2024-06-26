@@ -39,5 +39,6 @@ function prepareErrorResponse(err: unknown): ProxyHandlerResponse {
   }
   const data = err instanceof Error ? err.message : 'Unexpected proxy error';
   return { data, status: 502 };
-  // todo: think, how to handle error if no headers in error? Do we need retries?
+  // todo: - think, how to handle error if no headers in error?
+  //       - do we need retries?
 }

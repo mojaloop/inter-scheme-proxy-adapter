@@ -2,7 +2,7 @@ import { EventEmitter } from 'node:events';
 import { Agent } from 'node:https';
 import Hapi from '@hapi/hapi';
 
-import { ProxyHandlerFn, IHttpServer, ServerState, ServerStateEvent } from '../../domain/types';
+import { ProxyHandlerFn, ProxyHandlerResponse, IHttpServer, ServerState, ServerStateEvent } from '../../domain/types';
 import { INTERNAL_EVENTS } from '../../constants';
 import { HttpServerDeps } from '../types';
 import { loggingPlugin } from './plugins';
@@ -83,10 +83,8 @@ export class HttpServer extends EventEmitter implements IHttpServer {
           };
           logger.debug('incoming request details', reqDetails);
 
-          const response = await proxyHandlerFn(reqDetails, this.state); // or better { ...this.state }?
-
-          return h.response(response.data || undefined).code(response.status);
-          // todo: think how to handle headers
+          const response = await proxyHandlerFn(reqDetails, this.state);
+          return HttpServer.prepareHapiResponse(response, h);
         },
         options: {
           payload: {
@@ -121,5 +119,15 @@ export class HttpServer extends EventEmitter implements IHttpServer {
 
   private createServer() {
     return new Hapi.Server(this.deps.serverConfig);
+  }
+
+  private static prepareHapiResponse(proxyResponse: ProxyHandlerResponse, h: Hapi.ResponseToolkit) {
+    const { data, status, headers } = proxyResponse;
+    const response = h.response(data || undefined).code(status);
+
+    if (headers && typeof headers === 'object') {
+      Object.entries(headers).forEach(([key, value]) => response.header(key, String(value)));
+    }
+    return response;
   }
 }

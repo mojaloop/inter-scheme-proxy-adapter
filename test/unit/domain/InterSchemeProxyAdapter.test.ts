@@ -33,7 +33,7 @@ describe('InterSchemeProxyAdapter Tests -->', () => {
     expect(deps).toBeTruthy();
     deps.controlAgentA['open'] = async () => {};
     deps.controlAgentB['open'] = async () => {};
-    deps.controlAgentA['loadCerts'] = async () => ({ ...fixtures.certsJson.wrong }); //  fixtures.certsDto();
+    deps.controlAgentA['loadCerts'] = async () => ({ ...fixtures.certsJson.wrong });
     deps.controlAgentB['loadCerts'] = async () => ({ ...fixtures.certsJson.wrong });
     // todo: find a better way to mock MenAPI (ws) functionality
 

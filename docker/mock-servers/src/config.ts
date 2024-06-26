@@ -12,6 +12,12 @@ export const OIDC_PORT = parseInt(process.env.OIDC_PORT || '') || 8080;
 
 export const DELAY_MS = parseInt(process.env.ECHO_DELAY_MS || '') || 500;
 
+export const HUB_HEADERS: Record<string, string> = (process.env.HUB_HEADERS || '').split(';').reduce((acc, hv) => {
+  const [header, value] = hv.split(',');
+  if (!header || !value) throw new Error(`Invalid header value: ${hv}`);
+  return { ...acc, [header]: value };
+}, {});
+
 export const {
   SERVER_CERTS_FIELD = 'server-localhost', // from certs.json
   CLIENT_CERTS_FIELD = 'client-localhost',

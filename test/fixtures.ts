@@ -1,7 +1,15 @@
 import { ServerState, IncomingRequestDetails, ProxyDetails, OIDCToken } from '#src/domain/types';
 import config from '#src/config';
+import process from 'node:process';
 
 export { default as certsJson } from '../docker/mock-servers/certs/certs.json';
+
+// headers, which return mock hubServer
+export const HUB_HEADERS: Record<string, string> = (process.env.HUB_HEADERS || '').split(';').reduce((acc, hv) => {
+  const [header, value] = hv.split(',');
+  if (!header || !value) throw new Error(`Invalid header value: ${hv}`);
+  return { ...acc, [header]: value };
+}, {});
 
 // prettier-ignore
 export const serverStateDto = ({
