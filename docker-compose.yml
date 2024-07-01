@@ -1,0 +1,87 @@
+version: '3.8'
+
+x-mock-server: &MOCK_SERVER
+  build:
+    context: ./docker/mock-servers
+    dockerfile: Dockerfile
+  restart: always
+  env_file: .env
+  volumes:
+    - ./docker/mock-servers/certs/:/opt/app/certs/
+
+x-hub: &HUB
+  <<: *MOCK_SERVER
+  command: npm run start:hub
+
+x-men-api: &MEN_API
+  <<: *MOCK_SERVER
+  command: npm run start:ws
+
+x-oidc-server: &OIDC_SERVER
+  <<: *MOCK_SERVER
+  command: npm run start:oidc
+
+
+services:
+  proxy:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    command: /bin/sh -c "sleep 15 && npm start" # todo: use better approach instead of sleep 15
+    restart: on-failure
+    env_file: .env
+    environment:
+      - PEER_ENDPOINT_A=hub-a:6443
+      - PEER_ENDPOINT_B=hub-b:6443
+      - MGMT_API_WS_URL_A=men-api-a
+      - MGMT_API_WS_URL_B=men-api-b
+      - OAUTH_TOKEN_ENDPOINT_A=http://oidc-server-a:8080/openid-connect/token
+      - OAUTH_TOKEN_ENDPOINT_B=http://oidc-server-b:8080/openid-connect/token
+    ports:
+      - "${INBOUND_LISTEN_PORT_A}:${INBOUND_LISTEN_PORT_A}"
+      - "${INBOUND_LISTEN_PORT_B}:${INBOUND_LISTEN_PORT_B}"
+    depends_on:
+      - hub-a
+      - hub-b
+      - men-api-a
+      - men-api-b
+      - oidc-server-a
+      - oidc-server-b
+
+  hub-a:
+    <<: *HUB
+    environment:
+      - SERVER_CERTS_FIELD=server-hub-a
+    ports:
+      - "6443:6443"
+
+  hub-b:
+    <<: *HUB
+    environment:
+      - SERVER_CERTS_FIELD=server-hub-b
+    ports:
+      - "26443:6443"
+
+  men-api-a:
+    <<: *MEN_API
+    environment:
+      - CLIENT_CERTS_FIELD=client-hub-a
+    ports:
+      - "${MGMT_API_WS_PORT_A}:4005"
+
+  men-api-b:
+    <<: *MEN_API
+    environment:
+      - CLIENT_CERTS_FIELD=client-hub-b
+    ports:
+      - "24005:4005"
+
+  oidc-server-a:
+    <<: *OIDC_SERVER
+    ports:
+      - "8080:8080"
+
+  oidc-server-b:
+    <<: *OIDC_SERVER
+    ports:
+      - "28080:8080"

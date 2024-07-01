@@ -57,8 +57,8 @@ dist/
 # Yarn Integrity file
 .yarn-integrity
 
-# dotenv environment variables file
-.env
+# used in tests and local development
+# .env
 
 # next.js build output
 .next

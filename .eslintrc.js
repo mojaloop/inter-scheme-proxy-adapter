@@ -20,6 +20,7 @@ module.exports = {
     quotes: ['error', 'single', { allowTemplateLiterals: false }],
     indent: ['error', 2, { SwitchCase: 1 }],
     semi: ['error'],
+    'object-curly-spacing': ['error', 'always']
   },
   env: {
     node: true,

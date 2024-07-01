@@ -5,6 +5,7 @@
  The Mojaloop files are made available by the Bill & Melinda Gates Foundation under the Apache License, Version 2.0 (the "License") and you may not use these files except in compliance with the License. You may obtain a copy of the License at
  http://www.apache.org/licenses/LICENSE-2.0
  Unless required by applicable law or agreed to in writing, the Mojaloop files are distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+
  Contributors
  --------------
  This is the official list of the Mojaloop project contributors for this file.
@@ -18,5 +19,24 @@
  * Gates Foundation
  - Name Surname <name.surname@gatesfoundation.com>
 
+ * Eugen Klymniuk <eugen.klymniuk@infitx.com>
  --------------
- ******/
+ **********/
+
+import config from './config';
+import { InterSchemeProxyAdapter } from './domain';
+import { createProxyAdapter } from './createProxyAdapter';
+import { startingProcess } from './utils';
+
+let proxyAdapter: InterSchemeProxyAdapter;
+
+const start = async () => {
+  proxyAdapter = createProxyAdapter(config);
+  await proxyAdapter.start();
+};
+
+const stop = async () => {
+  await proxyAdapter?.stop();
+};
+
+startingProcess(start, stop);
