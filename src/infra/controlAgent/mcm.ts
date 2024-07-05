@@ -53,6 +53,10 @@ export const build = {
     READ: (id?: string) => buildMsg(VERB.READ, MESSAGE.CONFIGURATION, {}, id),
     NOTIFY: (config: GenericObject, id?: string) => buildMsg(VERB.NOTIFY, MESSAGE.CONFIGURATION, config, id),
   },
+  PEER_JWS: {
+    READ: (id?: string) => buildMsg(VERB.READ, MESSAGE.PEER_JWS, {}, id),
+    NOTIFY: (peerJWS: any, id?: string) => buildMsg(VERB.NOTIFY, MESSAGE.PEER_JWS, peerJWS, id),
+  },
   ERROR: {
     NOTIFY: {
       UNSUPPORTED_MESSAGE: (id?: string) => buildMsg(VERB.NOTIFY, MESSAGE.ERROR, ERROR.UNSUPPORTED_MESSAGE, id),

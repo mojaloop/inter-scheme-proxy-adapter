@@ -20,6 +20,7 @@ export interface IControlAgent {
   send: (message: string) => void;
   receive: () => Promise<GenericObject>;
   loadCerts: () => Promise<ICACerts>;
+  sendPeerJWS: (peerJWS: any) => void;
 }
 
 /**************************************************************************
@@ -63,6 +64,7 @@ export type ICACerts = {
  *************************************************************************/
 export interface ICACallbacks {
   onCert: (certs: ICACerts) => void;
+  onPeerJWS: (peerJWS: any) => void;
 }
 
 /**************************************************************************

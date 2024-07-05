@@ -162,6 +162,10 @@ export class ControlAgent implements IControlAgent {
     // todo: think, if it's make sense to add isCertsPayload here
   }
 
+  async sendPeerJWS(peerJWS: any): Promise<void> {
+    this.send(build.PEER_JWS.NOTIFY(peerJWS));
+  }
+
   private _checkSocketState() {
     if (!this._ws || this._ws.readyState !== WebSocket.OPEN) {
       throw new Error(`${this.id} WebSocket is not open`);
@@ -193,6 +197,20 @@ export class ControlAgent implements IControlAgent {
             this.send(build.ERROR.NOTIFY.UNSUPPORTED_VERB(msg.id));
             break;
         }
+        break;
+      case MESSAGE.PEER_JWS:
+        switch (msg.verb) {
+          case VERB.NOTIFY: {
+            this._callbackFns?.onPeerJWS(msg.data);
+            break;
+          }
+          default:
+            this.send(build.ERROR.NOTIFY.UNSUPPORTED_VERB(msg.id));
+            break;
+        }
+        break;
+      case MESSAGE.ERROR:
+        this._logger.error(`${this.id} received error message`, { msg });
         break;
       default:
         this.send(build.ERROR.NOTIFY.UNSUPPORTED_MESSAGE(msg.id));

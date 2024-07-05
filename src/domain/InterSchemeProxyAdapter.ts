@@ -95,9 +95,11 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
     await Promise.all([
       controlAgentA.init({
         onCert: (certs: ICACerts) => this.emitStateEventServerA({ certs }),
+        onPeerJWS: (peerJWS: any) => this.deps.controlAgentB.sendPeerJWS(peerJWS),
       }),
       controlAgentB.init({
         onCert: (certs: ICACerts) => this.emitStateEventServerB({ certs }),
+        onPeerJWS: (peerJWS: any) => this.deps.controlAgentA.sendPeerJWS(peerJWS),
       }),
     ]);
   }
