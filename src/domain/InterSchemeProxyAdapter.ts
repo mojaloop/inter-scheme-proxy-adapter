@@ -26,6 +26,8 @@
 import { INTERNAL_EVENTS } from '../constants';
 import { IProxyAdapter, ISPADeps, IncomingRequestDetails, ServerState, ServerStateEvent } from './types';
 import { ICACerts } from '../infra';
+import config from '../config';
+const { checkPeerJwsInterval } = config.get();
 
 export class InterSchemeProxyAdapter implements IProxyAdapter {
   constructor(private readonly deps: ISPADeps) {
@@ -50,6 +52,7 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
     await this.getAccessTokens();
     await this.initControlAgents();
     await this.loadInitialCerts();
+    this.startPeerJwsRefreshLoop();
     this.deps.logger.debug('certs and token are ready, starting httpServers...');
 
     const [isAStarted, isBStarted] = await Promise.all([
@@ -112,5 +115,13 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
 
     this.emitStateEventServerA({ certs: certsA });
     this.emitStateEventServerB({ certs: certsB });
+  }
+
+  private async startPeerJwsRefreshLoop() {
+    this.deps.controlAgentA.triggerFetchPeerJws();
+    this.deps.controlAgentB.triggerFetchPeerJws();
+    setTimeout(() => {
+      this.startPeerJwsRefreshLoop();
+    }, checkPeerJwsInterval);
   }
 }

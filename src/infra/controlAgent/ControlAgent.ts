@@ -156,6 +156,10 @@ export class ControlAgent implements IControlAgent {
     return ControlAgent.extractCerts(res.data);
   }
 
+  triggerFetchPeerJws(): void {
+    this.send(build.PEER_JWS.READ());
+  }
+
   static extractCerts(data: IMCMCertData): ICACerts {
     // current implementation is for the initial certs load
     return data.outbound.tls.creds;
