@@ -36,6 +36,8 @@ describe('InterSchemeProxyAdapter Tests -->', () => {
     deps.controlAgentB['open'] = async () => {};
     deps.controlAgentA['loadCerts'] = async () => ({ ...fixtures.certsJson.wrong });
     deps.controlAgentB['loadCerts'] = async () => ({ ...fixtures.certsJson.wrong });
+    deps.controlAgentA['triggerFetchPeerJws'] = async () => {};
+    deps.controlAgentB['triggerFetchPeerJws'] = async () => {};
     // todo: find a better way to mock MenAPI (ws) functionality
 
     await proxyAdapter.start();
