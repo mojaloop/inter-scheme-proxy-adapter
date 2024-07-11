@@ -30,6 +30,7 @@ import config from '../config';
 const { checkPeerJwsInterval } = config.get();
 
 export class InterSchemeProxyAdapter implements IProxyAdapter {
+  private peerJwsRefreshLoopTimer: NodeJS.Timeout | undefined;
   constructor(private readonly deps: ISPADeps) {
     this.handleProxyRequest = this.handleProxyRequest.bind(this);
   }
@@ -66,6 +67,7 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
   async stop(): Promise<void> {
     this.deps.authClientA.stopUpdates();
     this.deps.authClientB.stopUpdates();
+    this.stopPeerJwsRefreshLoop();
     // prettier-ignore
     const [isAStopped, isBStopped] = await Promise.all([
       this.deps.httpServerA.stop(),
@@ -118,10 +120,13 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
   }
 
   private async startPeerJwsRefreshLoop() {
-    this.deps.controlAgentA.triggerFetchPeerJws();
-    this.deps.controlAgentB.triggerFetchPeerJws();
-    setTimeout(() => {
-      this.startPeerJwsRefreshLoop();
+    this.peerJwsRefreshLoopTimer = setInterval(() => {
+      this.deps.controlAgentA.triggerFetchPeerJws();
+      this.deps.controlAgentB.triggerFetchPeerJws();
     }, checkPeerJwsInterval);
+  }
+
+  private async stopPeerJwsRefreshLoop() {
+    clearInterval(this.peerJwsRefreshLoopTimer);
   }
 }

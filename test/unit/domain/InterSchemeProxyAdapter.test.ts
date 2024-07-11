@@ -65,5 +65,6 @@ describe('InterSchemeProxyAdapter Tests -->', () => {
     });
     expect(response.statusCode).toBe(200);
     expect(response.result).toEqual(mockHubResponse);
+    await proxyAdapter.stop();
   });
 });
