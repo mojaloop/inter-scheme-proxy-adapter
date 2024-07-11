@@ -36,6 +36,7 @@ import {
   WsPayload,
   isWsPayload,
   isCertsPayload,
+  ICAPeerJWSCert,
 } from './types';
 
 /**************************************************************************
@@ -166,7 +167,7 @@ export class ControlAgent implements IControlAgent {
     // todo: think, if it's make sense to add isCertsPayload here
   }
 
-  async sendPeerJWS(peerJWS: any): Promise<void> {
+  async sendPeerJWS(peerJWS: ICAPeerJWSCert[]): Promise<void> {
     this.send(build.PEER_JWS.NOTIFY(peerJWS));
   }
 

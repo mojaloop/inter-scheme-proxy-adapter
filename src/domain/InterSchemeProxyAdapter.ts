@@ -25,7 +25,7 @@
 
 import { INTERNAL_EVENTS } from '../constants';
 import { IProxyAdapter, ISPADeps, IncomingRequestDetails, ServerState, ServerStateEvent } from './types';
-import { ICACerts } from '../infra';
+import { ICACerts, ICAPeerJWSCert } from '../infra';
 import config from '../config';
 const { checkPeerJwsInterval } = config.get();
 
@@ -98,13 +98,11 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
     await Promise.all([
       controlAgentA.init({
         onCert: (certs: ICACerts) => this.emitStateEventServerA({ certs }),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        onPeerJWS: (peerJWS: any) => this.deps.controlAgentB.sendPeerJWS(peerJWS),
+        onPeerJWS: (peerJWS: ICAPeerJWSCert[]) => this.deps.controlAgentB.sendPeerJWS(peerJWS),
       }),
       controlAgentB.init({
         onCert: (certs: ICACerts) => this.emitStateEventServerB({ certs }),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        onPeerJWS: (peerJWS: any) => this.deps.controlAgentA.sendPeerJWS(peerJWS),
+        onPeerJWS: (peerJWS: ICAPeerJWSCert[]) => this.deps.controlAgentA.sendPeerJWS(peerJWS),
       }),
     ]);
   }
