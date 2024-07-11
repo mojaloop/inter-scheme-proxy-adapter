@@ -27,6 +27,7 @@ describe('InterSchemeProxyAdapter Tests -->', () => {
   test('should proxy incoming request with proper headers', async () => {
     const oidcToken = fixtures.oidcTokenDto();
     mockAxios.onPost(`/${config.get('authConfigA').tokenEndpoint}`).reply(200, oidcToken);
+    mockAxios.onPost(`/${config.get('authConfigB').tokenEndpoint}`).reply(200, oidcToken);
 
     proxyAdapter = createProxyAdapter(config);
     const deps = proxyAdapter['deps'];

@@ -49,11 +49,23 @@ export interface ICAParams {
  * key   - key
  * ca    - ca
  *************************************************************************/
-export type ICACerts = {
+export interface ICACerts {
   cert: string;
   key: string;
   ca: string;
 };
+
+/**************************************************************************
+ * ICAPeerJWSCerts
+ * 
+ * Interface for the peer JWS certificates
+ **************************************************************************/
+
+export interface ICAPeerJWSCert {
+  createdAt: number;
+  dfspId: string;
+  publicKey: string;
+}
 
 /**************************************************************************
  * ICCallbacks
@@ -64,7 +76,7 @@ export type ICACerts = {
  *************************************************************************/
 export interface ICACallbacks {
   onCert: (certs: ICACerts) => void;
-  onPeerJWS: (peerJWS: any) => void;
+  onPeerJWS: (peerJWS: ICAPeerJWSCert[]) => void;
 }
 
 /**************************************************************************
