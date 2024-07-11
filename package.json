@@ -1,6 +1,6 @@
 {
   "name": "inter-scheme-proxy-adapter",
-  "version": "1.0.0-snapshot.2",
+  "version": "1.0.0-snapshot.3",
   "private": true,
   "description": "Schemes Proxy implementation (ISPA)",
   "author": "Eugen Klymniuk (geka-evk)",
