@@ -4,7 +4,7 @@ import { ICACallbacks } from '../../../../src/types';
 import { ILogger } from '../../../../src/domain/types';
 import stringify from 'fast-safe-stringify';
 
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const wait = (ms: number = 10) => new Promise((resolve) => setTimeout(resolve, ms));
 
 describe('ControlAgent Tests', () => {
   let controlAgent: ControlAgent;
@@ -37,6 +37,7 @@ describe('ControlAgent Tests', () => {
     });
     
     serverReceivedMessages = [];
+
     mockWsServer = new Server(`ws://${wsAddress}:${wsPort}`);
     mockWsServer.on('connection', (socket) => {
       socket.on('message', (data) => {
@@ -84,7 +85,7 @@ describe('ControlAgent Tests', () => {
     await controlAgent.open();
     const sendSpy = controlAgent['_ws'] && jest.spyOn(controlAgent['_ws'], 'send');
     controlAgent.send('test message');
-    await wait(100);
+    await wait();
     expect(sendSpy).toHaveBeenCalledWith('test message');
     expect(serverReceivedMessages).toHaveLength(1);
     expect(logger.debug).toHaveBeenCalledWith('testControlAgent sending message', { data: 'test message' });
@@ -95,8 +96,8 @@ describe('ControlAgent Tests', () => {
     const sendSpy = jest.spyOn(controlAgent, 'send');
     const peerJwsCerts: ICAPeerJWSCert[] = [{ createdAt: 1234567, dfspId: 'testdfsp', publicKey: 'test peer JWS' }];
     controlAgent.sendPeerJWS(peerJwsCerts);
-    await wait(100);
-    const actual = sendSpy.mock.calls[0] && sendSpy.mock.calls[0][0];
+    await wait();
+    const actual = sendSpy.mock.calls[0]?.[0];
     expect(serverReceivedMessages).toHaveLength(1);
     expect(actual).toContain(stringify(peerJwsCerts));
   });
