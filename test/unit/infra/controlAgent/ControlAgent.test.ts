@@ -4,18 +4,23 @@ import { ICACallbacks } from '../../../../src/types';
 import { ILogger } from '../../../../src/domain/types';
 import stringify from 'fast-safe-stringify';
 
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 describe('ControlAgent Tests', () => {
   let controlAgent: ControlAgent;
   let logger: ILogger;
   let callbacks: ICACallbacks;
   let mockWsServer: Server;
   let mockSocket: Client;
+  let serverReceivedMessages: string[];
   const wsAddress = 'localhost';
   const wsPort = 8000;
 
   jest.setTimeout(10_000);
 
   beforeEach(async () => {
+    serverReceivedMessages = [];
+
     logger = {
       info: jest.fn(),
       error: jest.fn(),
@@ -38,11 +43,15 @@ describe('ControlAgent Tests', () => {
 
     mockWsServer = new Server(`ws://${wsAddress}:${wsPort}`);
     mockWsServer.on('connection', (socket) => {
+      socket.on('message', (data) => {
+        serverReceivedMessages.unshift(data as any);
+      });
       mockSocket = socket;
     });
   });
 
   afterEach(() => {
+    mockSocket?.close();
     mockWsServer?.stop();
   });
 
@@ -82,15 +91,19 @@ describe('ControlAgent Tests', () => {
     const sendSpy = controlAgent['_ws'] && jest.spyOn(controlAgent['_ws'], 'send');
     controlAgent.send('test message');
     expect(sendSpy).toHaveBeenCalledWith('test message');
+    await wait(100);
+    expect(serverReceivedMessages).toHaveLength(1);
     expect(logger.debug).toHaveBeenCalledWith('testControlAgent sending message', { data: 'test message' });
   });
 
   test('should send peer JWS message', async () => {
     await controlAgent.open();
     const sendSpy = jest.spyOn(controlAgent, 'send');
-    const peerJwsCerts = [{ createdAt: 1234567, dfspId: 'testdfsp', publicKey: 'test peer JWS' }] as ICAPeerJWSCert[];
+    const peerJwsCerts: ICAPeerJWSCert[] = [{ createdAt: 1234567, dfspId: 'testdfsp', publicKey: 'test peer JWS' }];
     controlAgent.sendPeerJWS(peerJwsCerts);
+    await wait(100);
     const actual = sendSpy.mock.calls[0] && sendSpy.mock.calls[0][0];
+    expect(serverReceivedMessages).toHaveLength(1);
     expect(actual).toContain(stringify(peerJwsCerts));
   });
 });

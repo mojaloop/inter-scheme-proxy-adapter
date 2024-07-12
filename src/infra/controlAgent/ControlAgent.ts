@@ -163,7 +163,7 @@ export class ControlAgent implements IControlAgent {
     // todo: think, if it's make sense to add isCertsPayload here
   }
 
-  async sendPeerJWS(peerJWS: ICAPeerJWSCert[]): Promise<void> {
+  sendPeerJWS(peerJWS: ICAPeerJWSCert[]) {
     this.send(build.PEER_JWS.NOTIFY(peerJWS));
   }
 
