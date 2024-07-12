@@ -1,4 +1,4 @@
-import { Server, Client } from 'mock-socket';
+import { Server } from 'mock-socket';
 import { ControlAgent, ICAPeerJWSCert } from '../../../../src/infra/controlAgent';
 import { ICACallbacks } from '../../../../src/types';
 import { ILogger } from '../../../../src/domain/types';
@@ -11,16 +11,11 @@ describe('ControlAgent Tests', () => {
   let logger: ILogger;
   let callbacks: ICACallbacks;
   let mockWsServer: Server;
-  let mockSocket: Client;
   let serverReceivedMessages: string[];
   const wsAddress = 'localhost';
   const wsPort = 8000;
 
-  jest.setTimeout(10_000);
-
   beforeEach(async () => {
-    serverReceivedMessages = [];
-
     logger = {
       info: jest.fn(),
       error: jest.fn(),
@@ -40,18 +35,17 @@ describe('ControlAgent Tests', () => {
       logger,
       timeout: 1000,
     });
-
+    
+    serverReceivedMessages = [];
     mockWsServer = new Server(`ws://${wsAddress}:${wsPort}`);
     mockWsServer.on('connection', (socket) => {
       socket.on('message', (data) => {
         serverReceivedMessages.unshift(data as any);
       });
-      mockSocket = socket;
     });
   });
 
   afterEach(() => {
-    mockSocket?.close();
     mockWsServer?.stop();
   });
 
@@ -90,8 +84,8 @@ describe('ControlAgent Tests', () => {
     await controlAgent.open();
     const sendSpy = controlAgent['_ws'] && jest.spyOn(controlAgent['_ws'], 'send');
     controlAgent.send('test message');
-    expect(sendSpy).toHaveBeenCalledWith('test message');
     await wait(100);
+    expect(sendSpy).toHaveBeenCalledWith('test message');
     expect(serverReceivedMessages).toHaveLength(1);
     expect(logger.debug).toHaveBeenCalledWith('testControlAgent sending message', { data: 'test message' });
   });
