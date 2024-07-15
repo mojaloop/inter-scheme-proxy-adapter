@@ -56,6 +56,8 @@ export class ControlAgent implements IControlAgent {
   private _port: number;
   private _callbackFns: ICACallbacks | null = null;
   private _timeout: number;
+  private _reconnectInterval: number;
+  private _shouldReconnect: boolean;
 
   constructor(params: ICAParams) {
     this._id = params.id || 'ControlAgent';
@@ -63,6 +65,8 @@ export class ControlAgent implements IControlAgent {
     this._port = params.port;
     this._logger = params.logger;
     this._timeout = params.timeout;
+    this._shouldReconnect = true;
+    this._reconnectInterval = params.reconnectInterval;
     this.receive = this.receive.bind(this);
   }
 
@@ -95,7 +99,21 @@ export class ControlAgent implements IControlAgent {
         this._logger.info(`${this.id} websocket connected`, { url, protocol });
         resolve();
       });
-      this._ws.on('error', reject);
+
+      // Reconnect on close
+      this._ws.on('close', () => {
+        this._logger.warn(`${this.id} websocket connected`, { url, protocol });
+        if (this._shouldReconnect) {
+          this._logger.info(`${this.id} reconnecting in ${this._reconnectInterval}ms...`);
+          setTimeout(() => this.open(), this._reconnectInterval);
+        }
+      });
+
+      this._ws.on('error', () => {
+        this._logger.error(`${this.id} websocket error`, { url, protocol });
+        this._ws?.close();
+      });
+
       this._ws.on('message', this._handle.bind(this));
     });
   }
@@ -104,22 +122,28 @@ export class ControlAgent implements IControlAgent {
     return new Promise((resolve, reject) => {
       this._logger.info(`${this.id} shutting down...`);
 
-      this._checkSocketState();
+      // I think we don't need these checks on close.
+      // this._checkSocketState();
 
-      this._ws?.on('close', resolve);
-      this._ws?.on('error', reject);
+      // this._ws?.on('close', resolve);
+      // this._ws?.on('error', reject);
 
+      this._shouldReconnect = false;
       this._ws?.close();
     });
   }
 
   send(msg: string | GenericObject) {
-    this._checkSocketState();
+    try {
+      this._checkSocketState();
 
-    const data = typeof msg === 'string' ? msg : serialise(msg);
-    this._logger.debug(`${this.id} sending message`, { data });
+      const data = typeof msg === 'string' ? msg : serialise(msg);
+      this._logger.debug(`${this.id} sending message`, { data });
 
-    this._ws?.send(data);
+      this._ws?.send(data);
+    } catch (err) {
+      this._logger.error(`${this.id} failed to send message`, { err });
+    }
   }
 
   // Receive a single message
@@ -171,7 +195,7 @@ export class ControlAgent implements IControlAgent {
     this.send(build.PEER_JWS.NOTIFY(peerJWS));
   }
 
-  private _checkSocketState() {
+  private _checkSocketState() {    
     if (!this._ws || this._ws.readyState !== WebSocket.OPEN) {
       throw new Error(`${this.id} WebSocket is not open`);
     }
