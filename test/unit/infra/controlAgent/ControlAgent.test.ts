@@ -35,6 +35,14 @@ describe('ControlAgent Tests', () => {
       logger,
       timeout: 1000,
     });
+
+    // we need to modify the _handle method since mock-socket's
+    // message format is different from the one expected by ControlAgent
+    const originalHandle = controlAgent['_handle'];
+    controlAgent['_handle'] = function (data: any) {
+      const boundHandle = originalHandle.bind(this);
+      boundHandle(data.data);
+    }
     
     serverReceivedMessages = [];
 
@@ -66,6 +74,7 @@ describe('ControlAgent Tests', () => {
         url: `${wsAddress}:${wsPort}`,
         protocol: 'ws://',
     });
+    expect(mockWsServer.clients()).toHaveLength(1);
   });
 
   test('should reject opening WebSocket connection if it is already open', async () => {
@@ -101,4 +110,11 @@ describe('ControlAgent Tests', () => {
     expect(serverReceivedMessages).toHaveLength(1);
     expect(actual).toContain(stringify(peerJwsCerts));
   });
+// todo: send a peerJws message from server and assert on controlAgent_handle method
+  // test.only('should handle incoming message', async () => {
+  //   await controlAgent.open();
+  //   mockWsServer.emit('message', stringify({ data: 'test message' }));
+  //   await wait();
+  //   expect(logger.debug).toHaveBeenCalledWith('testControlAgent received message', { data: 'test message' });
+  // }, 600_000);
 });
