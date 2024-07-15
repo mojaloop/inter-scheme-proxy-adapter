@@ -119,7 +119,7 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
     this.emitStateEventServerB({ certs: certsB });
   }
 
-  private async startPeerJwsRefreshLoop() {
+  private startPeerJwsRefreshLoop() {
     this.peerJwsRefreshLoopTimer = setInterval(() => {
       this.deps.controlAgentA.triggerFetchPeerJws();
       this.deps.controlAgentB.triggerFetchPeerJws();

@@ -215,7 +215,7 @@ export class ControlAgent implements IControlAgent {
         }
         break;
       case MESSAGE.ERROR:
-        this._logger.error(`${this.id} received error message`, { msg });
+        this._logger.warn(`${this.id} received error message`, { msg });
         break;
       default:
         this.send(build.ERROR.NOTIFY.UNSUPPORTED_MESSAGE(msg.id));

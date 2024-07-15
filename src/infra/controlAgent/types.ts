@@ -21,7 +21,7 @@ export interface IControlAgent {
   receive: () => Promise<GenericObject>;
   loadCerts: () => Promise<ICACerts>;
   triggerFetchPeerJws: () => void;
-  sendPeerJWS: (peerJWS: any) => void;
+  sendPeerJWS: (peerJWS: ICAPeerJWSCert[]) => void;
 }
 
 /**************************************************************************
