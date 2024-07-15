@@ -109,7 +109,7 @@ describe('ControlAgent Tests', () => {
     expect(callbacks.onCert).toHaveBeenCalledWith(ControlAgent.extractCerts(certs));
   });
 
-  test('should handle message with unsupported verb', async () => {
+  test('should handle configuration message with unsupported verb', async () => {
     const certs = mtlsCertsDto();
     const certsMsg = controlAgent.build.CONFIGURATION.NOTIFY(certs as any);
     const modified = certsMsg.replace('NOTIFY', 'UNSUPPORTED');
@@ -141,7 +141,7 @@ describe('ControlAgent Tests', () => {
     expect(callbacks.onPeerJWS).toHaveBeenCalledWith(peerJWSCerts);
   });
 
-  test('should handle message with unsupported verb', async () => {
+  test('should handle peerJWS message with unsupported verb', async () => {
     const peerJWSCerts: ICAPeerJWSCert[] = peerJWSCertsDto();
     const peerJWSMsg = controlAgent.build.PEER_JWS.NOTIFY(peerJWSCerts);
     const modified = peerJWSMsg.replace('NOTIFY', 'UNSUPPORTED');
@@ -153,4 +153,21 @@ describe('ControlAgent Tests', () => {
     expect(sendSpy).toHaveBeenCalledWith(controlAgent.build.ERROR.NOTIFY.UNSUPPORTED_VERB(expected.msg.id));
   })
 
+  test('should handle incoming error message', async () => {
+    const errorMsg = stringify({ msg: 'ERROR', data: 'test error', id: 'testId' });
+    const expected = { msg: deserialise(errorMsg) };
+    mockWsServer.emit('message', errorMsg);
+    await wait();
+    expect(logger.warn).toHaveBeenCalledWith('testControlAgent received error message', expected); 
+  });
+
+  test('should handle unsupported message', async () => {
+    const errorMsg = stringify({ msg: 'ERROR', data: 'test error', id: 'testId' });
+    const modified = errorMsg.replace('ERROR', 'UNSUPPORTED');
+    const expected = { msg: deserialise(modified) };
+    const sendSpy = jest.spyOn(controlAgent, 'send');
+    mockWsServer.emit('message', modified);
+    await wait();
+    expect(sendSpy).toHaveBeenCalledWith(controlAgent.build.ERROR.NOTIFY.UNSUPPORTED_MESSAGE(expected.msg.id));
+  })
 });
