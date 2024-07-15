@@ -134,7 +134,7 @@ export class ControlAgent implements IControlAgent {
     try {
       this._checkSocketState();
 
-      const data = typeof msg === 'string' ? msg : serialise(msg);
+      const data = typeof msg === 'string' ? msg : this._serialise(msg);
       this._logger.debug(`${this.id} sending message`, { data });
 
       this._ws?.send(data);
@@ -153,7 +153,7 @@ export class ControlAgent implements IControlAgent {
       }, this._timeout);
 
       this._ws?.once('message', (data) => {
-        const msg = deserialise(data);
+        const msg = this._deserialise(data);
         this._logger.verbose('Received', { msg });
         const isValid = isWsPayload(msg);
         if (!isValid) {
@@ -198,14 +198,25 @@ export class ControlAgent implements IControlAgent {
     }
   }
 
+  // wrapping the serialise and deserialise functions 
+  // to make them easier to mock in tests
+  private _serialise(...args: any[]) {
+    return serialise(args);
+  }
+
+  private _deserialise(msg: string | ws.RawData) {
+    return deserialise(msg);
+  }
+
   private _handle(data: ws.RawData | string) {
     let msg;
     try {
-      msg = deserialise(data);
+      msg = this._deserialise(data);
       this._logger.debug(`${this.id} received `, { msg });
     } catch (err) {
       this._logger.error(`${this.id} couldn't parse received message`, { data });
       this.send(build.ERROR.NOTIFY.JSON_PARSE_ERROR());
+      return;
     }
     switch (msg.msg) {
       case MESSAGE.CONFIGURATION:
