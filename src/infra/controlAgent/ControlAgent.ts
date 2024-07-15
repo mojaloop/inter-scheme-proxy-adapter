@@ -149,28 +149,23 @@ export class ControlAgent implements IControlAgent {
   // Receive a single message
   receive(): Promise<WsPayload> {
     return new Promise((resolve, reject) => {
-      try {
-        this._checkSocketState();
+      this._checkSocketState();
 
-        const timer = setTimeout(() => {
-          reject(new Error(`${this.id} timed out waiting for message`));
-        }, this._timeout);
-  
-        this._ws?.once('message', (data) => {
-          const msg = deserialise(data);
-          this._logger.verbose('Received', { msg });
-          const isValid = isWsPayload(msg);
-          if (!isValid) {
-            reject(new TypeError('Invalid WS response format'));
-          } else {
-            resolve(msg);
-          }
-          clearTimeout(timer);
-        });
-      } catch (err) {
-        reject(err);
-        return;
-      }
+      const timer = setTimeout(() => {
+        reject(new Error(`${this.id} timed out waiting for message`));
+      }, this._timeout);
+
+      this._ws?.once('message', (data) => {
+        const msg = deserialise(data);
+        this._logger.verbose('Received', { msg });
+        const isValid = isWsPayload(msg);
+        if (!isValid) {
+          reject(new TypeError('Invalid WS response format'));
+        } else {
+          resolve(msg);
+        }
+        clearTimeout(timer);
+      });
     });
   }
 
