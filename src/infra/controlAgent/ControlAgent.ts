@@ -102,7 +102,7 @@ export class ControlAgent implements IControlAgent {
 
       // Reconnect on close
       this._ws.on('close', () => {
-        this._logger.warn(`${this.id} websocket connected`, { url, protocol });
+        this._logger.warn(`${this.id} websocket disconnected`, { url, protocol });
         if (this._shouldReconnect) {
           this._logger.info(`${this.id} reconnecting in ${this._reconnectInterval}ms...`);
           setTimeout(() => this.open(), this._reconnectInterval);
