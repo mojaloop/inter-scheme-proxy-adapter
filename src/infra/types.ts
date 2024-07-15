@@ -21,6 +21,7 @@ export type AppConfig = {
 
   pm4mlEnabled: boolean;
   incomingHeadersRemoval: string[];
+  checkPeerJwsInterval: number;
 };
 
 type HubConfig = {

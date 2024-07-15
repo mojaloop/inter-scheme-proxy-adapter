@@ -175,6 +175,13 @@ const config = convict<AppConfig>({
     default: [],
     env: 'INCOMING_HEADERS_REMOVAL',
   },
+
+  checkPeerJwsInterval: {
+    doc: 'Interval to check peer JWS changes in milliseconds',
+    format: Number,
+    default: 1800000, // 30 minutes, this is fail safe mechanism. So the value can be high.
+    env: 'CHECK_PEER_JWS_INTERVAL',
+  },
 });
 
 config.validate({ allowed: 'strict' });

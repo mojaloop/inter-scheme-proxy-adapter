@@ -36,10 +36,6 @@ npm test
 
 - Run backend dependencies by executing `docker compose up -d` from `/test/func` directory
 - Wait for all containers to be healthy
-- Run following command from `connection manager-api` repo in a new terminal
-  ```
-  DOTENV_CONFIG_PATH=./server_a_IGNORE.env npm run start:dev
-  ```
 - Run following commands from `connection manager-api` repo in a new terminal
   ```
   DOTENV_CONFIG_PATH=`pwd`/server_a_IGNORE.env npx knex --knexfile src/knexfile.js migrate:latest

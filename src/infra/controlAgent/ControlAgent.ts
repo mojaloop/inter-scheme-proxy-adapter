@@ -157,6 +157,10 @@ export class ControlAgent implements IControlAgent {
     return ControlAgent.extractCerts(res.data);
   }
 
+  triggerFetchPeerJws(): void {
+    this.send(build.PEER_JWS.READ());
+  }
+
   static extractCerts(data: IMCMCertData): ICACerts {
     // current implementation is for the initial certs load
     return data.outbound.tls.creds;
@@ -211,7 +215,7 @@ export class ControlAgent implements IControlAgent {
         }
         break;
       case MESSAGE.ERROR:
-        this._logger.error(`${this.id} received error message`, { msg });
+        this._logger.warn(`${this.id} received error message`, { msg });
         break;
       default:
         this.send(build.ERROR.NOTIFY.UNSUPPORTED_MESSAGE(msg.id));
