@@ -36,7 +36,7 @@ import {
   WsPayload,
   isWsPayload,
   isCertsPayload,
-  ICAPeerJWSCert,
+  ICAPeerJWSCert
 } from './types';
 
 /**************************************************************************
@@ -122,11 +122,8 @@ export class ControlAgent implements IControlAgent {
     return new Promise((resolve, reject) => {
       this._logger.info(`${this.id} shutting down...`);
 
-      // I think we don't need these checks on close.
-      // this._checkSocketState();
-
-      // this._ws?.on('close', resolve);
-      // this._ws?.on('error', reject);
+      this._ws?.on('close', resolve);
+      this._ws?.on('error', reject);
 
       this._shouldReconnect = false;
       this._ws?.close();
@@ -210,7 +207,6 @@ export class ControlAgent implements IControlAgent {
       this._logger.error(`${this.id} couldn't parse received message`, { data });
       this.send(build.ERROR.NOTIFY.JSON_PARSE_ERROR());
     }
-    this._logger.debug(`${this.id} handling received message`, { msg });
     switch (msg.msg) {
       case MESSAGE.CONFIGURATION:
         switch (msg.verb) {

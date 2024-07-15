@@ -1,5 +1,5 @@
 import { Server } from 'mock-socket';
-import { ControlAgent, ICAPeerJWSCert } from '../../../../src/infra/controlAgent';
+import { ControlAgent, ICAPeerJWSCert, deserialise } from '../../../../src/infra/controlAgent';
 import { ICACallbacks } from '../../../../src/types';
 import { ILogger } from '../../../../src/domain/types';
 import stringify from 'fast-safe-stringify';
@@ -23,6 +23,15 @@ describe('ControlAgent Tests', () => {
       debug: jest.fn(),
     } as unknown as ILogger;
 
+    serverReceivedMessages = [];
+
+    mockWsServer = new Server(`ws://${wsAddress}:${wsPort}`);
+    mockWsServer.on('connection', (socket) => {
+      socket.on('message', (data) => {
+        serverReceivedMessages.unshift(data as any);
+      });
+    });
+
     callbacks = {
       onCert: jest.fn(),
       onPeerJWS: jest.fn(),
@@ -33,7 +42,8 @@ describe('ControlAgent Tests', () => {
       address: wsAddress,
       port: wsPort,
       logger,
-      timeout: 1000,
+      timeout: 1_000,
+      reconnectInterval: 1_000,
     });
 
     // we need to modify the _handle method since mock-socket's
@@ -43,19 +53,12 @@ describe('ControlAgent Tests', () => {
       const boundHandle = originalHandle.bind(this);
       boundHandle(data.data);
     }
-    
-    serverReceivedMessages = [];
 
-    mockWsServer = new Server(`ws://${wsAddress}:${wsPort}`);
-    mockWsServer.on('connection', (socket) => {
-      socket.on('message', (data) => {
-        serverReceivedMessages.unshift(data as any);
-      });
-    });
+    await controlAgent.init(callbacks);
   });
 
-  afterEach(() => {
-    mockWsServer?.stop();
+  afterEach(async () => {
+    return mockWsServer?.stop();
   });
 
   test('should create ControlAgent instance', () => {
@@ -64,12 +67,10 @@ describe('ControlAgent Tests', () => {
   });
 
   test('should initialize ControlAgent', async () => {
-    await controlAgent.init(callbacks);
     expect(controlAgent['_callbackFns']).toBe(callbacks);
   })
 
   test('should open WebSocket connection', async () => {
-    await controlAgent.open();
     expect(logger.info).toHaveBeenCalledWith('testControlAgent websocket connected', {
         url: `${wsAddress}:${wsPort}`,
         protocol: 'ws://',
@@ -78,12 +79,10 @@ describe('ControlAgent Tests', () => {
   });
 
   test('should reject opening WebSocket connection if it is already open', async () => {
-    await controlAgent.open();
     await expect(controlAgent.open()).rejects.toThrow('WebSocket is already open');
   });
 
   test('should close WebSocket connection', async () => {
-    await controlAgent.open();
     const closeSpy = controlAgent['_ws'] && jest.spyOn(controlAgent['_ws'], 'close');
     await controlAgent.close();
     expect(closeSpy).toHaveBeenCalled();
@@ -91,7 +90,6 @@ describe('ControlAgent Tests', () => {
   });
 
   test('should send message', async () => {
-    await controlAgent.open();
     const sendSpy = controlAgent['_ws'] && jest.spyOn(controlAgent['_ws'], 'send');
     controlAgent.send('test message');
     await wait();
@@ -101,7 +99,6 @@ describe('ControlAgent Tests', () => {
   });
 
   test('should send peer JWS message', async () => {
-    await controlAgent.open();
     const sendSpy = jest.spyOn(controlAgent, 'send');
     const peerJwsCerts: ICAPeerJWSCert[] = [{ createdAt: 1234567, dfspId: 'testdfsp', publicKey: 'test peer JWS' }];
     controlAgent.sendPeerJWS(peerJwsCerts);
@@ -110,11 +107,14 @@ describe('ControlAgent Tests', () => {
     expect(serverReceivedMessages).toHaveLength(1);
     expect(actual).toContain(stringify(peerJwsCerts));
   });
-// todo: send a peerJws message from server and assert on controlAgent_handle method
-  // test.only('should handle incoming message', async () => {
-  //   await controlAgent.open();
-  //   mockWsServer.emit('message', stringify({ data: 'test message' }));
-  //   await wait();
-  //   expect(logger.debug).toHaveBeenCalledWith('testControlAgent received message', { data: 'test message' });
-  // }, 600_000);
+
+  test('should handle incoming peerJWS message', async () => {
+    const peerJWSCerts: ICAPeerJWSCert[] = [{ createdAt: 1234567, dfspId: 'testdfsp', publicKey: 'test peer JWS' }];
+    const peerJWSMsg = controlAgent.build.PEER_JWS.NOTIFY(peerJWSCerts);
+    const expected = { msg: deserialise(peerJWSMsg) };
+    mockWsServer.emit('message', peerJWSMsg);
+    await wait();
+    expect(logger.debug).toHaveBeenCalledWith('testControlAgent received ', expected); 
+    expect(callbacks.onPeerJWS).toHaveBeenCalledWith(peerJWSCerts);
+  });
 });

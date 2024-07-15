@@ -1,3 +1,4 @@
+import WebSocket from 'ws';
 import { ILogger } from '../../domain/types';
 import { MESSAGE, VERB } from './constants';
 
