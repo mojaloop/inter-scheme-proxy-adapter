@@ -1,8 +1,9 @@
 import { Server } from 'mock-socket';
+import stringify from 'fast-safe-stringify';
 import { ControlAgent, ICAPeerJWSCert, deserialise } from '../../../../src/infra/controlAgent';
 import { ICACallbacks } from '../../../../src/types';
 import { ILogger } from '../../../../src/domain/types';
-import stringify from 'fast-safe-stringify';
+import { mtlsCertsDto, peerJWSCertsDto } from '../../../fixtures';
 
 const wait = (ms: number = 10) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -98,9 +99,31 @@ describe('ControlAgent Tests', () => {
     expect(logger.debug).toHaveBeenCalledWith('testControlAgent sending message', { data: 'test message' });
   });
 
+  test('should handle incoming configuration message', async () => {
+    const certs = mtlsCertsDto();
+    const certsMsg = controlAgent.build.CONFIGURATION.NOTIFY(certs as any);
+    const expected = { msg: deserialise(certsMsg) };
+    mockWsServer.emit('message', certsMsg);
+    await wait();
+    expect(logger.debug).toHaveBeenCalledWith('testControlAgent received ', expected); 
+    expect(callbacks.onCert).toHaveBeenCalledWith(ControlAgent.extractCerts(certs));
+  });
+
+  test('should handle message with unsupported verb', async () => {
+    const certs = mtlsCertsDto();
+    const certsMsg = controlAgent.build.CONFIGURATION.NOTIFY(certs as any);
+    const modified = certsMsg.replace('NOTIFY', 'UNSUPPORTED');
+    const expected = { msg: deserialise(modified) };
+    const sendSpy = jest.spyOn(controlAgent, 'send');
+    mockWsServer.emit('message', modified);
+    await wait();
+    expect(logger.debug).toHaveBeenCalledWith('testControlAgent received ', expected); 
+    expect(sendSpy).toHaveBeenCalledWith(controlAgent.build.ERROR.NOTIFY.UNSUPPORTED_VERB(expected.msg.id));
+  })
+
   test('should send peer JWS message', async () => {
     const sendSpy = jest.spyOn(controlAgent, 'send');
-    const peerJwsCerts: ICAPeerJWSCert[] = [{ createdAt: 1234567, dfspId: 'testdfsp', publicKey: 'test peer JWS' }];
+    const peerJwsCerts: ICAPeerJWSCert[] = peerJWSCertsDto();
     controlAgent.sendPeerJWS(peerJwsCerts);
     await wait();
     const actual = sendSpy.mock.calls[0]?.[0];
@@ -109,7 +132,7 @@ describe('ControlAgent Tests', () => {
   });
 
   test('should handle incoming peerJWS message', async () => {
-    const peerJWSCerts: ICAPeerJWSCert[] = [{ createdAt: 1234567, dfspId: 'testdfsp', publicKey: 'test peer JWS' }];
+    const peerJWSCerts: ICAPeerJWSCert[] = peerJWSCertsDto();
     const peerJWSMsg = controlAgent.build.PEER_JWS.NOTIFY(peerJWSCerts);
     const expected = { msg: deserialise(peerJWSMsg) };
     mockWsServer.emit('message', peerJWSMsg);
@@ -117,4 +140,17 @@ describe('ControlAgent Tests', () => {
     expect(logger.debug).toHaveBeenCalledWith('testControlAgent received ', expected); 
     expect(callbacks.onPeerJWS).toHaveBeenCalledWith(peerJWSCerts);
   });
+
+  test('should handle message with unsupported verb', async () => {
+    const peerJWSCerts: ICAPeerJWSCert[] = peerJWSCertsDto();
+    const peerJWSMsg = controlAgent.build.PEER_JWS.NOTIFY(peerJWSCerts);
+    const modified = peerJWSMsg.replace('NOTIFY', 'UNSUPPORTED');
+    const expected = { msg: deserialise(modified) };
+    const sendSpy = jest.spyOn(controlAgent, 'send');
+    mockWsServer.emit('message', modified);
+    await wait();
+    expect(logger.debug).toHaveBeenCalledWith('testControlAgent received ', expected); 
+    expect(sendSpy).toHaveBeenCalledWith(controlAgent.build.ERROR.NOTIFY.UNSUPPORTED_VERB(expected.msg.id));
+  })
+
 });
