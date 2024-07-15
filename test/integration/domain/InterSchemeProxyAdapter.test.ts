@@ -1,5 +1,3 @@
-// Write tests for InterSchemeProxyAdapter
-
 import { InterSchemeProxyAdapter } from '../../../src/domain/InterSchemeProxyAdapter';
 import { ISPADeps } from '../../../src/domain/types';
 import { ICACerts, ICAPeerJWSCert } from '../../../src/infra';
