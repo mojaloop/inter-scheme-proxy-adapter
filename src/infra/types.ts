@@ -39,6 +39,7 @@ type ControlAgentConfig = {
   wsHost: string;
   wsPort: number;
   timeout: number;
+  reconnectInterval: number;
 };
 
 export type AuthConfig = {
