@@ -1,3 +1,4 @@
+import WebSocket from 'ws';
 import { ILogger } from '../../domain/types';
 import { MESSAGE, VERB } from './constants';
 
@@ -18,7 +19,7 @@ export interface IControlAgent {
   open: () => Promise<void>;
   close: () => Promise<void>;
   send: (message: string) => void;
-  receive: () => Promise<GenericObject>;
+  receive: (validate: boolean) => Promise<GenericObject>;
   loadCerts: () => Promise<ICACerts>;
   triggerFetchPeerJws: () => void;
   sendPeerJWS: (peerJWS: ICAPeerJWSCert[]) => void;
