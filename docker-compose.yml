@@ -35,6 +35,7 @@ services:
       - PEER_ENDPOINT_B=hub-b:6443
       - MGMT_API_WS_URL_A=men-api-a
       - MGMT_API_WS_URL_B=men-api-b
+      - MGMT_API_WS_PORT_B=4005
       - OAUTH_TOKEN_ENDPOINT_A=http://oidc-server-a:8080/openid-connect/token
       - OAUTH_TOKEN_ENDPOINT_B=http://oidc-server-b:8080/openid-connect/token
     ports:

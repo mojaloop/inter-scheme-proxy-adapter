@@ -109,8 +109,8 @@ export class ControlAgent implements IControlAgent {
         }
       });
 
-      this._ws.on('error', () => {
-        this._logger.error(`${this.id} websocket error`, { url, protocol });
+      this._ws.on('error', (error) => {
+        this._logger.error(`${this.id} websocket error`, { url, protocol, error });
         this._ws?.close();
       });
 
@@ -144,7 +144,7 @@ export class ControlAgent implements IControlAgent {
   }
 
   // Receive a single message
-  receive(): Promise<WsPayload> {
+  receive(validate = true): Promise<WsPayload> {
     return new Promise((resolve, reject) => {
       this._checkSocketState();
 
@@ -155,12 +155,16 @@ export class ControlAgent implements IControlAgent {
       this._ws?.once('message', (data) => {
         const msg = this._deserialise(data);
         this._logger.verbose('Received', { msg });
-        const isValid = isWsPayload(msg);
-        if (!isValid) {
-          reject(new TypeError('Invalid WS response format'));
-        } else {
-          resolve(msg);
+
+        if (validate) {
+          const isValid = isWsPayload(msg);
+          if (!isValid) {
+            reject(new TypeError('Invalid WS response format'));
+          }
         }
+
+        resolve(msg);
+
         clearTimeout(timer);
       });
     });
