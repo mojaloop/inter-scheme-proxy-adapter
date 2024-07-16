@@ -124,7 +124,7 @@ describe('ControlAgent Tests', () => {
     const sendSpy = controlAgent['_ws'] && jest.spyOn(controlAgent['_ws'], 'send');
     controlAgent.send({ test: 'message' });
     await wait();
-    expect(sendSpy).toHaveBeenCalledWith('[{"test":"message"}]');
+    expect(sendSpy).toHaveBeenCalledWith('{"test":"message"}');
   });
 
   test('should log error if send throws', async () => {

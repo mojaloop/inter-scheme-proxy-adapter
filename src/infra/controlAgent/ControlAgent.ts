@@ -200,8 +200,8 @@ export class ControlAgent implements IControlAgent {
 
   // wrapping the serialise and deserialise functions 
   // to make them easier to mock in tests
-  private _serialise(...args: any[]) {
-    return serialise(args);
+  private _serialise(msg: GenericObject) {
+    return serialise(msg);
   }
 
   private _deserialise(msg: string | ws.RawData) {
