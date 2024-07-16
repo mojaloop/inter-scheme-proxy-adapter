@@ -21,6 +21,7 @@ export type AppConfig = {
 
   pm4mlEnabled: boolean;
   incomingHeadersRemoval: string[];
+  checkPeerJwsInterval: number;
 };
 
 type HubConfig = {
@@ -38,6 +39,7 @@ type ControlAgentConfig = {
   wsHost: string;
   wsPort: number;
   timeout: number;
+  reconnectInterval: number;
 };
 
 export type AuthConfig = {

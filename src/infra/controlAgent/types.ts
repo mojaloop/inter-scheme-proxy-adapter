@@ -1,3 +1,4 @@
+import WebSocket from 'ws';
 import { ILogger } from '../../domain/types';
 import { MESSAGE, VERB } from './constants';
 
@@ -18,8 +19,10 @@ export interface IControlAgent {
   open: () => Promise<void>;
   close: () => Promise<void>;
   send: (message: string) => void;
-  receive: () => Promise<GenericObject>;
+  receive: (validate: boolean) => Promise<GenericObject>;
   loadCerts: () => Promise<ICACerts>;
+  triggerFetchPeerJws: () => void;
+  sendPeerJWS: (peerJWS: ICAPeerJWSCert[]) => void;
 }
 
 /**************************************************************************
@@ -37,6 +40,7 @@ export interface ICAParams {
   port: number;
   timeout: number;
   logger: ILogger;
+  reconnectInterval: number;
 }
 
 /**************************************************************************
@@ -48,11 +52,23 @@ export interface ICAParams {
  * key   - key
  * ca    - ca
  *************************************************************************/
-export type ICACerts = {
+export interface ICACerts {
   cert: string;
   key: string;
   ca: string;
 };
+
+/**************************************************************************
+ * ICAPeerJWSCerts
+ * 
+ * Interface for the peer JWS certificates
+ **************************************************************************/
+
+export interface ICAPeerJWSCert {
+  createdAt: number;
+  dfspId: string;
+  publicKey: string;
+}
 
 /**************************************************************************
  * ICCallbacks
@@ -63,6 +79,7 @@ export type ICACerts = {
  *************************************************************************/
 export interface ICACallbacks {
   onCert: (certs: ICACerts) => void;
+  onPeerJWS: (peerJWS: ICAPeerJWSCert[]) => void;
 }
 
 /**************************************************************************

@@ -109,10 +109,16 @@ const config = convict<AppConfig>({
       env: 'MGMT_API_WS_PORT_A',
     },
     timeout: {
-      doc: 'Timeout for control agent on hub A',
+      doc: 'Timeout for control agent A',
       format: Number,
       default: 5000,
       env: 'MGMT_API_WS_TIMEOUT_A',
+    },
+    reconnectInterval: {
+      doc: 'Reconnect interval for control agent A',
+      format: Number,
+      default: 5000,
+      env: 'MGMT_API_WS_RECONNECT_INTERVAL_A',
     },
   },
 
@@ -130,10 +136,16 @@ const config = convict<AppConfig>({
       env: 'MGMT_API_WS_PORT_B',
     },
     timeout: {
-      doc: 'Timeout for control agent on hub B',
+      doc: 'Timeout for control agent B',
       format: Number,
       default: 5000,
       env: 'MGMT_API_WS_TIMEOUT_B',
+    },
+    reconnectInterval: {
+      doc: 'Reconnect interval for control agent B',
+      format: Number,
+      default: 5000,
+      env: 'MGMT_API_WS_RECONNECT_INTERVAL_B',
     },
   },
 
@@ -174,6 +186,13 @@ const config = convict<AppConfig>({
     format: Array,
     default: [],
     env: 'INCOMING_HEADERS_REMOVAL',
+  },
+
+  checkPeerJwsInterval: {
+    doc: 'Interval to check peer JWS changes in milliseconds',
+    format: Number,
+    default: 1800000, // 30 minutes, this is fail safe mechanism. So the value can be high.
+    env: 'CHECK_PEER_JWS_INTERVAL',
   },
 });
 

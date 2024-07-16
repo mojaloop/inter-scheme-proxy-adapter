@@ -5,6 +5,7 @@ import { IMCMCertData } from './types';
  *************************************************************************/
 export enum MESSAGE {
   CONFIGURATION = 'CONFIGURATION',
+  PEER_JWS = 'PEER_JWS',
   ERROR = 'ERROR',
 }
 

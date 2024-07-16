@@ -25,9 +25,12 @@
 
 import { INTERNAL_EVENTS } from '../constants';
 import { IProxyAdapter, ISPADeps, IncomingRequestDetails, ServerState, ServerStateEvent } from './types';
-import { ICACerts } from '../infra';
+import { ICACerts, ICAPeerJWSCert } from '../infra';
+import config from '../config';
+const { checkPeerJwsInterval } = config.get();
 
 export class InterSchemeProxyAdapter implements IProxyAdapter {
+  private peerJwsRefreshLoopTimer: NodeJS.Timeout | undefined;
   constructor(private readonly deps: ISPADeps) {
     this.handleProxyRequest = this.handleProxyRequest.bind(this);
   }
@@ -50,6 +53,7 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
     await this.getAccessTokens();
     await this.initControlAgents();
     await this.loadInitialCerts();
+    this.startPeerJwsRefreshLoop();
     this.deps.logger.debug('certs and token are ready, starting httpServers...');
 
     const [isAStarted, isBStarted] = await Promise.all([
@@ -63,6 +67,7 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
   async stop(): Promise<void> {
     this.deps.authClientA.stopUpdates();
     this.deps.authClientB.stopUpdates();
+    this.stopPeerJwsRefreshLoop();
     // prettier-ignore
     const [isAStopped, isBStopped] = await Promise.all([
       this.deps.httpServerA.stop(),
@@ -95,9 +100,11 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
     await Promise.all([
       controlAgentA.init({
         onCert: (certs: ICACerts) => this.emitStateEventServerA({ certs }),
+        onPeerJWS: (peerJWS: ICAPeerJWSCert[]) => this.deps.controlAgentB.sendPeerJWS(peerJWS),
       }),
       controlAgentB.init({
         onCert: (certs: ICACerts) => this.emitStateEventServerB({ certs }),
+        onPeerJWS: (peerJWS: ICAPeerJWSCert[]) => this.deps.controlAgentA.sendPeerJWS(peerJWS),
       }),
     ]);
   }
@@ -110,5 +117,18 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
 
     this.emitStateEventServerA({ certs: certsA });
     this.emitStateEventServerB({ certs: certsB });
+  }
+
+  // @note: This is a fail safe measure to ensure that the peer JWS certs 
+  // are optimistically retrieved, just in case the websocket event is missed. 
+  private startPeerJwsRefreshLoop() {
+    this.peerJwsRefreshLoopTimer = setInterval(() => {
+      this.deps.controlAgentA.triggerFetchPeerJws();
+      this.deps.controlAgentB.triggerFetchPeerJws();
+    }, checkPeerJwsInterval);
+  }
+
+  private async stopPeerJwsRefreshLoop() {
+    clearInterval(this.peerJwsRefreshLoopTimer);
   }
 }

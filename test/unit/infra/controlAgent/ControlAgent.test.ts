@@ -1,0 +1,308 @@
+/*****
+ License
+ --------------
+ Copyright © 2017 Bill & Melinda Gates Foundation
+ The Mojaloop files are made available by the Bill & Melinda Gates Foundation under the Apache License, Version 2.0 (the "License") and you may not use these files except in compliance with the License. You may obtain a copy of the License at
+ http://www.apache.org/licenses/LICENSE-2.0
+ Unless required by applicable law or agreed to in writing, the Mojaloop files are distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+
+ Contributors
+ --------------
+ This is the official list of the Mojaloop project contributors for this file.
+ Names of the original copyright holders (individuals or organizations)
+ should be listed with a '*' in the first column. People who have
+ contributed from an organization can be listed under the organization
+ that actually holds the copyright for their contributions (see the
+ Gates Foundation organization for an example). Those individuals should have
+ their names indented and be marked with a '-'. Email address can be added
+ optionally within square brackets <email>.
+ * Gates Foundation
+ - Name Surname <name.surname@gatesfoundation.com>
+
+  Steven Oderayi <steven.oderayi@infitx.com>
+ **********/
+
+import { Client, Server } from 'mock-socket';
+import stringify from 'fast-safe-stringify';
+import { ControlAgent, ICAPeerJWSCert, deserialise } from '../../../../src/infra/controlAgent';
+import { ICACallbacks } from '../../../../src/types';
+import { ILogger } from '../../../../src/domain/types';
+import { mtlsCertsDto, peerJWSCertsDto } from '../../../fixtures';
+
+const wait = (ms: number = 10) => new Promise((resolve) => setTimeout(resolve, ms));
+
+describe('ControlAgent Tests', () => {
+  let controlAgent: ControlAgent;
+  let logger: ILogger;
+  let callbacks: ICACallbacks;
+  let mockWsServer: Server;
+  let mockSocket: Client;
+  let serverReceivedMessages: string[];
+  const wsAddress = 'localhost';
+  const wsPort = 8000;
+
+  beforeEach(async () => {
+    logger = {
+      info: jest.fn(),
+      error: jest.fn(),
+      warn: jest.fn(),
+      debug: jest.fn(),
+      verbose: jest.fn(),
+    } as unknown as ILogger;
+
+    serverReceivedMessages = [];
+
+    mockWsServer = new Server(`ws://${wsAddress}:${wsPort}`);
+    mockWsServer.on('connection', (socket) => {
+      mockSocket = socket;
+      socket.on('message', (data) => {
+        serverReceivedMessages.unshift(data as any);
+      });
+    });
+
+    callbacks = {
+      onCert: jest.fn(),
+      onPeerJWS: jest.fn(),
+    };
+    
+    controlAgent = new ControlAgent({
+      id: 'testControlAgent',
+      address: wsAddress,
+      port: wsPort,
+      logger,
+      timeout: 5_000,
+      reconnectInterval: 1_000,
+    });
+
+    // we need to modify the _handle method since mock-socket's
+    // message format is different from the one expected by ControlAgent
+    const originalHandle = controlAgent['_handle'];
+    controlAgent['_handle'] = function (data: any) {
+      const boundHandle = originalHandle.bind(this);
+      boundHandle(data.data || data);
+    }
+
+    await controlAgent.init(callbacks);
+  });
+
+  afterEach(async () => {
+    return mockWsServer?.stop();
+  });
+
+  test('should create ControlAgent instance', () => {
+    expect(controlAgent).toBeTruthy();
+    expect(controlAgent.id).toBe('testControlAgent');
+  });
+
+  test('should initialize ControlAgent', async () => {
+    expect(controlAgent['_callbackFns']).toBe(callbacks);
+  })
+
+  test('should open WebSocket connection', async () => {
+    expect(logger.info).toHaveBeenCalledWith('testControlAgent websocket connected', {
+        url: `${wsAddress}:${wsPort}`,
+        protocol: 'ws://',
+    });
+    expect(mockWsServer.clients()).toHaveLength(1);
+  });
+
+  test('should reconnect on close', async () => {
+    const openSpy = jest.spyOn(controlAgent, 'open');
+    mockSocket.close();
+    await wait(1500);
+    expect(openSpy).toHaveBeenCalled();
+  });
+
+  test('should close socket on error', async () => {
+    const closeSpy = controlAgent['_ws'] && jest.spyOn(controlAgent['_ws'], 'close');
+    mockWsServer.emit('error', {});
+    await wait();
+    expect(closeSpy).toHaveBeenCalled();
+  });
+
+  test('should reject opening WebSocket connection if it is already open', async () => {
+    await expect(controlAgent.open()).rejects.toThrow('WebSocket is already open');
+  });
+
+  test('should close WebSocket connection', async () => {
+    const closeSpy = controlAgent['_ws'] && jest.spyOn(controlAgent['_ws'], 'close');
+    await controlAgent.close();
+    expect(closeSpy).toHaveBeenCalled();
+    expect(logger.info).toHaveBeenCalledWith('testControlAgent shutting down...');
+  });
+
+  test('should send message', async () => {
+    const sendSpy = controlAgent['_ws'] && jest.spyOn(controlAgent['_ws'], 'send');
+    controlAgent.send('test message');
+    await wait();
+    expect(sendSpy).toHaveBeenCalledWith('test message');
+    expect(serverReceivedMessages).toHaveLength(1);
+    expect(logger.debug).toHaveBeenCalledWith('testControlAgent sending message', { data: 'test message' });
+  });
+
+  test('should serialise message if not a string', async () => {
+    const sendSpy = controlAgent['_ws'] && jest.spyOn(controlAgent['_ws'], 'send');
+    controlAgent.send({ test: 'message' });
+    await wait();
+    expect(sendSpy).toHaveBeenCalledWith('{"test":"message"}');
+  });
+
+  test('should log error if send throws', async () => {
+    const error = new Error('test error');
+    controlAgent['_ws'] && jest.spyOn(controlAgent['_ws'], 'send').mockImplementation(() => {
+      throw error;
+    });
+    controlAgent.send('test message');
+    await wait();
+    expect(logger.error).toHaveBeenCalledWith('testControlAgent failed to send message', { err: error});
+  });
+
+  test('should receive a single message', async () => {
+    const certs = mtlsCertsDto();
+    const certsMsg = controlAgent.build.CONFIGURATION.NOTIFY(certs as any);
+    const expected = deserialise(certsMsg);
+    setTimeout(async () => {
+      mockWsServer.emit('message', certsMsg);  
+    }, 100)
+    controlAgent['_timeout'] = 1_000;
+    const received = await controlAgent.receive();
+    expect(received).toEqual(expected);
+  });
+
+  test('should throw if timed out receiving a single message', async () => {
+    const certs = mtlsCertsDto();
+    const certsMsg = controlAgent.build.CONFIGURATION.NOTIFY(certs as any);
+    setTimeout(async () => {
+      mockWsServer.emit('message', certsMsg);  
+    }, 2000)
+    controlAgent['_timeout'] = 1_000;
+    await expect(controlAgent.receive()).rejects.toThrow('testControlAgent timed out waiting for message');
+  });
+
+  test('should throw if invalid message is received for a single message', async () => {
+    const modified = stringify({ invalid: 'message' })
+    setTimeout(async () => {
+      mockWsServer.emit('message', modified);  
+    }, 100)
+    controlAgent['_timeout'] = 1_000;
+    await expect(controlAgent.receive()).rejects.toThrow('Invalid WS response format');
+  });
+
+  test('should load certificates', async () => {
+    const certs = mtlsCertsDto();
+    const certsMsg = controlAgent.build.CONFIGURATION.NOTIFY(certs as any);
+    mockSocket.on('message', (data) => {
+      const msg = deserialise(data as string);
+      if (msg.msg === 'CONFIGURATION') {
+        mockSocket.send(certsMsg);
+      }
+    })
+    const actual = await controlAgent.loadCerts();
+    expect(actual).toStrictEqual(certs.outbound.tls.creds);
+  });
+
+  test('should throw if invalid message recived in loadCerts', async () => {
+    const certs = mtlsCertsDto();
+    const certsMsg = controlAgent.build.CONFIGURATION.NOTIFY(certs as any);
+    mockSocket.on('message', (data) => {
+      const msg = deserialise(data as string);
+      if (msg.msg === 'CONFIGURATION') {
+        mockSocket.send(certsMsg.replace('outbound', 'INVALID'));
+      }
+    })
+    await expect(controlAgent.loadCerts()).rejects.toThrow('Failed to read initial certs from testControlAgent');
+  });
+
+  test('should trigger fetchPeerJws', async () => {
+    const sendSpy = jest.spyOn(controlAgent, 'send');
+    const readSpy = jest.spyOn(controlAgent.build.PEER_JWS, 'READ');
+    controlAgent.triggerFetchPeerJws();
+    
+    expect(readSpy).toHaveBeenCalled();
+    expect(sendSpy).toHaveBeenCalled();
+    await wait();
+    expect(serverReceivedMessages).toHaveLength(1);
+  });
+
+  test('should send peer JWS message', async () => {
+    const sendSpy = jest.spyOn(controlAgent, 'send');
+    const peerJwsCerts: ICAPeerJWSCert[] = peerJWSCertsDto();
+    controlAgent.sendPeerJWS(peerJwsCerts);
+    await wait();
+    const actual = sendSpy.mock.calls[0]?.[0];
+    expect(serverReceivedMessages).toHaveLength(1);
+    expect(actual).toContain(stringify(peerJwsCerts));
+  });
+
+  test('should handle error if deserialisation fails in _handle', async () => {
+    const error = new Error('test error');
+    jest.spyOn(controlAgent as any, '_deserialise').mockImplementation(() => {
+      throw error;
+    });
+    controlAgent['_handle']('test message');
+    await wait();
+    expect(logger.error).toHaveBeenCalledWith('testControlAgent couldn\'t parse received message', { data: 'test message' });
+  });
+
+  test('should handle incoming configuration message', async () => {
+    const certs = mtlsCertsDto();
+    const certsMsg = controlAgent.build.CONFIGURATION.NOTIFY(certs as any);
+    const expected = { msg: deserialise(certsMsg) };
+    mockWsServer.emit('message', certsMsg);
+    await wait();
+    expect(logger.debug).toHaveBeenCalledWith('testControlAgent received ', expected); 
+    expect(callbacks.onCert).toHaveBeenCalledWith(ControlAgent.extractCerts(certs));
+  });
+
+  test('should handle configuration message with unsupported verb', async () => {
+    const certs = mtlsCertsDto();
+    const certsMsg = controlAgent.build.CONFIGURATION.NOTIFY(certs as any);
+    const modified = certsMsg.replace('NOTIFY', 'UNSUPPORTED');
+    const expected = { msg: deserialise(modified) };
+    const sendSpy = jest.spyOn(controlAgent, 'send');
+    mockWsServer.emit('message', modified);
+    await wait();
+    expect(logger.debug).toHaveBeenCalledWith('testControlAgent received ', expected); 
+    expect(sendSpy).toHaveBeenCalledWith(controlAgent.build.ERROR.NOTIFY.UNSUPPORTED_VERB(expected.msg.id));
+  })
+
+  test('should handle incoming peerJWS message', async () => {
+    const peerJWSCerts: ICAPeerJWSCert[] = peerJWSCertsDto();
+    const peerJWSMsg = controlAgent.build.PEER_JWS.NOTIFY(peerJWSCerts);
+    const expected = { msg: deserialise(peerJWSMsg) };
+    mockWsServer.emit('message', peerJWSMsg);
+    await wait();
+    expect(logger.debug).toHaveBeenCalledWith('testControlAgent received ', expected); 
+    expect(callbacks.onPeerJWS).toHaveBeenCalledWith(peerJWSCerts);
+  });
+
+  test('should handle peerJWS message with unsupported verb', async () => {
+    const peerJWSCerts: ICAPeerJWSCert[] = peerJWSCertsDto();
+    const peerJWSMsg = controlAgent.build.PEER_JWS.NOTIFY(peerJWSCerts);
+    const modified = peerJWSMsg.replace('NOTIFY', 'UNSUPPORTED');
+    const expected = { msg: deserialise(modified) };
+    const sendSpy = jest.spyOn(controlAgent, 'send');
+    mockWsServer.emit('message', modified);
+    await wait();
+    expect(logger.debug).toHaveBeenCalledWith('testControlAgent received ', expected); 
+    expect(sendSpy).toHaveBeenCalledWith(controlAgent.build.ERROR.NOTIFY.UNSUPPORTED_VERB(expected.msg.id));
+  })
+
+  test('should handle incoming error message', async () => {
+    const errorMsg = stringify({ msg: 'ERROR', data: 'test error', id: 'testId' });
+    const expected = { msg: deserialise(errorMsg) };
+    mockWsServer.emit('message', errorMsg);
+    await wait();
+    expect(logger.warn).toHaveBeenCalledWith('testControlAgent received error message', expected); 
+  });
+
+  test('should handle unsupported message', async () => {
+    const errorMsg = stringify({ msg: 'ERROR', data: 'test error', id: 'testId' });
+    const modified = errorMsg.replace('ERROR', 'UNSUPPORTED');
+    const expected = { msg: deserialise(modified) };
+    const sendSpy = jest.spyOn(controlAgent, 'send');
+    mockWsServer.emit('message', modified);
+    await wait();
+    expect(sendSpy).toHaveBeenCalledWith(controlAgent.build.ERROR.NOTIFY.UNSUPPORTED_MESSAGE(expected.msg.id));
+  })
+});

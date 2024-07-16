@@ -36,6 +36,7 @@ import {
   WsPayload,
   isWsPayload,
   isCertsPayload,
+  ICAPeerJWSCert
 } from './types';
 
 /**************************************************************************
@@ -55,6 +56,8 @@ export class ControlAgent implements IControlAgent {
   private _port: number;
   private _callbackFns: ICACallbacks | null = null;
   private _timeout: number;
+  private _reconnectInterval: number;
+  private _shouldReconnect: boolean;
 
   constructor(params: ICAParams) {
     this._id = params.id || 'ControlAgent';
@@ -62,6 +65,8 @@ export class ControlAgent implements IControlAgent {
     this._port = params.port;
     this._logger = params.logger;
     this._timeout = params.timeout;
+    this._shouldReconnect = true;
+    this._reconnectInterval = params.reconnectInterval;
     this.receive = this.receive.bind(this);
   }
 
@@ -94,7 +99,21 @@ export class ControlAgent implements IControlAgent {
         this._logger.info(`${this.id} websocket connected`, { url, protocol });
         resolve();
       });
-      this._ws.on('error', reject);
+
+      // Reconnect on close
+      this._ws.on('close', () => {
+        this._logger.warn(`${this.id} websocket disconnected`, { url, protocol });
+        if (this._shouldReconnect) {
+          this._logger.info(`${this.id} reconnecting in ${this._reconnectInterval}ms...`);
+          setTimeout(() => this.open(), this._reconnectInterval);
+        }
+      });
+
+      this._ws.on('error', (error) => {
+        this._logger.error(`${this.id} websocket error`, { url, protocol, error });
+        this._ws?.close();
+      });
+
       this._ws.on('message', this._handle.bind(this));
     });
   }
@@ -103,26 +122,29 @@ export class ControlAgent implements IControlAgent {
     return new Promise((resolve, reject) => {
       this._logger.info(`${this.id} shutting down...`);
 
-      this._checkSocketState();
-
       this._ws?.on('close', resolve);
       this._ws?.on('error', reject);
 
+      this._shouldReconnect = false;
       this._ws?.close();
     });
   }
 
   send(msg: string | GenericObject) {
-    this._checkSocketState();
+    try {
+      this._checkSocketState();
 
-    const data = typeof msg === 'string' ? msg : serialise(msg);
-    this._logger.debug(`${this.id} sending message`, { data });
+      const data = typeof msg === 'string' ? msg : this._serialise(msg);
+      this._logger.debug(`${this.id} sending message`, { data });
 
-    this._ws?.send(data);
+      this._ws?.send(data);
+    } catch (err) {
+      this._logger.error(`${this.id} failed to send message`, { err });
+    }
   }
 
   // Receive a single message
-  receive(): Promise<WsPayload> {
+  receive(validate = true): Promise<WsPayload> {
     return new Promise((resolve, reject) => {
       this._checkSocketState();
 
@@ -131,14 +153,18 @@ export class ControlAgent implements IControlAgent {
       }, this._timeout);
 
       this._ws?.once('message', (data) => {
-        const msg = deserialise(data);
+        const msg = this._deserialise(data);
         this._logger.verbose('Received', { msg });
-        const isValid = isWsPayload(msg);
-        if (!isValid) {
-          reject(new TypeError('Invalid WS response format'));
-        } else {
-          resolve(msg);
+
+        if (validate) {
+          const isValid = isWsPayload(msg);
+          if (!isValid) {
+            reject(new TypeError('Invalid WS response format'));
+          }
         }
+
+        resolve(msg);
+
         clearTimeout(timer);
       });
     });
@@ -156,28 +182,46 @@ export class ControlAgent implements IControlAgent {
     return ControlAgent.extractCerts(res.data);
   }
 
+  triggerFetchPeerJws(): void {
+    this.send(build.PEER_JWS.READ());
+  }
+
   static extractCerts(data: IMCMCertData): ICACerts {
     // current implementation is for the initial certs load
     return data.outbound.tls.creds;
     // todo: think, if it's make sense to add isCertsPayload here
   }
 
-  private _checkSocketState() {
+  sendPeerJWS(peerJWS: ICAPeerJWSCert[]) {
+    this.send(build.PEER_JWS.NOTIFY(peerJWS));
+  }
+
+  private _checkSocketState() {    
     if (!this._ws || this._ws.readyState !== WebSocket.OPEN) {
       throw new Error(`${this.id} WebSocket is not open`);
     }
   }
 
+  // wrapping the serialise and deserialise functions 
+  // to make them easier to mock in tests
+  private _serialise(msg: GenericObject, ...args: any[]) {
+    return serialise(msg, ...args);
+  }
+
+  private _deserialise(msg: string | ws.RawData) {
+    return deserialise(msg);
+  }
+
   private _handle(data: ws.RawData | string) {
     let msg;
     try {
-      msg = deserialise(data);
+      msg = this._deserialise(data);
       this._logger.debug(`${this.id} received `, { msg });
     } catch (err) {
       this._logger.error(`${this.id} couldn't parse received message`, { data });
       this.send(build.ERROR.NOTIFY.JSON_PARSE_ERROR());
+      return;
     }
-    this._logger.debug(`${this.id} handling received message`, { msg });
     switch (msg.msg) {
       case MESSAGE.CONFIGURATION:
         switch (msg.verb) {
@@ -193,6 +237,20 @@ export class ControlAgent implements IControlAgent {
             this.send(build.ERROR.NOTIFY.UNSUPPORTED_VERB(msg.id));
             break;
         }
+        break;
+      case MESSAGE.PEER_JWS:
+        switch (msg.verb) {
+          case VERB.NOTIFY: {
+            this._callbackFns?.onPeerJWS(msg.data);
+            break;
+          }
+          default:
+            this.send(build.ERROR.NOTIFY.UNSUPPORTED_VERB(msg.id));
+            break;
+        }
+        break;
+      case MESSAGE.ERROR:
+        this._logger.warn(`${this.id} received error message`, { msg });
         break;
       default:
         this.send(build.ERROR.NOTIFY.UNSUPPORTED_MESSAGE(msg.id));

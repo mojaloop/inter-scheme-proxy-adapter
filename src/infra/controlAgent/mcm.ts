@@ -3,7 +3,7 @@ import * as jsonPatch from 'fast-json-patch';
 import stringify from 'fast-safe-stringify';
 import { generateSlug } from 'random-word-slugs';
 import { ERROR, MESSAGE, VERB } from './constants';
-import { GenericObject } from './types';
+import { GenericObject, ICAPeerJWSCert } from './types';
 
 /**************************************************************************
  * MCM protocol support functions
@@ -28,13 +28,14 @@ export const deserialise = (msg: string | ws.RawData) => {
   });
 };
 
-export const buildMsg = (verb: VERB, msg: MESSAGE, data: jsonPatch.Operation[] | GenericObject | string, id = generateSlug(4)) =>
+export const buildMsg = (verb: VERB, msg: MESSAGE, data: jsonPatch.Operation[] | GenericObject | string | ICAPeerJWSCert[], id = generateSlug(4)) =>
   serialise({
     verb,
     msg,
     data,
     id,
   });
+
 
 export const buildPatchConfiguration = (oldConf: GenericObject, newConf: GenericObject, id: string) => {
   const patches = jsonPatch.compare(oldConf, newConf);
@@ -52,6 +53,10 @@ export const build = {
     PATCH: buildPatchConfiguration,
     READ: (id?: string) => buildMsg(VERB.READ, MESSAGE.CONFIGURATION, {}, id),
     NOTIFY: (config: GenericObject, id?: string) => buildMsg(VERB.NOTIFY, MESSAGE.CONFIGURATION, config, id),
+  },
+  PEER_JWS: {
+    READ: (id?: string) => buildMsg(VERB.READ, MESSAGE.PEER_JWS, {}, id),
+    NOTIFY: (peerJWS: ICAPeerJWSCert[], id?: string) => buildMsg(VERB.NOTIFY, MESSAGE.PEER_JWS, peerJWS, id),
   },
   ERROR: {
     NOTIFY: {

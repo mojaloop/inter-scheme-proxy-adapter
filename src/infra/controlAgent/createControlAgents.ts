@@ -23,6 +23,7 @@ export const createControlAgents = (deps: createControlAgentsDeps): controlAgent
     port: controlAgentAConfig.wsPort,
     timeout: controlAgentAConfig.timeout,
     logger: deps.logger.child(idA),
+    reconnectInterval: controlAgentAConfig.reconnectInterval,
   });
 
   const idB = 'ControlAgentB';
@@ -32,6 +33,7 @@ export const createControlAgents = (deps: createControlAgentsDeps): controlAgent
     port: controlAgentBConfig.wsPort,
     timeout: controlAgentBConfig.timeout,
     logger: deps.logger.child(idB),
+    reconnectInterval: controlAgentBConfig.reconnectInterval,
   });
 
   return Object.freeze({
