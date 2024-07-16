@@ -32,6 +32,7 @@ import { loggerFactory } from '#src/utils';
 import * as fixtures from '#test/fixtures';
 
 const PROXY_HOST = 'http://localhost';
+
 const { serverAConfig, hubAConfig, PROXY_ID } = config.get();
 
 const logger = loggerFactory('ISPA Tests');

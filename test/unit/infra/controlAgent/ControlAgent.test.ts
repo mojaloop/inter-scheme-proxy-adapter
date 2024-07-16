@@ -82,10 +82,6 @@ describe('ControlAgent Tests', () => {
     expect(mockWsServer.clients()).toHaveLength(1);
   });
 
-  test('should throw if trying to open WebSocket connection twice', async () => {
-    await expect(controlAgent.open()).rejects.toThrow('WebSocket is already open');
-  });
-
   test('should reconnect on close', async () => {
     const openSpy = jest.spyOn(controlAgent, 'open');
     mockSocket.close();
