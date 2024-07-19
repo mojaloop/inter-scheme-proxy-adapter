@@ -14,18 +14,12 @@ import * as fixtures from '#test/fixtures';
 const mockAxios = new MockAdapter(axios);
 
 describe('InterSchemeProxyAdapter Tests -->', () => {
+  const oidcToken = fixtures.oidcTokenDto();
+
   let proxyAdapter: InterSchemeProxyAdapter;
 
   beforeEach(async () => {
     mockAxios.reset();
-  });
-
-  afterEach(async () => {
-    await proxyAdapter?.stop();
-  });
-
-  test('should proxy incoming request with proper headers', async () => {
-    const oidcToken = fixtures.oidcTokenDto();
     mockAxios.onPost(`/${config.get('authConfigA').tokenEndpoint}`).reply(200, oidcToken);
     mockAxios.onPost(`/${config.get('authConfigB').tokenEndpoint}`).reply(200, oidcToken);
 
@@ -36,10 +30,17 @@ describe('InterSchemeProxyAdapter Tests -->', () => {
     deps.controlAgentB['open'] = async () => {};
     deps.controlAgentA['loadCerts'] = async () => ({ ...fixtures.certsJson.wrong });
     deps.controlAgentB['loadCerts'] = async () => ({ ...fixtures.certsJson.wrong });
-    deps.controlAgentA['triggerFetchPeerJws'] = async () => {};
-    deps.controlAgentB['triggerFetchPeerJws'] = async () => {};
+    deps.controlAgentA['triggerFetchPeerJws'] = () => {};
+    deps.controlAgentB['triggerFetchPeerJws'] = () => {};
     // todo: find a better way to mock MenAPI (ws) functionality
+  });
 
+  afterEach(async () => {
+    await proxyAdapter?.stop();
+  });
+
+  test('should proxy incoming request with proper headers', async () => {
+    const deps = proxyAdapter['deps'];
     await proxyAdapter.start();
     // todo: think, if we need to avoid actual port listening in tests
 
@@ -66,5 +67,25 @@ describe('InterSchemeProxyAdapter Tests -->', () => {
     expect(response.statusCode).toBe(200);
     expect(response.result).toEqual(mockHubResponse);
     await proxyAdapter.stop();
+  });
+
+  test('should not set any default headers', async () => {
+    const headers = {};
+    await proxyAdapter.start();
+
+    let acceptHeader;
+    mockAxios.onAny().reply(async (reqOptions: axios.AxiosRequestConfig) => {
+      acceptHeader = reqOptions.headers?.Accept || reqOptions.headers?.accept;
+      return [200, null];
+    });
+
+    const { httpServerA } = proxyAdapter['deps'];
+    await httpServerA.hapiServer.inject({
+      url: '/',
+      method: 'GET',
+      headers,
+    });
+
+    expect(acceptHeader).toBeUndefined();
   });
 });

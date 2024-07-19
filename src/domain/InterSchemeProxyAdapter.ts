@@ -122,8 +122,8 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
     this.emitStateEventServerB({ certs: certsB });
   }
 
-  // @note: This is a fail safe measure to ensure that the peer JWS certs 
-  // are optimistically retrieved, just in case the websocket event is missed. 
+  // @note: This is a fail safe measure to ensure that the peer JWS certs
+  // are optimistically retrieved, just in case the websocket event is missed.
   private startPeerJwsRefreshLoop() {
     this.peerJwsRefreshLoopTimer = setInterval(() => {
       this.deps.controlAgentA.triggerFetchPeerJws();
