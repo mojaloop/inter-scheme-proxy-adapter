@@ -27,7 +27,7 @@ import { INTERNAL_EVENTS } from '../constants';
 import { IProxyAdapter, ISPADeps, IncomingRequestDetails, ServerState, ServerStateEvent } from './types';
 import { ICACerts, ICAPeerJWSCert } from '../infra';
 import config from '../config';
-const { checkPeerJwsInterval } = config.get();
+const { checkPeerJwsInterval, pm4mlEnabled } = config.get();
 
 export class InterSchemeProxyAdapter implements IProxyAdapter {
   private peerJwsRefreshLoopTimer: NodeJS.Timeout | undefined;
@@ -50,11 +50,14 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
   }
 
   async start(): Promise<void> {
-    await this.getAccessTokens();
-    await this.initControlAgents();
-    await this.loadInitialCerts();
-    this.startPeerJwsRefreshLoop();
-    this.deps.logger.debug('certs and token are ready, starting httpServers...');
+    if (pm4mlEnabled) {
+      await this.getAccessTokens();
+      await this.initControlAgents();
+      await this.loadInitialCerts();
+      this.startPeerJwsRefreshLoop();
+      this.deps.logger.debug('certs and token are ready.');
+    }
+    this.deps.logger.debug('Starting httpServers...');
 
     const [isAStarted, isBStarted] = await Promise.all([
       this.deps.httpServerA.start(this.handleProxyRequest),

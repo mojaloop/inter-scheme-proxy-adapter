@@ -26,7 +26,7 @@
 import https from 'node:https';
 import axios from 'axios'; // todo: add wrapper
 import config from '#src/config';
-import { PROXY_HEADER, AUTH_HEADER, SCHEME } from '#src/constants';
+import { PROXY_HEADER, AUTH_HEADER, SCHEME_HTTPS } from '#src/constants';
 import { loggerFactory } from '#src/utils';
 
 import * as fixtures from '#test/fixtures';
@@ -81,7 +81,7 @@ describe('ISPA Integration Tests -->', () => {
   });
 
   describe('mTLS hub (peer-endpoint) Tests -->', () => {
-    const url = `${SCHEME}://${hubAConfig.baseUrl}/int-test`;
+    const url = `${SCHEME_HTTPS}://${hubAConfig.baseUrl}/int-test`;
     logger.info('mTLS URL', { url });
     // prettier-ignore
     const sendGetRequest = (options: axios.AxiosRequestConfig) => sendRequest({

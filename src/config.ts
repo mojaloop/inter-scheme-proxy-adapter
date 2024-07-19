@@ -177,7 +177,7 @@ const config = convict<AppConfig>({
   pm4mlEnabled: {
     doc: 'Defines if pm4ml is enabled',
     format: Boolean,
-    default: false,
+    default: true,
     env: 'PM4ML_ENABLED',
   },
 

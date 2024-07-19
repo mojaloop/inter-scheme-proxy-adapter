@@ -1,8 +1,8 @@
 import config from '../config';
-import { PROXY_HEADER, AUTH_HEADER, SCHEME } from '../constants';
+import { PROXY_HEADER, AUTH_HEADER, SCHEME_HTTP, SCHEME_HTTPS } from '../constants';
 import { ISPAServiceInterface, ISPAServiceDeps, IncomingRequestDetails, ServerState, ILogger } from './types';
 
-const { PROXY_ID, incomingHeadersRemoval } = config.get(); // or pass it as a parameter in ctor?
+const { PROXY_ID, incomingHeadersRemoval, pm4mlEnabled } = config.get(); // or pass it as a parameter in ctor?
 
 export class ISPAService implements ISPAServiceInterface {
   private readonly log: ILogger;
@@ -16,7 +16,7 @@ export class ISPAService implements ISPAServiceInterface {
     const { baseUrl } = reqDetails.proxyDetails;
 
     const proxyTarget = {
-      url: `${SCHEME}://${baseUrl}${pathname}${search}`,
+      url: `${pm4mlEnabled ? SCHEME_HTTPS : SCHEME_HTTP}://${baseUrl}${pathname}${search}`,
       headers: {
         ...this.cleanupIncomingHeaders(reqDetails.headers),
         [PROXY_HEADER]: PROXY_ID,
