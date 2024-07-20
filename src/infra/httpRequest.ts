@@ -2,6 +2,8 @@ import axios from 'axios';
 import { HttpRequestOptions, ProxyHandlerResponse } from '../domain/types';
 import { loggerFactory } from '../utils';
 
+axios.defaults.headers.common = {}; // to avoid setting "accept"/"content-type" headers by default
+
 const logger = loggerFactory('httpRequest');
 
 // rename to proxyRequest

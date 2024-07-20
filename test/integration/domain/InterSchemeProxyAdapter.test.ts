@@ -43,13 +43,13 @@ describe('InterSchemeProxyAdapter', () => {
     // Arrange
     await controlAgentA.init({
       onCert: (_certs: ICACerts) => jest.fn(),
-      onPeerJWS: (_peerJWS: ICAPeerJWSCert[]) => jest.fn()
-    })
+      onPeerJWS: (_peerJWS: ICAPeerJWSCert[]) => jest.fn(),
+    });
 
     await controlAgentB.init({
       onCert: (_certs: ICACerts) => jest.fn(),
-      onPeerJWS: (_peerJWS: ICAPeerJWSCert[]) => jest.fn()
-    })
+      onPeerJWS: (_peerJWS: ICAPeerJWSCert[]) => jest.fn(),
+    });
 
     // Act
     // Send a test message to mock server to publish peer JWS keys
@@ -61,30 +61,30 @@ describe('InterSchemeProxyAdapter', () => {
         {
           createdAt: Date.now(),
           dfspId: 'testdfsp',
-          publicKey: 'test peer JWS key'
-        }
-      ]
-    }
+          publicKey: 'test peer JWS key',
+        },
+      ],
+    };
     const testMessage = {
       id: randomUUID(),
       msg: 'TEST',
       verb: 'PUBLISH',
-      data: peerJWSMessage
-    }
-    controlAgentA.send(serialise(testMessage))
-    await wait(200)
+      data: peerJWSMessage,
+    };
+    controlAgentA.send(serialise(testMessage));
+    await wait(200);
 
     // Assert
     // Read messges received by Mgt API B
     const readMessage = {
       id: randomUUID(),
       msg: 'TEST',
-      verb: 'GET_MESSAGES'
-    }
-    controlAgentB.send(serialise(readMessage))
-    const receivedMessages: any = await controlAgentB.receive(false)
-    const parsedMessages = receivedMessages.map((msg: any) => deserialise(msg))
-    expect(parsedMessages[1].msg).toBe('PEER_JWS')
-    expect(parsedMessages[1].data[0]).toStrictEqual(peerJWSMessage.data[0])
+      verb: 'GET_MESSAGES',
+    };
+    controlAgentB.send(serialise(readMessage));
+    const receivedMessages: any = await controlAgentB.receive(false);
+    const parsedMessages = receivedMessages.map((msg: any) => deserialise(msg));
+    expect(parsedMessages[1].msg).toBe('PEER_JWS');
+    expect(parsedMessages[1].data[0]).toStrictEqual(peerJWSMessage.data[0]);
   });
 });

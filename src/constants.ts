@@ -2,7 +2,7 @@ import { name, version } from '../package.json';
 
 export const SERVICE_NAME = `${name}@${version}`;
 
-export const PROXY_HEADER = 'FSPIOP-Proxy';
+export const PROXY_HEADER = 'fspiop-proxy';
 export const AUTH_HEADER = 'Authorization';
 
 export const SCHEME_HTTP = 'http';
