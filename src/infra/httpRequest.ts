@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { HttpRequestOptions, ProxyHandlerResponse } from '../domain/types';
 import { loggerFactory } from '../utils';
+import { DEFAULT_ERROR_STATUS_CODE } from '../constants';
 
 axios.defaults.headers.common = {}; // to avoid setting "accept"/"content-type" headers by default
 
@@ -35,12 +36,11 @@ function prepareErrorResponse(err: unknown): ProxyHandlerResponse {
       const { data, status, headers } = axiosError.response;
       return { data, status, headers };
     } else {
-      const { message, status = 502 } = axiosError;
+      const { message, status = DEFAULT_ERROR_STATUS_CODE } = axiosError;
       return { data: message, status };
     }
   }
   const data = err instanceof Error ? err.message : 'Unexpected proxy error';
-  return { data, status: 502 };
-  // todo: - think, how to handle error if no headers in error?
-  //       - do we need retries?
+  return { data, status: DEFAULT_ERROR_STATUS_CODE };
+  // todo: think, how to handle error if no headers in error?
 }

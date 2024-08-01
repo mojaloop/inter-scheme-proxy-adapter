@@ -8,6 +8,8 @@ export const AUTH_HEADER = 'Authorization';
 export const SCHEME_HTTP = 'http';
 export const SCHEME_HTTPS = 'https';
 
+export const DEFAULT_ERROR_STATUS_CODE = 503;
+
 export const INTERNAL_EVENTS = {
   serverState: 'serverState',
 } as const;
