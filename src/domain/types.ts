@@ -1,14 +1,10 @@
 import { URL } from 'node:url';
 import { ServerInfo, Server } from '@hapi/hapi';
 import { INTERNAL_EVENTS } from '../constants';
-import { ProxyTlsAgent, IControlAgent, TlsOptions } from '../infra/types';
+import { ProxyTlsAgent, IControlAgent, TlsOptions, ICAPeerJWSCert } from '../infra/types';
 import { LogMethods, LogContext } from '../utils/types';
 
 type Headers = Record<string, string>; // check, why it doesn't work with Json
-
-export type ProxyDetails = {
-  baseUrl: string;
-};
 
 export type ProxyTarget = {
   url: string;
@@ -20,7 +16,7 @@ export type IncomingRequestDetails = {
   method: string;
   headers: Headers;
   payload?: unknown;
-  proxyDetails: ProxyDetails;
+  peerEndpoint: string; // todo: shouldn't be a part of IncomingRequestDetails
 };
 
 export type ProxyHandlerResponse = {
@@ -38,6 +34,7 @@ export interface IProxyAdapter {
   start: () => Promise<void>;
   stop: () => Promise<void>;
   handleProxyRequest: ProxyHandlerFn;
+  getDeps: () => ISPADeps; // for testing
 }
 
 export interface ISPAServiceInterface {
@@ -46,12 +43,8 @@ export interface ISPAServiceInterface {
 
 export type ISPADeps = {
   ispaService: ISPAServiceInterface;
-  authClientA: IAuthClient; // todo: think, if it should be part of httpServers
-  authClientB: IAuthClient;
-  httpServerA: IHttpServer;
-  httpServerB: IHttpServer;
-  controlAgentA: IControlAgent;
-  controlAgentB: IControlAgent;
+  peerA: TPeerServer;
+  peerB: TPeerServer;
   httpRequest: HttpRequest;
   logger: ILogger;
 };
@@ -61,13 +54,30 @@ export type ISPAServiceDeps = {
   // maybe, move httpRequest (axios instance) here?
 };
 
+export type PeerLabel = 'A' | 'B';
+
+export type TPeerServer = {
+  start: (proxyHandlerFn: ProxyHandlerFn) => Promise<boolean>;
+  stop: () => Promise<boolean>;
+  on: (eventName: typeof INTERNAL_EVENTS.peerJWS, listener: (peerJWSEvent: PeerJWSEvent) => void) => void;
+  propagatePeerJWSEvent: (peerJWSEvent: PeerJWSEvent) => void;
+  // state: ServerState; // PeerState?
+};
+
+export type TPeerServerDeps = {
+  httpServer: IHttpServer;
+  authClient: IAuthClient;
+  controlAgent: IControlAgent;
+  logger: ILogger;
+};
+
 export type HttpRequestOptions = {
   httpsAgent: ProxyTlsAgent;
   url: string;
   method: string;
   headers: Headers;
   data?: unknown; // rename to payload?
-  // todo: add logger here
+  // add logger here?
 };
 
 export type HttpRequest = (options: HttpRequestOptions) => Promise<ProxyHandlerResponse>;
@@ -87,6 +97,10 @@ export type ServerStateEvent = Partial<{
 }>;
 // todo: define that, at least, one of the fields should be present
 
+export type PeerJWSEvent = {
+  peerJWS: ICAPeerJWSCert[];
+};
+
 export interface IHttpServer {
   start: (proxyHandlerFn: ProxyHandlerFn) => Promise<boolean>;
   stop: () => Promise<boolean>;
@@ -97,7 +111,7 @@ export interface IHttpServer {
 }
 
 export interface IAuthClient {
-  startAccessTokenUpdates: (cb: (token: string) => void) => void;
+  startAccessTokenUpdates: (cb: (token: string) => void) => Promise<void>;
   stopUpdates: () => void;
   getOidcToken: () => Promise<OIDCToken>;
 }

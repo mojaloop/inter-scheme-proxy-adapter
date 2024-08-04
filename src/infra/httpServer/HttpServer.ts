@@ -26,13 +26,13 @@ export class HttpServer extends EventEmitter implements IHttpServer {
     await this.registerProxy(proxyHandler);
     this.deps.logger.debug('plugins and routes are registered');
     await this.server.start();
-    logger.verbose('http-server is listening', this.server.info);
+    logger.verbose('httpServer is started', this.server.info);
     return true;
   }
 
   async stop(): Promise<boolean> {
     await this.server.stop();
-    this.deps.logger.verbose('http-server is stopped');
+    this.deps.logger.verbose('httpServer is stopped');
     return true;
   }
 
@@ -72,10 +72,10 @@ export class HttpServer extends EventEmitter implements IHttpServer {
         method: '*',
         path: '/{any*}',
         handler: async (request: Hapi.Request, h: Hapi.ResponseToolkit) => {
-          const { proxyDetails } = this.deps;
+          const { peerEndpoint } = this.deps;
           const { url, method, headers, payload } = request;
           const reqDetails = {
-            proxyDetails, // todo: move it to serverState
+            peerEndpoint, // todo: move out from reqDetails
             url,
             method,
             headers,

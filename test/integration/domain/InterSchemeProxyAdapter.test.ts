@@ -1,15 +1,24 @@
 jest.unmock('ws');
 
-import { randomUUID } from 'crypto';
-import { ICACerts, ICAPeerJWSCert, deserialise, serialise } from '../../../src/infra';
-import { createControlAgents } from '../../../src/infra';
-import { loggerFactory } from '../../../src/utils';
+import { randomUUID } from 'node:crypto';
+import config from '#src/config';
+import { createControlAgent, ICACerts, ICAPeerJWSCert, deserialise, serialise } from '#src/infra';
+import { loggerFactory } from '#src/utils';
 
 const wait = (ms: number = 10) => new Promise((resolve) => setTimeout(resolve, ms));
 
-describe('InterSchemeProxyAdapter', () => {
-  const logger = loggerFactory(`InterSchemeProxyAdapterTest`);
-  const { controlAgentA, controlAgentB } = createControlAgents({ logger });
+describe('ControlAgent Integration Tests -->', () => {
+  const logger = loggerFactory(`CAIT`);
+  const controlAgentA = createControlAgent({
+    peer: 'A',
+    controlAgentConfig: config.get('peerAConfig.controlAgentConfig'),
+    logger,
+  });
+  const controlAgentB = createControlAgent({
+    peer: 'B',
+    controlAgentConfig: config.get('peerBConfig.controlAgentConfig'),
+    logger,
+  });
 
   afterAll(async () => {
     return Promise.all([controlAgentA.close(), controlAgentB.close()]);

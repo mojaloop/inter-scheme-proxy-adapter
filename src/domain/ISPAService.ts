@@ -12,11 +12,10 @@ export class ISPAService implements ISPAServiceInterface {
   }
 
   getProxyTarget(reqDetails: IncomingRequestDetails, state: ServerState) {
-    const { pathname, search } = reqDetails.url;
-    const { baseUrl } = reqDetails.proxyDetails;
+    const { url, peerEndpoint } = reqDetails; // move peerEndpoint to ServerState?
 
     const proxyTarget = {
-      url: `${pm4mlEnabled ? SCHEME_HTTPS : SCHEME_HTTP}://${baseUrl}${pathname}${search}`,
+      url: `${pm4mlEnabled ? SCHEME_HTTPS : SCHEME_HTTP}://${peerEndpoint}${url.pathname}${url.search}`,
       headers: {
         ...this.cleanupIncomingHeaders(reqDetails.headers),
         [PROXY_HEADER]: PROXY_ID,
