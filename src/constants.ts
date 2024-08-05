@@ -12,4 +12,5 @@ export const DEFAULT_ERROR_STATUS_CODE = 503;
 
 export const INTERNAL_EVENTS = {
   serverState: 'serverState',
+  peerJWS: 'peerJWS',
 } as const;

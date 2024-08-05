@@ -63,8 +63,6 @@ dist/
 # next.js build output
 .next
 
-# typedocs directory
-docs/
 
 # editor directory
 .vscode/**

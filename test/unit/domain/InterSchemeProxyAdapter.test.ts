@@ -4,35 +4,44 @@ jest.setTimeout(10_000);
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 
-import { InterSchemeProxyAdapter } from '#src/domain';
-import { createProxyAdapter } from '#src/createProxyAdapter';
+import { InterSchemeProxyAdapter, PeerServer } from '#src/domain';
+import { createProxyAdapter, createPeerServer } from '#src/createProxyAdapter';
 import { AUTH_HEADER, PROXY_HEADER } from '#src/constants';
 import config from '#src/config';
-
 import * as fixtures from '#test/fixtures';
 
 const mockAxios = new MockAdapter(axios);
 
-describe('InterSchemeProxyAdapter Tests -->', () => {
-  const oidcToken = fixtures.oidcTokenDto();
+const { peerAConfig, peerBConfig } = config.get();
 
+const mockControlAgent = (peer: PeerServer) => {
+  const deps = peer['deps'];
+  expect(deps).toBeTruthy();
+  deps.controlAgent['open'] = async () => {};
+  deps.controlAgent['close'] = async () => {};
+  deps.controlAgent['loadCerts'] = async () => ({ ...fixtures.certsJson.wrong });
+  deps.controlAgent['triggerFetchPeerJws'] = () => {};
+  // todo: find a better way to mock MenAPI (ws) functionality
+};
+
+const oidcToken = fixtures.oidcTokenDto();
+
+describe('InterSchemeProxyAdapter Tests -->', () => {
+  let peerA: PeerServer;
+  let peerB: PeerServer;
   let proxyAdapter: InterSchemeProxyAdapter;
 
   beforeEach(async () => {
     mockAxios.reset();
-    mockAxios.onPost(`/${config.get('authConfigA').tokenEndpoint}`).reply(200, oidcToken);
-    mockAxios.onPost(`/${config.get('authConfigB').tokenEndpoint}`).reply(200, oidcToken);
+    mockAxios.onPost(`/${peerAConfig.authConfig.tokenEndpoint}`).reply(200, oidcToken);
+    mockAxios.onPost(`/${peerBConfig.authConfig.tokenEndpoint}`).reply(200, oidcToken);
 
-    proxyAdapter = createProxyAdapter(config);
-    const deps = proxyAdapter['deps'];
-    expect(deps).toBeTruthy();
-    deps.controlAgentA['open'] = async () => {};
-    deps.controlAgentB['open'] = async () => {};
-    deps.controlAgentA['loadCerts'] = async () => ({ ...fixtures.certsJson.wrong });
-    deps.controlAgentB['loadCerts'] = async () => ({ ...fixtures.certsJson.wrong });
-    deps.controlAgentA['triggerFetchPeerJws'] = () => {};
-    deps.controlAgentB['triggerFetchPeerJws'] = () => {};
-    // todo: find a better way to mock MenAPI (ws) functionality
+    peerA = createPeerServer(peerAConfig);
+    peerB = createPeerServer(peerBConfig);
+    proxyAdapter = createProxyAdapter(config, { peerA, peerB });
+
+    mockControlAgent(peerA);
+    mockControlAgent(peerB);
   });
 
   afterEach(async () => {
@@ -40,7 +49,7 @@ describe('InterSchemeProxyAdapter Tests -->', () => {
   });
 
   test('should proxy incoming request with proper headers', async () => {
-    const deps = proxyAdapter['deps'];
+    const deps = peerA['deps'];
     await proxyAdapter.start();
     // todo: think, if we need to avoid actual port listening in tests
 
@@ -59,14 +68,13 @@ describe('InterSchemeProxyAdapter Tests -->', () => {
       return [200, mockHubResponse];
     });
 
-    const response = await deps.httpServerA.hapiServer.inject({
+    const response = await deps.httpServer.hapiServer.inject({
       url: '/test-route',
       method: 'GET',
       headers,
     });
     expect(response.statusCode).toBe(200);
     expect(response.result).toEqual(mockHubResponse);
-    await proxyAdapter.stop();
   });
 
   test('should not set any default headers', async () => {
@@ -79,8 +87,8 @@ describe('InterSchemeProxyAdapter Tests -->', () => {
       return [200, null];
     });
 
-    const { httpServerA } = proxyAdapter['deps'];
-    await httpServerA.hapiServer.inject({
+    const { httpServer } = peerA['deps'];
+    await httpServer.hapiServer.inject({
       url: '/',
       method: 'GET',
       headers,

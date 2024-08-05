@@ -12,7 +12,7 @@ import {
   WsPayload,
   isWsPayload,
   isCertsPayload,
-  ICAPeerJWSCert
+  ICAPeerJWSCert,
 } from './types';
 
 /**************************************************************************
@@ -130,7 +130,7 @@ export class ControlAgent implements IControlAgent {
 
       this._ws?.once('message', (data) => {
         const msg = this._deserialise(data);
-        this._logger.verbose('Received', { msg });
+        this._logger.verbose('WS message received once');
 
         if (validate) {
           const isValid = isWsPayload(msg);
@@ -172,13 +172,13 @@ export class ControlAgent implements IControlAgent {
     this.send(build.PEER_JWS.NOTIFY(peerJWS));
   }
 
-  private _checkSocketState() {    
+  private _checkSocketState() {
     if (!this._ws || this._ws.readyState !== WebSocket.OPEN) {
       throw new Error(`${this.id} WebSocket is not open`);
     }
   }
 
-  // wrapping the serialise and deserialise functions 
+  // wrapping the serialise and deserialise functions
   // to make them easier to mock in tests
   private _serialise(msg: GenericObject, ...args: any[]) {
     return serialise(msg, ...args);

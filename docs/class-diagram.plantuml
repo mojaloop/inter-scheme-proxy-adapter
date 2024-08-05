@@ -1,0 +1,100 @@
+@startuml
+interface IProxyAdapter {
+  +start()
+  +stop()
+}
+
+interface IPeerServer {
+  +handleProxyRequest()
+  +start()
+  +stop()
+  +propagatePeerJWSEvent()
+}
+
+interface IProxyService {
+  +sendProxyRequest(reqDetails, serverState)
+  +getProxyTarget()
+}
+
+interface IAuthClient {
+  +startAccessTokenUpdates()
+  +stopUpdates()
+  +getOidcToken()
+}
+
+interface IHttpServer {
+  info: ServerInfo
+  +start(proxyHandlerFn: ProxyHandlerFn)
+  +stop()
+  +emit(event: serverState, data: ServerStateEvent)
+}
+
+interface IControlAgent {
+  +id: string;
+  +init()
+  +open()
+  +close()
+  +send()
+  +receive()
+  +loadCerts()
+  +triggerFetchPeerJws()
+  +sendPeerJWS()
+}
+
+interface IHttpClient {
+  +sendRequest()
+}
+
+interface ILogger {}
+
+
+class PeerServer {
+  -deps
+  -peerJwsRefreshLoopTimer: NodeJS.Timeout
+}
+
+class ProxyService {
+  -cleanupIncomingHeaders()
+}
+
+class AuthClient {
+  -timer: NodeJS.Timeout
+}
+
+class HttpServer {
+  -state: { accessToken, httpsAgent }
+}
+
+class ControlAgent {
+  -ws: WebSocket
+}
+
+
+IProxyAdapter <|..ISPA
+
+ISPA o-- "2" PeerServer
+
+PeerServer *-- ProxyService
+PeerServer *-- AuthClient
+PeerServer *-- HttpServer
+PeerServer *-- ControlAgent
+PeerServer *-- Logger
+EventEmmiter <|-- PeerServer
+
+
+ProxyService *-- HttpClient
+
+axios <-- HttpClient
+
+IPeerServer <|..PeerServer
+ProxyService ..|> IProxyService
+AuthClient ..|> IAuthClient
+HttpServer ..|> IHttpServer
+ControlAgent ..|> IControlAgent
+HttpClient ..|> IHttpClient
+Logger ..|> ILogger
+
+
+EventEmmiter <|-- HttpServer
+
+@enduml

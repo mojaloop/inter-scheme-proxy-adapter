@@ -1,28 +1,36 @@
 import { Config } from 'convict';
-import { InterSchemeProxyAdapter, ISPAService } from './domain';
-import { AuthClient, createControlAgents, createHttpServers, httpRequest, AppConfig } from './infra';
+import { InterSchemeProxyAdapter, ISPADeps, PeerServer, ProxyService } from './domain';
 import { loggerFactory } from './utils';
+import { AuthClient, createHttpServer, createControlAgent, HttpClient, AppConfig, PeerServerConfig } from './infra';
 
-export const createProxyAdapter = (config: Config<AppConfig>) => {
-  const { PROXY_ID, authConfigA, authConfigB } = config.get();
-  const logger = loggerFactory(`ISPA-${PROXY_ID}`);
+export const createPeerServer = (peerConfig: PeerServerConfig) => {
+  const { peer, peerEndpoint, authConfig, controlAgentConfig, serverConfig } = peerConfig;
 
-  const { httpServerA, httpServerB } = createHttpServers({ logger });
-  const { controlAgentA, controlAgentB } = createControlAgents({ logger });
+  const logger = loggerFactory({ peer });
+  const httpClient = new HttpClient({ logger });
 
-  const authClientA = new AuthClient({ logger, authConfig: authConfigA });
-  const authClientB = new AuthClient({ logger, authConfig: authConfigB });
-  const ispaService = new ISPAService({ logger });
+  const proxyService = new ProxyService({ httpClient, logger });
+  const authClient = new AuthClient({ authConfig, logger });
+  const controlAgent = createControlAgent({ peer, controlAgentConfig, logger });
+  const httpServer = createHttpServer({ serverConfig, peerEndpoint, logger });
+
+  return new PeerServer({
+    proxyService,
+    authClient,
+    controlAgent,
+    httpServer,
+    logger,
+  });
+};
+
+export const createProxyAdapter = (config: Config<AppConfig>, deps: Partial<ISPADeps> = {}) => {
+  const logger = loggerFactory('ISPA'); // think how to deal with logger
+  const peerA = deps.peerA || createPeerServer(config.get('peerAConfig'));
+  const peerB = deps.peerB || createPeerServer(config.get('peerBConfig'));
 
   return new InterSchemeProxyAdapter({
-    ispaService,
-    authClientA,
-    authClientB,
-    controlAgentA,
-    controlAgentB,
-    httpServerA,
-    httpServerB,
-    httpRequest,
+    peerA,
+    peerB,
     logger,
   });
 };
