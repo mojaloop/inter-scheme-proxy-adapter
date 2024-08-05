@@ -5,6 +5,7 @@ on:
   pull_request:
     branches:
       - '*'
+      - feat/csi-415 # todo: remove this line before merging in main
     types:
       - opened
       - reopened
