@@ -10,6 +10,7 @@ import { loggingPlugin } from './plugins';
 export class HttpServer extends EventEmitter implements IHttpServer {
   private readonly server: Hapi.Server;
   private state: ServerState = {
+    peerEndpoint: '',
     accessToken: '',
     httpsAgent: null,
   };
@@ -18,6 +19,7 @@ export class HttpServer extends EventEmitter implements IHttpServer {
     super();
     this.server = this.createServer();
     this.initInternalEvents();
+    this.state.peerEndpoint = deps.peerEndpoint;
   }
 
   async start(proxyHandler: ProxyHandlerFn): Promise<boolean> {
@@ -73,10 +75,8 @@ export class HttpServer extends EventEmitter implements IHttpServer {
         method: '*',
         path: '/{any*}',
         handler: async (request: Hapi.Request, h: Hapi.ResponseToolkit) => {
-          const { peerEndpoint } = this.deps;
           const { url, method, headers, payload } = request;
           const reqDetails = {
-            peerEndpoint, // todo: move out from reqDetails
             url,
             method,
             headers,

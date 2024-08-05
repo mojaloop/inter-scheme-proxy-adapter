@@ -8,8 +8,8 @@ export class ProxyService implements IProxyService {
   constructor(private readonly deps: ProxyServiceDeps) {}
 
   sendProxyRequest(reqDetails: IncomingRequestDetails, state: ServerState) {
-    const { accessToken, httpsAgent } = state;
-    const proxyTarget = this.getProxyTarget(reqDetails, accessToken);
+    const proxyTarget = this.getProxyTarget(reqDetails, state);
+    const { httpsAgent } = state;
 
     return this.deps.httpClient.sendRequest({
       httpsAgent,
@@ -20,13 +20,14 @@ export class ProxyService implements IProxyService {
     });
   }
 
-  getProxyTarget(reqDetails: IncomingRequestDetails, accessToken: string) {
-    const { url, peerEndpoint } = reqDetails; // move peerEndpoint to ServerState?
+  getProxyTarget(reqDetails: IncomingRequestDetails, state: ServerState) {
+    const { url, headers } = reqDetails;
+    const { accessToken, peerEndpoint } = state;
 
     const proxyTarget = {
       url: `${pm4mlEnabled ? SCHEME_HTTPS : SCHEME_HTTP}://${peerEndpoint}${url.pathname}${url.search}`,
       headers: {
-        ...this.cleanupIncomingHeaders(reqDetails.headers),
+        ...this.cleanupIncomingHeaders(headers),
         [PROXY_HEADER]: PROXY_ID,
         [AUTH_HEADER]: `Bearer ${accessToken}`,
       },
