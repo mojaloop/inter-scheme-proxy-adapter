@@ -2,7 +2,7 @@ import { ILogger } from '../../../domain';
 
 export type ReqAppState = {
   context: {
-    id: string;
+    requestId: string;
     remoteAddress: string;
     path: string;
     method: string;

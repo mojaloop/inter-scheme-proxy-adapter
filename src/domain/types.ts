@@ -33,31 +33,30 @@ export type ProxyHandlerFn = (
 export interface IProxyAdapter {
   start: () => Promise<void>;
   stop: () => Promise<void>;
-  handleProxyRequest: ProxyHandlerFn;
   getDeps: () => ISPADeps; // for testing
 }
 
-export interface ISPAServiceInterface {
-  getProxyTarget: (reqDetails: IncomingRequestDetails, state: ServerState) => ProxyTarget;
+export interface IProxyService {
+  sendProxyRequest: (reqDetails: IncomingRequestDetails, state: ServerState) => Promise<ProxyHandlerResponse>;
+  getProxyTarget: (reqDetails: IncomingRequestDetails, accessToken: string) => ProxyTarget;
 }
 
 export type ISPADeps = {
-  ispaService: ISPAServiceInterface;
   peerA: TPeerServer;
   peerB: TPeerServer;
-  httpRequest: HttpRequest;
   logger: ILogger;
 };
 
-export type ISPAServiceDeps = {
+export type ProxyServiceDeps = {
+  httpClient: IHttpClient;
   logger: ILogger;
-  // maybe, move httpRequest (axios instance) here?
 };
 
 export type PeerLabel = 'A' | 'B';
 
 export type TPeerServer = {
-  start: (proxyHandlerFn: ProxyHandlerFn) => Promise<boolean>;
+  handleProxyRequest: ProxyHandlerFn;
+  start: () => Promise<boolean>;
   stop: () => Promise<boolean>;
   on: (eventName: typeof INTERNAL_EVENTS.peerJWS, listener: (peerJWSEvent: PeerJWSEvent) => void) => void;
   propagatePeerJWSEvent: (peerJWSEvent: PeerJWSEvent) => void;
@@ -65,6 +64,7 @@ export type TPeerServer = {
 };
 
 export type TPeerServerDeps = {
+  proxyService: IProxyService;
   httpServer: IHttpServer;
   authClient: IAuthClient;
   controlAgent: IControlAgent;
@@ -80,7 +80,9 @@ export type HttpRequestOptions = {
   // add logger here?
 };
 
-export type HttpRequest = (options: HttpRequestOptions) => Promise<ProxyHandlerResponse>;
+export interface IHttpClient {
+  sendRequest: (options: HttpRequestOptions) => Promise<ProxyHandlerResponse>;
+}
 
 export interface ILogger extends LogMethods {
   child(context?: LogContext): ILogger;

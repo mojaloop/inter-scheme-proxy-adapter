@@ -14,10 +14,10 @@ export const loggingPlugin: Plugin<PluginOptions> = {
     server.ext({
       type: 'onRequest',
       method: (req: Request, h: ResponseToolkit) => {
-        const { path, method, info } = req;
-        const { id, remoteAddress, received } = info;
+        const { path, method } = req;
+        const { id, remoteAddress, received } = req.info;
         const context = {
-          id: `${id}__${req.headers[TRACE_ID_FIELD] || randomUUID()}`,
+          requestId: `${id}__${req.headers[TRACE_ID_FIELD] || randomUUID()}`,
           remoteAddress,
           path,
           method,

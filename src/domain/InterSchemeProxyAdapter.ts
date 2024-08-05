@@ -1,31 +1,13 @@
 import { INTERNAL_EVENTS } from '../constants';
-import { IProxyAdapter, ISPADeps, IncomingRequestDetails, ServerState, PeerJWSEvent } from './types';
+import { IProxyAdapter, ISPADeps, PeerJWSEvent } from './types';
 
 export class InterSchemeProxyAdapter implements IProxyAdapter {
   constructor(private readonly deps: ISPADeps) {
     this.addPeerEventListeners();
-    this.handleProxyRequest = this.handleProxyRequest.bind(this);
-  }
-
-  async handleProxyRequest(reqDetails: IncomingRequestDetails, serverState: ServerState) {
-    const { ispaService, httpRequest } = this.deps;
-    const { httpsAgent } = serverState;
-    const proxyTarget = ispaService.getProxyTarget(reqDetails, serverState); // pass only accessToken
-
-    return httpRequest({
-      httpsAgent,
-      url: proxyTarget.url,
-      headers: proxyTarget.headers,
-      method: reqDetails.method,
-      data: reqDetails.payload,
-    });
   }
 
   async start(): Promise<void> {
-    const [isAStarted, isBStarted] = await Promise.all([
-      this.deps.peerA.start(this.handleProxyRequest),
-      this.deps.peerB.start(this.handleProxyRequest),
-    ]);
+    const [isAStarted, isBStarted] = await Promise.all([this.deps.peerA.start(), this.deps.peerB.start()]);
     this.deps.logger.info('ISPA is started', { isAStarted, isBStarted });
   }
 

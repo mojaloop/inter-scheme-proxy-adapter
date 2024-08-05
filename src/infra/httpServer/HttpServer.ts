@@ -32,6 +32,7 @@ export class HttpServer extends EventEmitter implements IHttpServer {
 
   async stop(): Promise<boolean> {
     await this.server.stop();
+    this.removeAllListeners(INTERNAL_EVENTS.serverState);
     this.deps.logger.verbose('httpServer is stopped');
     return true;
   }

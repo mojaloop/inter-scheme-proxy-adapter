@@ -1,8 +1,15 @@
 import { EventEmitter } from 'node:events';
-import config from '../config'; // try to avoid this dependency
+import config from '../config'; // try to avoid this dependency (pass through ctor?)
 import { INTERNAL_EVENTS } from '../constants';
 import { ICACerts, ICAPeerJWSCert } from '../infra';
-import { TPeerServer, TPeerServerDeps, ProxyHandlerFn, ServerStateEvent, PeerJWSEvent } from './types';
+import {
+  TPeerServer,
+  TPeerServerDeps,
+  ServerStateEvent,
+  PeerJWSEvent,
+  IncomingRequestDetails,
+  ServerState,
+} from './types';
 
 const { checkPeerJwsInterval, pm4mlEnabled } = config.get();
 
@@ -12,9 +19,14 @@ export class PeerServer extends EventEmitter implements TPeerServer {
 
   constructor(private readonly deps: TPeerServerDeps) {
     super();
+    this.handleProxyRequest = this.handleProxyRequest.bind(this);
   }
 
-  async start(handleProxyRequestFn: ProxyHandlerFn) {
+  async handleProxyRequest(reqDetails: IncomingRequestDetails, serverState: ServerState) {
+    return this.deps.proxyService.sendProxyRequest(reqDetails, serverState);
+  }
+
+  async start() {
     if (pm4mlEnabled) {
       await this.getAccessToken();
       await this.initControlAgent();
@@ -22,12 +34,13 @@ export class PeerServer extends EventEmitter implements TPeerServer {
       this.startPeerJwsRefreshLoop();
       this.deps.logger.debug('certs and token are ready.');
     }
-    const isStarted = await this.deps.httpServer.start(handleProxyRequestFn);
+    const isStarted = await this.deps.httpServer.start(this.handleProxyRequest);
     this.deps.logger.info('PeerServer is started', { isStarted, pm4mlEnabled });
     return isStarted;
   }
 
   async stop() {
+    this.removeAllListeners(INTERNAL_EVENTS.peerJWS);
     this.deps.authClient.stopUpdates();
     this.stopPeerJwsRefreshLoop();
     await this.deps.controlAgent.close();

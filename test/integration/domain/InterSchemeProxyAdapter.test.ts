@@ -8,7 +8,7 @@ import { loggerFactory } from '#src/utils';
 const wait = (ms: number = 10) => new Promise((resolve) => setTimeout(resolve, ms));
 
 describe('ControlAgent Integration Tests -->', () => {
-  const logger = loggerFactory(`CAIT`);
+  const logger = loggerFactory('CAIT');
   const controlAgentA = createControlAgent({
     peer: 'A',
     controlAgentConfig: config.get('peerAConfig.controlAgentConfig'),

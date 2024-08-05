@@ -1,17 +1,26 @@
 import config from '../config';
 import { PROXY_HEADER, AUTH_HEADER, SCHEME_HTTP, SCHEME_HTTPS } from '../constants';
-import { ISPAServiceInterface, ISPAServiceDeps, IncomingRequestDetails, ServerState, ILogger } from './types';
+import { IProxyService, ProxyServiceDeps, IncomingRequestDetails, ServerState } from './types';
 
 const { PROXY_ID, incomingHeadersRemoval, pm4mlEnabled } = config.get(); // or pass it as a parameter in ctor?
 
-export class ISPAService implements ISPAServiceInterface {
-  private readonly log: ILogger;
+export class ProxyService implements IProxyService {
+  constructor(private readonly deps: ProxyServiceDeps) {}
 
-  constructor(deps: ISPAServiceDeps) {
-    this.log = deps.logger.child(ISPAService.name);
+  sendProxyRequest(reqDetails: IncomingRequestDetails, state: ServerState) {
+    const { accessToken, httpsAgent } = state;
+    const proxyTarget = this.getProxyTarget(reqDetails, accessToken);
+
+    return this.deps.httpClient.sendRequest({
+      httpsAgent,
+      url: proxyTarget.url,
+      headers: proxyTarget.headers,
+      method: reqDetails.method,
+      data: reqDetails.payload,
+    });
   }
 
-  getProxyTarget(reqDetails: IncomingRequestDetails, state: ServerState) {
+  getProxyTarget(reqDetails: IncomingRequestDetails, accessToken: string) {
     const { url, peerEndpoint } = reqDetails; // move peerEndpoint to ServerState?
 
     const proxyTarget = {
@@ -19,10 +28,10 @@ export class ISPAService implements ISPAServiceInterface {
       headers: {
         ...this.cleanupIncomingHeaders(reqDetails.headers),
         [PROXY_HEADER]: PROXY_ID,
-        [AUTH_HEADER]: `Bearer ${state.accessToken}`,
+        [AUTH_HEADER]: `Bearer ${accessToken}`,
       },
     };
-    this.log.verbose('proxyTarget: ', proxyTarget);
+    this.deps.logger.verbose('proxyTarget: ', proxyTarget);
     return proxyTarget;
   }
 

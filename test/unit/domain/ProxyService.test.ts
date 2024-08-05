@@ -1,16 +1,20 @@
-import { ISPAService, ISPAServiceInterface } from '#src/domain';
+import { ProxyService, IProxyService } from '#src/domain';
+import { HttpClient } from '#src/infra';
 import { PROXY_HEADER, AUTH_HEADER, SCHEME_HTTPS } from '#src/constants';
 import { logger } from '#src/utils';
 import config from '#src/config';
 import * as fixtures from '#test/fixtures';
 
+const httpClient = new HttpClient({ logger });
+
 const { peerEndpoint } = config.get('peerAConfig');
+const { accessToken } = fixtures.serverStateDto();
 
 describe('ISPAService Tests -->', () => {
-  let service: ISPAServiceInterface;
+  let service: IProxyService;
 
   beforeEach(() => {
-    service = new ISPAService({ logger });
+    service = new ProxyService({ httpClient, logger });
   });
 
   test('should return correct proxy details', () => {
@@ -23,15 +27,13 @@ describe('ISPAService Tests -->', () => {
       headers,
       peerEndpoint,
     });
-    const serverState = fixtures.serverStateDto();
-
-    const proxyTarget = service.getProxyTarget(reqDetails, serverState);
+    const proxyTarget = service.getProxyTarget(reqDetails, accessToken);
 
     expect(proxyTarget.url).toBe(`${SCHEME_HTTPS}://${peerEndpoint}/${path}?${query}`);
     expect(proxyTarget.headers).toEqual({
       ...headers,
       [PROXY_HEADER]: config.get('PROXY_ID'),
-      [AUTH_HEADER]: `Bearer ${serverState.accessToken}`,
+      [AUTH_HEADER]: `Bearer ${accessToken}`,
     });
   });
 
@@ -41,7 +43,7 @@ describe('ISPAService Tests -->', () => {
       'content-length': '1234',
     } as any; // todo: add typings for requestDetailsDto, and remove "as any"
     const reqDetails = fixtures.requestDetailsDto({ headers });
-    const proxyTarget = service.getProxyTarget(reqDetails, fixtures.serverStateDto());
+    const proxyTarget = service.getProxyTarget(reqDetails, accessToken);
 
     expect(proxyTarget.headers.host).toBeUndefined();
     expect(proxyTarget.headers['content-length']).toBeUndefined();
@@ -55,7 +57,7 @@ describe('ISPAService Tests -->', () => {
       [h1]: 'test-host',
     } as any; // todo: add typings for requestDetailsDto, and remove "as any"
     const reqDetails = fixtures.requestDetailsDto({ headers });
-    const proxyTarget = service.getProxyTarget(reqDetails, fixtures.serverStateDto());
+    const proxyTarget = service.getProxyTarget(reqDetails, accessToken);
 
     expect(proxyTarget.headers[h1]).toBeUndefined();
   });
