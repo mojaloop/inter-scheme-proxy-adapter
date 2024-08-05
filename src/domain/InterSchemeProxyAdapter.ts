@@ -7,8 +7,13 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
   }
 
   async start(): Promise<void> {
-    const [isAStarted, isBStarted] = await Promise.all([this.deps.peerA.start(), this.deps.peerB.start()]);
-    this.deps.logger.info('ISPA is started', { isAStarted, isBStarted });
+    // prettier-ignore
+    const [isAok, isBok] = await Promise.all([
+      this.deps.peerA.start(),
+      this.deps.peerB.start(),
+    ]);
+    // todo: think, if we should catch errors here (instead of inside peer.start()) ?
+    this.deps.logger.info('ISPA is started', { isAok, isBok });
   }
 
   async stop(): Promise<void> {

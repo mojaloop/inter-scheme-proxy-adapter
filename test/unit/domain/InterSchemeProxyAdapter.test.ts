@@ -45,6 +45,7 @@ describe('InterSchemeProxyAdapter Tests -->', () => {
   });
 
   afterEach(async () => {
+    jest.clearAllMocks();
     await proxyAdapter?.stop();
   });
 
@@ -95,5 +96,17 @@ describe('InterSchemeProxyAdapter Tests -->', () => {
     });
 
     expect(acceptHeader).toBeUndefined();
+  });
+
+  test('should not throw error if a peer failed to start (config is correct)', async () => {
+    peerA['getAccessToken'] = async () => {
+      throw new Error('Some error');
+    };
+    const aStartSpy = jest.spyOn(peerA, 'start');
+    await proxyAdapter.start();
+
+    expect(aStartSpy).toHaveBeenCalledTimes(1);
+    const isAok = await aStartSpy.mock.results[0]?.value;
+    expect(isAok).toBe(false);
   });
 });

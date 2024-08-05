@@ -27,16 +27,22 @@ export class PeerServer extends EventEmitter implements TPeerServer {
   }
 
   async start() {
-    if (pm4mlEnabled) {
-      await this.getAccessToken();
-      await this.initControlAgent();
-      await this.loadInitialCerts();
-      this.startPeerJwsRefreshLoop();
-      this.deps.logger.debug('certs and token are ready.');
+    const { logger } = this.deps;
+    try {
+      if (pm4mlEnabled) {
+        await this.getAccessToken();
+        await this.initControlAgent();
+        await this.loadInitialCerts();
+        this.startPeerJwsRefreshLoop();
+        logger.debug('certs and token are ready.');
+      }
+      const isStarted = await this.deps.httpServer.start(this.handleProxyRequest);
+      logger.info('PeerServer is started', { isStarted, pm4mlEnabled });
+      return isStarted;
+    } catch (err: unknown) {
+      logger.error('PeerServer is failed to start:', err);
+      return false;
     }
-    const isStarted = await this.deps.httpServer.start(this.handleProxyRequest);
-    this.deps.logger.info('PeerServer is started', { isStarted, pm4mlEnabled });
-    return isStarted;
   }
 
   async stop() {
