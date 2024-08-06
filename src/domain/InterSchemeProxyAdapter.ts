@@ -12,7 +12,6 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
       this.deps.peerA.start(),
       this.deps.peerB.start(),
     ]);
-    // todo: think, if we should catch errors here (instead of inside peer.start()) ?
     this.deps.logger.info('ISPA is started', { isAok, isBok });
   }
 
