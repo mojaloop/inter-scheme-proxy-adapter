@@ -198,6 +198,13 @@ const config = convict<AppConfig>({
     default: 1800000, // 30 minutes, this is fail safe mechanism. So the value can be high.
     env: 'CHECK_PEER_JWS_INTERVAL',
   },
+
+  retryStartTimeoutSec: {
+    doc: 'Interval to retry start peerServer (in seconds)',
+    format: Number,
+    default: 60,
+    env: 'RETRY_START_TIMEOUT_SEC',
+  },
 });
 
 config.validate({ allowed: 'strict' });

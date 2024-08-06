@@ -2,7 +2,7 @@ import https from 'node:https';
 import axios from 'axios'; // add wrapper?
 
 import config from '#src/config';
-import { PROXY_HEADER, AUTH_HEADER, SCHEME_HTTPS } from '#src/constants';
+import { PROXY_HEADER, AUTH_HEADER, SCHEME_HTTPS, HEALTH_STATUSES } from '#src/constants';
 import { loggerFactory } from '#src/utils';
 import * as fixtures from '#test/fixtures';
 
@@ -50,6 +50,14 @@ describe('ISPA Integration Tests -->', () => {
     Object.entries(fixtures.HUB_HEADERS).forEach(([header, value]) => {
       expect(responseHeaders[header]).toBe(value);
     });
+  });
+
+  test('should have healthcheck endpoint', async () => {
+    const { status, data } = await sendRequest({
+      url: `${PROXY_HOST}:${peerAConfig.serverConfig.port}/health`,
+    });
+    expect(status).toBe(200);
+    expect(data.status).toBe(HEALTH_STATUSES.ok);
   });
 
   describe('mTLS hub (peer-endpoint) Tests -->', () => {

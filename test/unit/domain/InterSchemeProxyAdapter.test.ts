@@ -8,21 +8,12 @@ import { InterSchemeProxyAdapter, PeerServer } from '#src/domain';
 import { createProxyAdapter, createPeerServer } from '#src/createProxyAdapter';
 import { AUTH_HEADER, PROXY_HEADER } from '#src/constants';
 import config from '#src/config';
-import * as fixtures from '#test/fixtures';
 
-const mockAxios = new MockAdapter(axios);
+import * as fixtures from '#test/fixtures';
+import { mockControlAgent, injectHttpRequest } from '#test/utils';
 
 const { peerAConfig, peerBConfig } = config.get();
-
-const mockControlAgent = (peer: PeerServer) => {
-  const deps = peer['deps'];
-  expect(deps).toBeTruthy();
-  deps.controlAgent['open'] = async () => {};
-  deps.controlAgent['close'] = async () => {};
-  deps.controlAgent['loadCerts'] = async () => ({ ...fixtures.certsJson.wrong });
-  deps.controlAgent['triggerFetchPeerJws'] = () => {};
-  // todo: find a better way to mock MenAPI (ws) functionality
-};
+const mockAxios = new MockAdapter(axios);
 
 const oidcToken = fixtures.oidcTokenDto();
 
@@ -65,15 +56,10 @@ describe('InterSchemeProxyAdapter Tests -->', () => {
       expect(reqOptions.headers[PROXY_HEADER]).toBe(config.get('PROXY_ID'));
       expect(reqOptions.headers[AUTH_HEADER]).toBe(`Bearer ${oidcToken.access_token}`);
       expect(reqOptions.headers.test).toBe(headers.test);
-
       return [200, mockHubResponse];
     });
 
-    const response = await deps.httpServer.hapiServer.inject({
-      url: '/test-route',
-      method: 'GET',
-      headers,
-    });
+    const response = await injectHttpRequest(deps.httpServer, '/test-route', 'GET', headers);
     expect(response.statusCode).toBe(200);
     expect(response.result).toEqual(mockHubResponse);
   });
@@ -89,16 +75,11 @@ describe('InterSchemeProxyAdapter Tests -->', () => {
     });
 
     const { httpServer } = peerA['deps'];
-    await httpServer.hapiServer.inject({
-      url: '/',
-      method: 'GET',
-      headers,
-    });
-
+    await injectHttpRequest(httpServer, '/', 'GET', headers);
     expect(acceptHeader).toBeUndefined();
   });
 
-  test('should not throw error if a peer failed to start (config is correct)', async () => {
+  test('should not throw error if a peerServer failed to start (config is correct)', async () => {
     peerA['getAccessToken'] = async () => {
       throw new Error('Some error');
     };
