@@ -15,6 +15,8 @@ import {
   ICAPeerJWSCert,
 } from './types';
 
+const WS_CLOSE_TIMEOUT_MS = 5_000;
+
 /**************************************************************************
  * Client
  *
@@ -60,33 +62,36 @@ export class ControlAgent implements IControlAgent {
   }
 
   open(): Promise<void> {
+    const url = this._port ? `${this._address}:${this._port}` : this._address;
+    const protocol = this._address.includes('://') ? '' : 'ws://';
+    const address = `${protocol}${url}`;
+
+    const log = this._logger.child({ address });
+
     return new Promise((resolve, reject) => {
       if (this._ws && this._ws.readyState === WebSocket.OPEN) {
         reject(new Error('WebSocket is already open'));
         return;
       }
 
-      const url = this._port ? `${this._address}:${this._port}` : this._address;
-      const protocol = this._address.includes('://') ? '' : 'ws://';
-
-      this._ws = new WebSocket(`${protocol}${url}`);
+      this._ws = new WebSocket(address);
 
       this._ws.on('open', () => {
-        this._logger.info(`${this.id} websocket connected`, { url, protocol });
+        log.info(`${this.id} websocket connected`);
         resolve();
       });
 
       // Reconnect on close
       this._ws.on('close', () => {
-        this._logger.warn(`${this.id} websocket disconnected`, { url, protocol });
+        log.warn(`${this.id} websocket disconnected`);
         if (this._shouldReconnect) {
-          this._logger.info(`${this.id} reconnecting in ${this._reconnectInterval}ms...`);
+          log.info(`${this.id} reconnecting in ${this._reconnectInterval}ms...`);
           setTimeout(() => this.open(), this._reconnectInterval);
         }
       });
 
       this._ws.on('error', (error) => {
-        this._logger.error(`${this.id} websocket error`, { url, protocol, error });
+        log.error(`${this.id} websocket error`, error);
         this._ws?.close();
       });
 
@@ -95,16 +100,32 @@ export class ControlAgent implements IControlAgent {
   }
 
   async close(): Promise<void> {
-    await new Promise((resolve, reject) => {
-      this._logger.info(`${this.id} shutting down...`);
+    const log = this._logger;
+    // think, if we need to rethrow in case of error?
+    const isOK = await new Promise((resolve) => {
+      log.verbose(`shutting down websocket...`, { WS_CLOSE_TIMEOUT_MS });
 
-      this._ws?.on('close', resolve);
-      this._ws?.on('error', reject);
+      const timer = setTimeout(() => {
+        log.warn('websocket close timed out', { WS_CLOSE_TIMEOUT_MS });
+        resolve(false);
+      }, WS_CLOSE_TIMEOUT_MS);
+
+      this._ws?.once('close', () => {
+        clearTimeout(timer);
+        resolve(true);
+      });
+      this._ws?.once('error', (err: Error) => {
+        log.error('error on websocket close', err);
+        clearTimeout(timer);
+        resolve(false);
+      });
 
       this._shouldReconnect = false;
       this._ws?.close();
     });
+
     this._ws = null;
+    this._logger.info(`websocket is closed`, { isOK });
   }
 
   send(msg: string | GenericObject) {
@@ -116,7 +137,7 @@ export class ControlAgent implements IControlAgent {
 
       this._ws?.send(data);
     } catch (err) {
-      this._logger.error(`${this.id} failed to send message`, { err });
+      this._logger.error(`${this.id} failed to send message`, err);
     }
   }
 
