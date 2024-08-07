@@ -1,6 +1,6 @@
 {
   "name": "inter-scheme-proxy-adapter",
-  "version": "1.1.0-snapshot.2",
+  "version": "1.2.0",
   "private": true,
   "description": "Schemes Proxy implementation (ISPA)",
   "author": "Eugen Klymniuk (geka-evk)",
@@ -37,7 +37,7 @@
   "dependencies": {
     "@hapi/hapi": "^21.3.10",
     "@mojaloop/central-services-logger": "^11.5.0",
-    "@mojaloop/sdk-standard-components": "^18.3.0",
+    "@mojaloop/sdk-standard-components": "^18.4.0",
     "axios": "^1.7.3",
     "convict": "^6.2.4",
     "fast-json-patch": "^3.1.1",
@@ -46,7 +46,7 @@
     "ws": "^8.18.0"
   },
   "devDependencies": {
-    "@commitlint/cli": "^19.3.0",
+    "@commitlint/cli": "^19.4.0",
     "@commitlint/config-conventional": "^19.2.2",
     "@types/convict": "^6.1.6",
     "@types/jest": "^29.5.12",
