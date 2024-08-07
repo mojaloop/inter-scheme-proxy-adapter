@@ -14,3 +14,8 @@ export const INTERNAL_EVENTS = {
   serverState: 'serverState',
   peerJWS: 'peerJWS',
 } as const;
+
+export const HEALTH_STATUSES = {
+  ok: 'OK',
+  down: 'DOWN',
+} as const;

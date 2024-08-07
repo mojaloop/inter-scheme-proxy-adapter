@@ -1,15 +1,23 @@
 import config from '../config';
+import * as dto from '../dto';
 import { PROXY_HEADER, AUTH_HEADER, SCHEME_HTTP, SCHEME_HTTPS } from '../constants';
-import { IProxyService, ProxyServiceDeps, IncomingRequestDetails, ServerState } from './types';
+import { IProxyService, IncomingRequestDetails, ProxyServiceDeps, ProxyHandlerResponse, ServerState } from './types';
 
 const { PROXY_ID, incomingHeadersRemoval, pm4mlEnabled } = config.get(); // or pass it as a parameter in ctor?
 
 export class ProxyService implements IProxyService {
   constructor(private readonly deps: ProxyServiceDeps) {}
 
-  sendProxyRequest(reqDetails: IncomingRequestDetails, state: ServerState) {
-    const { accessToken, httpsAgent } = state;
-    const proxyTarget = this.getProxyTarget(reqDetails, accessToken);
+  async sendProxyRequest(reqDetails: IncomingRequestDetails, state: ServerState): Promise<ProxyHandlerResponse> {
+    const healthDetails = dto.serverStateToHealthcheckDetailsDto(state);
+    if (!healthDetails.isReady) {
+      const errResponse = dto.errorResponsePeerFailedToStartDto();
+      this.deps.logger.error('PeerServer state is not ready', { healthDetails, errResponse });
+      return errResponse;
+    }
+
+    const proxyTarget = this.getProxyTarget(reqDetails, state);
+    const { httpsAgent } = state;
 
     return this.deps.httpClient.sendRequest({
       httpsAgent,
@@ -20,13 +28,14 @@ export class ProxyService implements IProxyService {
     });
   }
 
-  getProxyTarget(reqDetails: IncomingRequestDetails, accessToken: string) {
-    const { url, peerEndpoint } = reqDetails; // move peerEndpoint to ServerState?
+  getProxyTarget(reqDetails: IncomingRequestDetails, state: ServerState) {
+    const { url, headers } = reqDetails;
+    const { accessToken, peerEndpoint } = state;
 
     const proxyTarget = {
       url: `${pm4mlEnabled ? SCHEME_HTTPS : SCHEME_HTTP}://${peerEndpoint}${url.pathname}${url.search}`,
       headers: {
-        ...this.cleanupIncomingHeaders(reqDetails.headers),
+        ...this.cleanupIncomingHeaders(headers),
         [PROXY_HEADER]: PROXY_ID,
         [AUTH_HEADER]: `Bearer ${accessToken}`,
       },

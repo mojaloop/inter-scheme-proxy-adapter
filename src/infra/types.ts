@@ -1,5 +1,7 @@
 import { type Agent } from 'node:https';
-import { PeerLabel, ILogger } from '../domain/types';
+import { PeerLabel, ILogger, ServerStateEvent } from '../domain/types';
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
+import { HEALTH_STATUSES } from '../constants';
 
 export * from './controlAgent/types';
 
@@ -13,6 +15,7 @@ export type AppConfig = {
   pm4mlEnabled: boolean;
   incomingHeadersRemoval: string[];
   checkPeerJwsInterval: number;
+  retryStartTimeoutSec: number;
 };
 
 export type PeerServerConfig = {
@@ -63,4 +66,17 @@ export type AuthClientDeps = {
   authConfig: AuthConfig;
   logger: ILogger;
   // httpClient: HttpClient; // axios
+};
+
+type Status = (typeof HEALTH_STATUSES)[keyof typeof HEALTH_STATUSES];
+
+export type HealthcheckDetails = {
+  [key in keyof Required<ServerStateEvent>]: boolean;
+} & { isReady: boolean };
+
+export type HealthcheckState = {
+  status: Status;
+  details: HealthcheckDetails; // or rename to state?
+  startTime: string; // ISO date string
+  versionNumber: string;
 };

@@ -94,8 +94,8 @@ export class ControlAgent implements IControlAgent {
     });
   }
 
-  close(): Promise<void> {
-    return new Promise((resolve, reject) => {
+  async close(): Promise<void> {
+    await new Promise((resolve, reject) => {
       this._logger.info(`${this.id} shutting down...`);
 
       this._ws?.on('close', resolve);
@@ -104,6 +104,7 @@ export class ControlAgent implements IControlAgent {
       this._shouldReconnect = false;
       this._ws?.close();
     });
+    this._ws = null;
   }
 
   send(msg: string | GenericObject) {

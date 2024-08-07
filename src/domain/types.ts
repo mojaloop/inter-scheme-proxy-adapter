@@ -16,7 +16,6 @@ export type IncomingRequestDetails = {
   method: string;
   headers: Headers;
   payload?: unknown;
-  peerEndpoint: string; // todo: shouldn't be a part of IncomingRequestDetails
 };
 
 export type ProxyHandlerResponse = {
@@ -38,7 +37,7 @@ export interface IProxyAdapter {
 
 export interface IProxyService {
   sendProxyRequest: (reqDetails: IncomingRequestDetails, state: ServerState) => Promise<ProxyHandlerResponse>;
-  getProxyTarget: (reqDetails: IncomingRequestDetails, accessToken: string) => ProxyTarget;
+  getProxyTarget: (reqDetails: IncomingRequestDetails, state: ServerState) => ProxyTarget;
 }
 
 export type ISPADeps = {
@@ -89,6 +88,7 @@ export interface ILogger extends LogMethods {
 }
 
 export type ServerState = {
+  peerEndpoint: string;
   accessToken: string;
   httpsAgent: ProxyTlsAgent;
 };

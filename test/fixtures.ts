@@ -14,9 +14,11 @@ export const HUB_HEADERS: Record<string, string> = (process.env.HUB_HEADERS || '
 
 // prettier-ignore
 export const serverStateDto = ({
+  peerEndpoint = config.get('peerAConfig.peerEndpoint'),
   accessToken = 'testAccessToken',
   httpsAgent = null,
 } = {}): ServerState => ({
+  peerEndpoint,
   accessToken,
   httpsAgent,
 });
@@ -29,12 +31,10 @@ export const requestDetailsDto = ({
   path = 'test-path',
   query = 'query=test',
   headers = { h1: 'testHeader' },
-  peerEndpoint = config.get('peerAConfig.peerEndpoint'),
 } = {}): IncomingRequestDetails => ({
   url: new URL(`${schema}://${host}:${port}/${path}?${query}`),
   method,
   headers,
-  peerEndpoint,
 });
 
 export const oidcTokenDto = ({
