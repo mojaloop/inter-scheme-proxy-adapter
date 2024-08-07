@@ -1,5 +1,7 @@
 import { type Agent } from 'node:https';
-import { ILogger, ProxyDetails } from '../domain/types';
+import { PeerLabel, ILogger, ServerStateEvent } from '../domain/types';
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
+import { HEALTH_STATUSES } from '../constants';
 
 export * from './controlAgent/types';
 
@@ -7,35 +9,30 @@ export type AppConfig = {
   PROXY_ID: string;
   LOG_LEVEL: string; // todo: use LogLevel type
 
-  authConfigA: AuthConfig;
-  authConfigB: AuthConfig;
-
-  serverAConfig: ServerConfig;
-  serverBConfig: ServerConfig;
-
-  hubAConfig: HubConfig;
-  hubBConfig: HubConfig;
-
-  controlAgentAConfig: ControlAgentConfig;
-  controlAgentBConfig: ControlAgentConfig;
+  peerAConfig: PeerServerConfig;
+  peerBConfig: PeerServerConfig;
 
   pm4mlEnabled: boolean;
   incomingHeadersRemoval: string[];
   checkPeerJwsInterval: number;
+  retryStartTimeoutSec: number;
 };
 
-type HubConfig = {
-  // todo: move to ServerConfig
-  baseUrl: string;
+export type PeerServerConfig = {
+  peer: PeerLabel;
+  peerEndpoint: string;
+  authConfig: AuthConfig;
+  controlAgentConfig: ControlAgentConfig;
+  serverConfig: ServerConfig;
 };
 
-type ServerConfig = {
-  // todo: rename to ProxyServerConfig
+// rename to ProxyServerConfig or HttpServerConfig?
+export type ServerConfig = {
   host: string;
   port: number;
 };
 
-type ControlAgentConfig = {
+export type ControlAgentConfig = {
   wsHost: string;
   wsPort: number;
   timeout: number;
@@ -61,7 +58,7 @@ export type ProxyTlsAgent = Agent | null;
 
 export type HttpServerDeps = {
   serverConfig: ServerConfig;
-  proxyDetails: ProxyDetails;
+  peerEndpoint: string; // url
   logger: ILogger;
 };
 
@@ -69,4 +66,17 @@ export type AuthClientDeps = {
   authConfig: AuthConfig;
   logger: ILogger;
   // httpClient: HttpClient; // axios
+};
+
+type Status = (typeof HEALTH_STATUSES)[keyof typeof HEALTH_STATUSES];
+
+export type HealthcheckDetails = {
+  [key in keyof Required<ServerStateEvent>]: boolean;
+} & { isReady: boolean };
+
+export type HealthcheckState = {
+  status: Status;
+  details: HealthcheckDetails; // or rename to state?
+  startTime: string; // ISO date string
+  versionNumber: string;
 };

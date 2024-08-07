@@ -22,20 +22,24 @@ export const deserialise = (msg: string | ws.RawData) => {
       'data' in v &&
       Array.isArray(v.data)
     ) {
-      return new Buffer(v.data);
+      return Buffer.from(v.data);
     }
     return v;
   });
 };
 
-export const buildMsg = (verb: VERB, msg: MESSAGE, data: jsonPatch.Operation[] | GenericObject | string | ICAPeerJWSCert[], id = generateSlug(4)) =>
+export const buildMsg = (
+  verb: VERB,
+  msg: MESSAGE,
+  data: jsonPatch.Operation[] | GenericObject | string | ICAPeerJWSCert[],
+  id = generateSlug(4),
+) =>
   serialise({
     verb,
     msg,
     data,
     id,
   });
-
 
 export const buildPatchConfiguration = (oldConf: GenericObject, newConf: GenericObject, id: string) => {
   const patches = jsonPatch.compare(oldConf, newConf);

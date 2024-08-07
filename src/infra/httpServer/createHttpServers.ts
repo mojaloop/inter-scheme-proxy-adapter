@@ -1,35 +1,10 @@
-import config from '../../config';
-import { IHttpServer, ILogger } from '../../domain';
-import { HttpServer } from '../../infra';
+import { HttpServer, HttpServerDeps } from '../../infra';
 
-type httpServersMap = Readonly<{
-  httpServerA: IHttpServer;
-  httpServerB: IHttpServer;
-}>;
+export const createHttpServer = (deps: HttpServerDeps) => {
+  const { logger, ...restDeps } = deps;
 
-type createHttpServersDeps = {
-  logger: ILogger;
-};
-
-export const createHttpServers = (deps: createHttpServersDeps): httpServersMap => {
-  const httpServerA = new HttpServer({
-    serverConfig: config.get('serverAConfig'),
-    proxyDetails: {
-      baseUrl: config.get('hubAConfig').baseUrl, // todo: rename to peerEndpoint
-    },
-    logger: deps.logger.child('serverA'),
-  });
-
-  const httpServerB = new HttpServer({
-    serverConfig: config.get('serverBConfig'),
-    proxyDetails: {
-      baseUrl: config.get('hubBConfig').baseUrl, // todo: rename to peerEndpoint
-    },
-    logger: deps.logger.child('serverB'),
-  });
-
-  return Object.freeze({
-    httpServerA,
-    httpServerB,
+  return new HttpServer({
+    ...restDeps,
+    logger: logger.child('HttpServer'),
   });
 };

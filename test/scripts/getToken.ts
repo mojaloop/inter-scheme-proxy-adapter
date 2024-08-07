@@ -1,13 +1,13 @@
+import { PeerLabel } from '../../src/domain';
 import { AuthClient } from '../../src/infra';
 import { loggerFactory } from '../../src/utils';
 import config from '../../src/config';
 
-type Hubs = 'A' | 'B';
-const hub: Hubs = 'A';
+const hub: PeerLabel = 'A';
 const logger = loggerFactory({ hub });
 
 const authClient = new AuthClient({
-  authConfig: config.get(`authConfig${hub}`),
+  authConfig: config.get(`peer${hub}Config.authConfig`),
   logger,
 });
 

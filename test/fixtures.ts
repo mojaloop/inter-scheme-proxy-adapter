@@ -1,7 +1,7 @@
 import process from 'node:process';
-import { ServerState, IncomingRequestDetails, ProxyDetails, OIDCToken } from '#src/domain/types';
-import { ICAPeerJWSCert, ICACerts } from '#src/infra/types';
 import config from '#src/config';
+import { ServerState, IncomingRequestDetails, OIDCToken } from '#src/domain/types';
+import { ICAPeerJWSCert, IMCMCertData } from '#src/infra/types';
 
 export { default as certsJson } from '../docker/mock-servers/certs/certs.json';
 
@@ -14,18 +14,13 @@ export const HUB_HEADERS: Record<string, string> = (process.env.HUB_HEADERS || '
 
 // prettier-ignore
 export const serverStateDto = ({
+  peerEndpoint = config.get('peerAConfig.peerEndpoint'),
   accessToken = 'testAccessToken',
   httpsAgent = null,
 } = {}): ServerState => ({
+  peerEndpoint,
   accessToken,
   httpsAgent,
-});
-
-// prettier-ignore
-export const proxyDetailsDto = ({
-  baseUrl = config.get('hubAConfig.baseUrl')
-} = {}): ProxyDetails => ({
-  baseUrl,
 });
 
 export const requestDetailsDto = ({
@@ -36,12 +31,10 @@ export const requestDetailsDto = ({
   path = 'test-path',
   query = 'query=test',
   headers = { h1: 'testHeader' },
-  proxyDetails = proxyDetailsDto(),
 } = {}): IncomingRequestDetails => ({
   url: new URL(`${schema}://${host}:${port}/${path}?${query}`),
   method,
   headers,
-  proxyDetails,
 });
 
 export const oidcTokenDto = ({
@@ -58,17 +51,17 @@ export const oidcTokenDto = ({
 
 export const peerJWSCertsDto = (): ICAPeerJWSCert[] => [
   { createdAt: 1721045192, dfspId: 'testdfsp1', publicKey: 'test peer JWS1' },
-  { createdAt: 1721045208, dfspId: 'testdfsp2', publicKey: 'test peer JWS2' }
+  { createdAt: 1721045208, dfspId: 'testdfsp2', publicKey: 'test peer JWS2' },
 ];
 
-export const mtlsCertsDto = () => ({
+export const mtlsCertsDto = (): IMCMCertData => ({
   outbound: {
     tls: {
       creds: {
         cert: 'testCert',
         key: 'testKey',
-        ca: 'testCA'
-      }
-    }
-  }
+        ca: 'testCA',
+      },
+    },
+  },
 });

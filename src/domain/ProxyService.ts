@@ -1,29 +1,46 @@
 import config from '../config';
+import * as dto from '../dto';
 import { PROXY_HEADER, AUTH_HEADER, SCHEME_HTTP, SCHEME_HTTPS } from '../constants';
-import { ISPAServiceInterface, ISPAServiceDeps, IncomingRequestDetails, ServerState, ILogger } from './types';
+import { IProxyService, IncomingRequestDetails, ProxyServiceDeps, ProxyHandlerResponse, ServerState } from './types';
 
 const { PROXY_ID, incomingHeadersRemoval, pm4mlEnabled } = config.get(); // or pass it as a parameter in ctor?
 
-export class ISPAService implements ISPAServiceInterface {
-  private readonly log: ILogger;
+export class ProxyService implements IProxyService {
+  constructor(private readonly deps: ProxyServiceDeps) {}
 
-  constructor(deps: ISPAServiceDeps) {
-    this.log = deps.logger.child(ISPAService.name);
+  async sendProxyRequest(reqDetails: IncomingRequestDetails, state: ServerState): Promise<ProxyHandlerResponse> {
+    const healthDetails = dto.serverStateToHealthcheckDetailsDto(state);
+    if (!healthDetails.isReady) {
+      const errResponse = dto.errorResponsePeerFailedToStartDto();
+      this.deps.logger.error('PeerServer state is not ready', { healthDetails, errResponse });
+      return errResponse;
+    }
+
+    const proxyTarget = this.getProxyTarget(reqDetails, state);
+    const { httpsAgent } = state;
+
+    return this.deps.httpClient.sendRequest({
+      httpsAgent,
+      url: proxyTarget.url,
+      headers: proxyTarget.headers,
+      method: reqDetails.method,
+      data: reqDetails.payload,
+    });
   }
 
   getProxyTarget(reqDetails: IncomingRequestDetails, state: ServerState) {
-    const { pathname, search } = reqDetails.url;
-    const { baseUrl } = reqDetails.proxyDetails;
+    const { url, headers } = reqDetails;
+    const { accessToken, peerEndpoint } = state;
 
     const proxyTarget = {
-      url: `${pm4mlEnabled ? SCHEME_HTTPS : SCHEME_HTTP}://${baseUrl}${pathname}${search}`,
+      url: `${pm4mlEnabled ? SCHEME_HTTPS : SCHEME_HTTP}://${peerEndpoint}${url.pathname}${url.search}`,
       headers: {
-        ...this.cleanupIncomingHeaders(reqDetails.headers),
+        ...this.cleanupIncomingHeaders(headers),
         [PROXY_HEADER]: PROXY_ID,
-        [AUTH_HEADER]: `Bearer ${state.accessToken}`,
+        [AUTH_HEADER]: `Bearer ${accessToken}`,
       },
     };
-    this.log.verbose('proxyTarget: ', proxyTarget);
+    this.deps.logger.verbose('proxyTarget: ', proxyTarget);
     return proxyTarget;
   }
 

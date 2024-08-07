@@ -1,21 +1,19 @@
 import https from 'node:https';
-import axios from 'axios'; // todo: add wrapper
-import config from '#src/config';
-import { PROXY_HEADER, AUTH_HEADER, SCHEME_HTTPS } from '#src/constants';
-import { loggerFactory } from '#src/utils';
+import axios from 'axios'; // add wrapper?
 
+import config from '#src/config';
+import { PROXY_HEADER, AUTH_HEADER, SCHEME_HTTPS, HEALTH_STATUSES } from '#src/constants';
+import { loggerFactory } from '#src/utils';
 import * as fixtures from '#test/fixtures';
 
 const PROXY_HOST = 'http://localhost';
-
-const { serverAConfig, hubAConfig, PROXY_ID } = config.get();
-
 const logger = loggerFactory('ISPA Tests');
+const { peerAConfig, PROXY_ID } = config.get();
 
 const checkProxyServiceHeaders = (headers: Record<string, unknown>) => {
   expect(headers[PROXY_HEADER.toLowerCase()]).toBe(PROXY_ID);
   expect(headers[AUTH_HEADER.toLowerCase()]).toMatch(/^Bearer /);
-  // todo: add possibility to validate token value
+  // add possibility to validate token value
 };
 
 const sendRequest = async (options: axios.AxiosRequestConfig) =>
@@ -30,12 +28,11 @@ describe('ISPA Integration Tests -->', () => {
     const payload = { value: 'test1' };
     const headerName = 'test-header'; // (!) headers in response are always lowercased
     const headers = { [headerName]: 'test2' };
-    const url = `${PROXY_HOST}:${serverAConfig.port}${path}`;
+    const url = `${PROXY_HOST}:${peerAConfig.serverConfig.port}${path}`;
 
-    // data is "echo" of initial request details: method, path, body, headers, query
     const {
       status,
-      data,
+      data, // data is "echo" of initial request details: method, path, body, headers, query
       headers: responseHeaders,
     } = await sendRequest({
       method: 'POST',
@@ -55,8 +52,16 @@ describe('ISPA Integration Tests -->', () => {
     });
   });
 
+  test('should have healthcheck endpoint', async () => {
+    const { status, data } = await sendRequest({
+      url: `${PROXY_HOST}:${peerAConfig.serverConfig.port}/health`,
+    });
+    expect(status).toBe(200);
+    expect(data.status).toBe(HEALTH_STATUSES.ok);
+  });
+
   describe('mTLS hub (peer-endpoint) Tests -->', () => {
-    const url = `${SCHEME_HTTPS}://${hubAConfig.baseUrl}/int-test`;
+    const url = `${SCHEME_HTTPS}://${peerAConfig.peerEndpoint}/int-test`;
     logger.info('mTLS URL', { url });
     // prettier-ignore
     const sendGetRequest = (options: axios.AxiosRequestConfig) => sendRequest({

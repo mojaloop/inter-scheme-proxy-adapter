@@ -56,11 +56,11 @@ export interface ICACerts {
   cert: string;
   key: string;
   ca: string;
-};
+}
 
 /**************************************************************************
  * ICAPeerJWSCerts
- * 
+ *
  * Interface for the peer JWS certificates
  **************************************************************************/
 
@@ -106,7 +106,7 @@ export interface IMCMCertData {
  *************************************************************************/
 export type GenericObject = Record<string, unknown>;
 
-type GenericWsData = unknown; // todo: define the shape of the data
+type GenericWsData = unknown;
 
 export type WsPayload = {
   verb: VERB;
