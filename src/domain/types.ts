@@ -58,7 +58,7 @@ export type TPeerServer = {
   start: () => Promise<boolean>;
   stop: () => Promise<boolean>;
   on: (eventName: typeof INTERNAL_EVENTS.peerJWS, listener: (peerJWSEvent: PeerJWSEvent) => void) => void;
-  propagatePeerJWSEvent: (peerJWSEvent: PeerJWSEvent) => void;
+  propagatePeerJWSEvent: (peerJWSEvent: PeerJWSEvent) => boolean;
   // state: ServerState; // PeerState?
 };
 

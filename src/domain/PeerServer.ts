@@ -51,10 +51,11 @@ export class PeerServer extends EventEmitter implements TPeerServer {
   propagatePeerJWSEvent(event: PeerJWSEvent) {
     if (!this.isReady) {
       this.deps.logger.warn('peerJWSEvent is NOT sent, coz peerServer is not ready');
-      return;
+      return false;
     }
     this.deps.controlAgent.sendPeerJWS(event?.peerJWS);
-    this.deps.logger.verbose('peerJWSEvent is sent');
+    this.deps.logger.debug('peerJWSEvent is sent');
+    return true;
   }
 
   private async startPm4mlPart() {

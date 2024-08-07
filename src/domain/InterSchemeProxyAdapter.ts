@@ -32,13 +32,13 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
     const { peerA, peerB, logger } = this.deps;
 
     peerA.on(INTERNAL_EVENTS.peerJWS, (event: PeerJWSEvent) => {
-      peerB.propagatePeerJWSEvent(event);
-      logger.info('peerJWS event is propagated [A --> B]');
+      const isSent = peerB.propagatePeerJWSEvent(event);
+      logger.info('peerJWS event is processed [A --> B]', { isSent });
     });
 
     peerB.on(INTERNAL_EVENTS.peerJWS, (event: PeerJWSEvent) => {
-      peerA.propagatePeerJWSEvent(event);
-      logger.info('peerJWS event is propagated [B --> A]');
+      const isSent = peerA.propagatePeerJWSEvent(event);
+      logger.info('peerJWS event is processed [B --> A]', { isSent });
     });
   }
 }

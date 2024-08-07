@@ -7,7 +7,8 @@ export type Json =
   | Array<Json>;
 
 // todo: import from @mojaloop/central-services-logger
-export type TLogLevels = 'error' | 'warn' | 'info' | 'verbose' | 'debug' | 'silly' | 'audit' | 'trace' | 'perf';
+export const logLevelValues = ['error', 'warn', 'info', 'verbose', 'debug', 'silly', 'audit', 'trace', 'perf'] as const;
+export type TLogLevels = (typeof logLevelValues)[number];
 
 export type LogMeta = unknown; //  Json | Error | null;
 export type LogContext = Json | string | null;
