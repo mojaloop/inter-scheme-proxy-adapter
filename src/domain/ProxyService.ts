@@ -12,7 +12,7 @@ export class ProxyService implements IProxyService {
     const healthDetails = dto.serverStateToHealthcheckDetailsDto(state);
     if (!healthDetails.isReady) {
       const errResponse = dto.errorResponsePeerFailedToStartDto();
-      this.deps.logger.error('PeerServer state is not ready', { healthDetails, errResponse });
+      this.deps.logger.warn('PeerServer state is not ready', { healthDetails, errResponse });
       return errResponse;
     }
 
