@@ -1,12 +1,16 @@
 import { IHttpServer, PeerServer } from '#src/domain';
+import { ICACallbacks } from '#src/infra';
 import * as fixtures from '#test/fixtures';
 
-export const mockControlAgent = (peer: PeerServer) => {
+export const mockControlAgent = (peer: PeerServer, certs = { ...fixtures.certsJson.wrong }) => {
   const deps = peer['deps'];
   expect(deps).toBeTruthy();
+  deps.controlAgent['init'] = async (cbs: ICACallbacks) => {
+    cbs.onCert(certs);
+  };
   deps.controlAgent['open'] = async () => {};
   deps.controlAgent['close'] = async () => {};
-  deps.controlAgent['loadCerts'] = async () => ({ ...fixtures.certsJson.wrong });
+  deps.controlAgent['loadCerts'] = async () => certs;
   deps.controlAgent['triggerFetchPeerJws'] = () => {};
   // todo: find a better way to mock MenAPI (ws) functionality
 };
