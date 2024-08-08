@@ -84,9 +84,14 @@ export class ControlAgent implements IControlAgent {
       // Reconnect on close
       this._ws.on('close', () => {
         log.warn(`${this.id} websocket disconnected`);
+
         if (this._shouldReconnect) {
           log.info(`${this.id} reconnecting in ${this._reconnectInterval}ms...`);
-          setTimeout(() => this.open(), this._reconnectInterval);
+          setTimeout(async () => {
+            await this.open();
+            await this.loadCerts();
+            log.debug(`${this.id} reconnecting is done`);
+          }, this._reconnectInterval);
         }
       });
 
@@ -177,7 +182,11 @@ export class ControlAgent implements IControlAgent {
       this._logger.warn('wrong verb or message in ws response', { res });
       throw new TypeError(`Failed to read initial certs from ${this.id}`);
     }
-    return ControlAgent.extractCerts(res.data);
+    const certs = ControlAgent.extractCerts(res.data);
+    this._callbackFns?.onCert(certs);
+
+    this._logger.debug('loadCerts is done');
+    return certs; // think, if we need to return certs here
   }
 
   triggerFetchPeerJws(): void {

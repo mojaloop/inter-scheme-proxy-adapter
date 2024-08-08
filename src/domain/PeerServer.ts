@@ -63,9 +63,8 @@ export class PeerServer extends EventEmitter implements TPeerServer {
       try {
         await this.getAccessToken();
         await this.initControlAgent();
-        await this.loadInitialCerts();
         this.startPeerJwsRefreshLoop();
-        this.deps.logger.verbose('certs and accessToken are ready');
+        this.deps.logger.info('accessToken and certs are ready');
       } catch (err) {
         this.deps.logger.error('error in startPm4mlPart:', err);
         if (!NEED_RETRY_ON_FAILURE) throw err;
@@ -107,18 +106,14 @@ export class PeerServer extends EventEmitter implements TPeerServer {
   }
 
   private async initControlAgent() {
-    await this.deps.controlAgent.init({
+    const { controlAgent, logger } = this.deps;
+
+    await controlAgent.init({
       onCert: (certs: ICACerts) => this.emitServerStateEvent({ certs }),
       onPeerJWS: (peerJWS: ICAPeerJWSCert[]) => this.emitPeerJWSEvent({ peerJWS }),
     });
-    this.deps.logger.debug('initControlAgent is done');
-    return true;
-  }
-
-  private async loadInitialCerts() {
-    const certs = await this.deps.controlAgent.loadCerts();
-    this.emitServerStateEvent({ certs });
-    this.deps.logger.debug('loadInitialCerts is done');
+    await controlAgent.loadCerts();
+    logger.verbose('initControlAgent is done');
     return true;
   }
 

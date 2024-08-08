@@ -170,9 +170,10 @@ describe('ControlAgent Tests', () => {
     });
     const actual = await controlAgent.loadCerts();
     expect(actual).toStrictEqual(certs.outbound.tls.creds);
+    expect(callbacks.onCert).toHaveBeenCalledWith(actual);
   });
 
-  test('should throw if invalid message recived in loadCerts', async () => {
+  test('should throw if invalid message received in loadCerts', async () => {
     const certs = mtlsCertsDto();
     const certsMsg = controlAgent.build.CONFIGURATION.NOTIFY(certs as any);
     mockSocket.on('message', (data) => {

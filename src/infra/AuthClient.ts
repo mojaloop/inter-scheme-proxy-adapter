@@ -41,8 +41,9 @@ export class AuthClient implements IAuthClient {
 
   private sendRequest(): Promise<OIDCTokenResponse> {
     const httpOptions = this.createHttpOptions();
+    this.deps.logger.debug('sendRequest with httpOptions...', { httpOptions });
     return axios(httpOptions);
-    // todo: think, if it's better to add abstraction on top of axios lib, and pass it through deps
+    // todo: try to use HttpClient as abstraction on top of axios lib (pass it through deps)
   }
 
   private createHttpOptions() {
