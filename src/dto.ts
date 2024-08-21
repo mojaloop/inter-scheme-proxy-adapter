@@ -1,4 +1,7 @@
 import { ServerState, HealthcheckDetails } from './types';
+import config from './config'; // try to avoid this dependency (pass through deps?)
+
+const { pm4mlEnabled } = config.get();
 
 type ErrorInformation = {
   errorCode: string;
@@ -38,6 +41,11 @@ export const errorResponsePeerFailedToStartDto = () =>
   });
 
 export const serverStateToHealthcheckDetailsDto = (state: ServerState): HealthcheckDetails => {
+  if(!pm4mlEnabled) {
+    return {
+      isReady: true
+    }
+  }
   const accessToken = Boolean(state.accessToken);
   const certs = Boolean(state.httpsAgent);
   return Object.freeze({

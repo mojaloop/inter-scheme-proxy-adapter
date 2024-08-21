@@ -7,9 +7,7 @@ import { INTERNAL_EVENTS, SERVICE_NAME, HEALTH_STATUSES } from '../../constants'
 import * as dto from '../../dto';
 import { HttpServerDeps, HealthcheckState } from '../types';
 import { loggingPlugin } from './plugins';
-import config from '../../config'; // try to avoid this dependency (pass through deps?)
 
-const { pm4mlEnabled } = config.get();
 
 export class HttpServer extends EventEmitter implements IHttpServer {
   private readonly server: Hapi.Server;
@@ -54,7 +52,7 @@ export class HttpServer extends EventEmitter implements IHttpServer {
 
   heathCheck(): HealthcheckState {
     // todo: think, if we need to ping peerEndpoint?
-    const details = pm4mlEnabled ? dto.serverStateToHealthcheckDetailsDto(this.state) : { isReady: true };
+    const details = dto.serverStateToHealthcheckDetailsDto(this.state);
     return Object.freeze({
       status: details.isReady ? HEALTH_STATUSES.ok : HEALTH_STATUSES.down,
       details,
