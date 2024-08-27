@@ -2,6 +2,8 @@ import axios from 'axios';
 import { IAuthClient, OIDCToken } from '../domain/types';
 import { AuthClientDeps } from './types';
 
+const IN_ADVANCE_PERIOD_SEC = 30; // think, if it's better to make it configurable
+
 type OIDCTokenResponse = axios.AxiosResponse<OIDCToken>;
 
 export class AuthClient implements IAuthClient {
@@ -25,7 +27,7 @@ export class AuthClient implements IAuthClient {
     emitNewToken(access_token);
 
     const { refreshSeconds, tokenEndpoint } = this.deps.authConfig;
-    const updateTimeoutSec = Math.min(refreshSeconds, expires_in);
+    const updateTimeoutSec = Math.min(refreshSeconds, expires_in) - IN_ADVANCE_PERIOD_SEC;
     this.deps.logger.verbose('accessToken updated, waiting for next updates...', { updateTimeoutSec, tokenEndpoint });
 
     this.timer = setTimeout(this.startAccessTokenUpdates.bind(this, emitNewToken), updateTimeoutSec * 1000);
