@@ -10,6 +10,8 @@ export const SCHEME_HTTPS = 'https';
 
 export const DEFAULT_ERROR_STATUS_CODE = 503;
 
+export const IN_ADVANCE_PERIOD_SEC = 30; // time before accessToken expiration to update it
+
 export const INTERNAL_EVENTS = {
   serverState: 'serverState',
   peerJWS: 'peerJWS',

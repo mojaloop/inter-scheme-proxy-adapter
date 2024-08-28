@@ -118,9 +118,9 @@ export class HttpServer extends EventEmitter implements IHttpServer {
     this.on(INTERNAL_EVENTS.serverState, (data: ServerStateEvent) => {
       if (!data) return;
 
-      if (data.accessToken) {
+      if (typeof data.accessToken === 'string') {
         this.state.accessToken = data.accessToken;
-        logger.debug('accessToken is updated', data.accessToken);
+        logger.debug('accessToken is updated', data);
       }
 
       if (data.certs) {

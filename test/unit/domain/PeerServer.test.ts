@@ -7,7 +7,7 @@ import MockAdapter from 'axios-mock-adapter';
 import { PeerServer, IHttpServer } from '#src/domain';
 import { HealthcheckState } from '#src/infra';
 import { createPeerServer } from '#src/createProxyAdapter';
-import { HEALTH_STATUSES, INTERNAL_EVENTS } from '#src/constants';
+import { HEALTH_STATUSES, INTERNAL_EVENTS, IN_ADVANCE_PERIOD_SEC } from '#src/constants';
 import config from '#src/config';
 import * as dto from '#src/dto';
 
@@ -17,17 +17,21 @@ import { injectHttpRequest, mockControlAgent } from '#test/utils';
 const { peerBConfig } = config.get();
 const mockAxios = new MockAdapter(axios);
 
+const resetTokenEndpoint = (status = 200, token: unknown = fixtures.oidcTokenDto()) => {
+  mockAxios.reset();
+  mockAxios.onPost(`/${peerBConfig.authConfig.tokenEndpoint}`).reply(status, token);
+};
+
 const injectHealthCheckRequest = async (httpServer: IHttpServer) =>
   injectHttpRequest<HealthcheckState>(httpServer, '/health');
 
 describe('PeerServer Tests -->', () => {
   let peer: PeerServer;
 
-  beforeEach(async () => {
+  beforeEach(() => {
     peer = createPeerServer(peerBConfig);
     mockControlAgent(peer);
-    mockAxios.reset();
-    mockAxios.onPost(`/${peerBConfig.authConfig.tokenEndpoint}`).reply(200, fixtures.oidcTokenDto());
+    resetTokenEndpoint();
   });
 
   afterEach(async () => {
@@ -92,6 +96,22 @@ describe('PeerServer Tests -->', () => {
     await sleep(config.get('retryStartTimeoutSec') * 1000);
     ({ statusCode } = await injectHealthCheckRequest(httpServer));
     expect(statusCode).toBe(200);
+  });
+
+  test('should return unhealthy status in case of error during accessToken updates', async () => {
+    const sec = 1;
+    const oidcToken = fixtures.oidcTokenDto({ expires_in: IN_ADVANCE_PERIOD_SEC + sec });
+    resetTokenEndpoint(200, oidcToken);
+
+    await peer.start();
+    resetTokenEndpoint(500, {});
+    await sleep((sec + 2) * 1000); // wait for accessToken updates to fail
+
+    const { result, statusCode } = await injectHealthCheckRequest(peer['deps'].httpServer);
+    expect(statusCode).toBe(502);
+    expect(result?.details.accessToken).toBe(false);
+    expect(result?.details.isReady).toBe(false);
+    expect(result?.details.certs).toBe(true);
   });
 
   test('should not send peerJWS event, if peerServer is not started', async () => {
