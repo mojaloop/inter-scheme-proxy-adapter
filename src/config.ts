@@ -39,11 +39,17 @@ const config = convict<AppConfig>({
         sensitive: true,
         env: 'OAUTH_CLIENT_SECRET_A',
       },
-      refreshSeconds: {
-        doc: 'Time interval (in sec) to update access token on hub A',
+      accessTokenUpdateIntervalSec: {
+        doc: 'Time interval to update access token on hub A (in seconds)',
         format: Number,
         default: 60,
         env: 'OAUTH_REFRESH_SECONDS_A',
+      },
+      retryAccessTokenUpdatesTimeoutSec: {
+        doc: 'Interval to retry accessToken updates in case of error (in seconds)',
+        format: Number,
+        default: 5,
+        env: 'RETRY_ACCESS_TOKEN_UPDATES_TIMEOUT_SEC',
       },
     },
 
@@ -120,11 +126,17 @@ const config = convict<AppConfig>({
         sensitive: true,
         env: 'OAUTH_CLIENT_SECRET_B',
       },
-      refreshSeconds: {
-        doc: 'Time interval (in sec) to update access token on hub B',
+      accessTokenUpdateIntervalSec: {
+        doc: 'Time interval to update access token on hub B (in seconds)',
         format: Number,
         default: 60,
         env: 'OAUTH_REFRESH_SECONDS_B',
+      },
+      retryAccessTokenUpdatesTimeoutSec: {
+        doc: 'Interval to retry accessToken updates in case of error (in seconds)',
+        format: Number,
+        default: 5,
+        env: 'RETRY_ACCESS_TOKEN_UPDATES_TIMEOUT_SEC',
       },
     },
 

@@ -43,7 +43,8 @@ export type AuthConfig = {
   tokenEndpoint: string;
   clientKey: string; // or rename it to clientId?
   clientSecret: string;
-  refreshSeconds: number;
+  accessTokenUpdateIntervalSec: number;
+  retryAccessTokenUpdatesTimeoutSec: number;
   // think, if we need to add mTlsEnabled option
 };
 
