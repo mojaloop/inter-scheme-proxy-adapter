@@ -6,7 +6,7 @@ on:
 
 jobs:
   lint-and-test:
-    uses: infitx-org/inter-scheme-proxy-adapter/.github/workflows/main.yml@main
+    uses: mojaloop/inter-scheme-proxy-adapter/.github/workflows/main.yml@main
 
   build-and-push-image:
     needs: lint-and-test
