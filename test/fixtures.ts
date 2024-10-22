@@ -39,7 +39,7 @@ export const requestDetailsDto = ({
 
 export const oidcTokenDto = ({
   access_token = 'accessToken',
-  expires_in = Date.now() + 60 * 60,
+  expires_in = 60 * 10, // in seconds
   token_type = 'tokenType',
   scope = 'email',
 } = {}): OIDCToken => ({

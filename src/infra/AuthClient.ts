@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { IAuthClient, OIDCToken } from '../domain/types';
+import { IN_ADVANCE_PERIOD_SEC } from '../constants';
 import { AuthClientDeps } from './types';
 
 type OIDCTokenResponse = axios.AxiosResponse<OIDCToken>;
@@ -9,26 +10,41 @@ export class AuthClient implements IAuthClient {
 
   constructor(private readonly deps: AuthClientDeps) {}
 
-  async getOidcToken() {
-    const { data, status }: OIDCTokenResponse = await this.sendRequest();
-    this.deps.logger.debug('oidc token received:', { data, status });
+  async getOidcToken(): Promise<OIDCToken | null> {
+    const { logger } = this.deps;
+    try {
+      const { data, status }: OIDCTokenResponse = await this.sendRequest();
+      logger.debug('oidc token data received:', { data, status });
 
-    if (!data.access_token || !data.expires_in) {
-      throw new Error('Invalid response from token endpoint');
-      // todo: think if we need to throw an error OR just log it and return null
+      if (!data.access_token || !data.expires_in) {
+        throw new Error('Invalid response format from token endpoint');
+      }
+      return data;
+    } catch (err) {
+      logger.error('error in getOidcToken:', err);
+      return null;
     }
-    return data;
   }
 
-  async startAccessTokenUpdates(emitNewToken: (token: string) => void) {
-    const { access_token, expires_in = Infinity } = await this.getOidcToken();
-    emitNewToken(access_token);
+  async startAccessTokenUpdates(emitNewToken: (token: string) => void): Promise<boolean> {
+    const { authConfig, logger } = this.deps;
 
-    const { refreshSeconds, tokenEndpoint } = this.deps.authConfig;
-    const updateTimeoutSec = Math.min(refreshSeconds, expires_in);
-    this.deps.logger.verbose('accessToken updated, waiting for next updates...', { updateTimeoutSec, tokenEndpoint });
+    const tokenData = await this.getOidcToken();
+    let updateTimeoutSec: number;
 
+    if (!tokenData) {
+      emitNewToken('');
+      updateTimeoutSec = authConfig.retryAccessTokenUpdatesTimeoutSec;
+      // todo: think, if we need to stop after several failed retries
+    } else {
+      const { access_token, expires_in = Infinity } = tokenData;
+      emitNewToken(access_token);
+      updateTimeoutSec = Math.min(authConfig.accessTokenUpdateIntervalSec, expires_in) - IN_ADVANCE_PERIOD_SEC;
+    }
+    logger.verbose(`accessToken is ${tokenData ? '' : 'NOT '}updated, next time in:`, { updateTimeoutSec });
     this.timer = setTimeout(this.startAccessTokenUpdates.bind(this, emitNewToken), updateTimeoutSec * 1000);
+
+    return !!tokenData;
   }
 
   stopUpdates() {

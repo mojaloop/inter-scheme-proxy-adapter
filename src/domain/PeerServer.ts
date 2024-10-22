@@ -100,9 +100,11 @@ export class PeerServer extends EventEmitter implements TPeerServer {
 
   private async getAccessToken() {
     const emitNewToken = (accessToken: string) => this.emitServerStateEvent({ accessToken });
-    await this.deps.authClient.startAccessTokenUpdates(emitNewToken);
-    this.deps.logger.debug('getAccessToken is done');
-    return true;
+    const isOk = await this.deps.authClient.startAccessTokenUpdates(emitNewToken);
+    if (!isOk) throw new Error('getAccessToken is failed');
+
+    this.deps.logger.debug('getAccessToken is done', { isOk });
+    return isOk;
   }
 
   private async initControlAgent() {
