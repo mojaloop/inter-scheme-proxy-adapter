@@ -72,7 +72,7 @@ export type AuthClientDeps = {
 type Status = (typeof HEALTH_STATUSES)[keyof typeof HEALTH_STATUSES];
 
 export type HealthcheckDetails = {
-  [key in keyof Required<ServerStateEvent>]: boolean;
+  [key in keyof Required<ServerStateEvent>]?: boolean;
 } & { isReady: boolean };
 
 export type HealthcheckState = {
