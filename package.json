@@ -20,7 +20,7 @@
     "test:coverage-check": "npm run test:unit -- --coverage",
     "test:int": "jest --testMatch='**/test/integration/**/*.test.ts'",
     "test:functional": "echo \"ACTION: Add functional test here, or remove this script. Also check CI configs to comment out the necessary job'\"",
-    "test:integration": "npm run test:int",
+    "test:integration": "./test/scripts/test-integration.sh",
     "lint": "eslint ./src/**/*.ts ./test/**/*.ts",
     "lint:fix": "npm run lint -- --fix",
     "build": "tsc",
