@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.3](https://github.com/mojaloop/inter-scheme-proxy-adapter/compare/v1.3.2...v1.3.3) (2024-12-04)
+
+
+### Chore
+
+* release ([7fb47b6](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/7fb47b6dfeb51302999952f7dcfccee6e0d62bbb))
+
 ### [1.3.2](https://github.com/mojaloop/inter-scheme-proxy-adapter/compare/v1.3.0-snapshot.8...v1.3.2) (2024-12-04)
 
 
