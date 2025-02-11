@@ -1,10 +1,10 @@
-import axios from 'axios';
+import { AxiosResponse } from 'axios';
 import { IAuthClient, OIDCToken, OidcResponseData, AccessTokenUpdatesResult } from '../domain/types';
 import { IN_ADVANCE_PERIOD_SEC } from '../constants';
 import { DnsError } from '../errors';
 import { AuthClientDeps } from './types';
 
-type OidcHttpResponse = axios.AxiosResponse<OIDCToken>;
+type OidcHttpResponse = AxiosResponse<OIDCToken>;
 
 export class AuthClient implements IAuthClient {
   private timer: NodeJS.Timeout | null = null;
@@ -58,10 +58,10 @@ export class AuthClient implements IAuthClient {
   }
 
   private sendRequest(): Promise<OidcHttpResponse> {
+    const { axiosInstance, logger } = this.deps;
     const httpOptions = this.createHttpOptions();
-    this.deps.logger.debug('sendRequest with httpOptions...', { httpOptions });
-    return axios(httpOptions);
-    // add HttpClient as abstraction on top of axios lib (pass it through deps)
+    logger.debug('sendRequest with httpOptions...', { httpOptions });
+    return axiosInstance(httpOptions);
   }
 
   private createHttpOptions() {

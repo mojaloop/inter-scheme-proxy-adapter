@@ -1,6 +1,5 @@
-import { AuthClient } from '#src/infra';
+import { AuthClient, configureAxios } from '#src/infra';
 import { logger } from '#src/utils';
-import { DnsError } from '#src/errors';
 import config from '#src/config';
 
 describe('AuthClient Tests -->', () => {
@@ -8,7 +7,8 @@ describe('AuthClient Tests -->', () => {
 
   beforeEach(() => {
     const { authConfig } = config.get('peerAConfig');
-    authClient = new AuthClient({ authConfig, logger });
+    const axiosInstance = configureAxios({ logger });
+    authClient = new AuthClient({ axiosInstance, authConfig, logger });
   });
 
   test('should return oidcToken === null in case of any network error', async () => {

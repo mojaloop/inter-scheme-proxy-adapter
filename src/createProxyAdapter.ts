@@ -1,16 +1,25 @@
 import { Config } from 'convict';
 import { InterSchemeProxyAdapter, ISPADeps, PeerServer, ProxyService } from './domain';
 import { loggerFactory } from './utils';
-import { AuthClient, createHttpServer, createControlAgent, HttpClient, AppConfig, PeerServerConfig } from './infra';
+import {
+  AppConfig,
+  AuthClient,
+  configureAxios,
+  createControlAgent,
+  createHttpServer,
+  HttpClient,
+  PeerServerConfig,
+} from './infra';
 
 export const createPeerServer = (peerConfig: PeerServerConfig) => {
   const { peer, peerEndpoint, authConfig, controlAgentConfig, serverConfig } = peerConfig;
 
   const logger = loggerFactory({ peer });
-  const httpClient = new HttpClient({ logger });
+  const axiosInstance = configureAxios({ logger });
+  const httpClient = new HttpClient({ axiosInstance, logger });
 
   const proxyService = new ProxyService({ httpClient, logger });
-  const authClient = new AuthClient({ authConfig, logger });
+  const authClient = new AuthClient({ axiosInstance, authConfig, logger });
   const controlAgent = createControlAgent({ peer, controlAgentConfig, logger });
   const httpServer = createHttpServer({ serverConfig, peerEndpoint, logger });
 
