@@ -125,4 +125,16 @@ describe('PeerServer Tests -->', () => {
     peer.propagatePeerJWSEvent({ peerJWS: fixtures.peerJWSCertsDto() });
     expect(peerJWSSpy).not.toHaveBeenCalled();
   });
+
+  test('should call retryStartPm4ml with isDnsError=true, in case of DNS-related issue', async () => {
+    const { authClient } = peer['deps'];
+    authClient['getOidcToken'] = async () => {
+      return { oidcToken: null, error: new axios.AxiosError('getaddrinfo ENOTFOUND ...') };
+    };
+    const isDnsError = true;
+    const retrySpy = jest.spyOn(peer as any, 'retryStartPm4ml');
+    await peer.start();
+
+    expect(retrySpy).toHaveBeenCalledWith(isDnsError);
+  });
 });

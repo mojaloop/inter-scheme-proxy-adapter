@@ -112,9 +112,27 @@ export interface IHttpServer {
   hapiServer: Readonly<Server>; // for testing purposes
 }
 
+export type OidcResponseData =
+  | {
+      oidcToken: OIDCToken;
+    }
+  | {
+      oidcToken: null;
+      error: unknown;
+    };
+
+export type AccessTokenUpdatesResult =
+  | {
+      success: true;
+    }
+  | {
+      success: false;
+      error: unknown;
+    };
+
 export interface IAuthClient {
-  getOidcToken: () => Promise<OIDCToken | null>;
-  startAccessTokenUpdates: (cb: (token: string) => void) => Promise<boolean>;
+  getOidcToken: () => Promise<OidcResponseData>;
+  startAccessTokenUpdates: (cb: (token: string) => void) => Promise<AccessTokenUpdatesResult>;
   stopUpdates: () => void;
 }
 

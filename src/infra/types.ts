@@ -16,6 +16,7 @@ export type AppConfig = {
   incomingHeadersRemoval: string[];
   checkPeerJwsInterval: number;
   retryStartTimeoutSec: number;
+  retryDnsErrorTimeoutSec: number;
 };
 
 export type PeerServerConfig = {
@@ -45,7 +46,7 @@ export type AuthConfig = {
   clientSecret: string;
   accessTokenUpdateIntervalSec: number;
   retryAccessTokenUpdatesTimeoutSec: number;
-  // think, if we need to add mTlsEnabled option
+  retryDnsErrorTimeoutSec: number; // or try to add it only to the AppConfig?
 };
 
 export type TlsOptions = Readonly<{

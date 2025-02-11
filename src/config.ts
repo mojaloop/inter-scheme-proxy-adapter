@@ -51,6 +51,12 @@ const config = convict<AppConfig>({
         default: 5,
         env: 'RETRY_ACCESS_TOKEN_UPDATES_TIMEOUT_SEC',
       },
+      retryDnsErrorTimeoutSec: {
+        doc: 'Interval to retry DNS errors (in seconds)',
+        format: Number,
+        default: 5,
+        env: 'RETRY_DNS_ERROR_TIMEOUT_SEC',
+      },
     },
 
     controlAgentConfig: {
@@ -138,6 +144,12 @@ const config = convict<AppConfig>({
         default: 5,
         env: 'RETRY_ACCESS_TOKEN_UPDATES_TIMEOUT_SEC',
       },
+      retryDnsErrorTimeoutSec: {
+        doc: 'Interval to retry DNS errors (in seconds)',
+        format: Number,
+        default: 5,
+        env: 'RETRY_DNS_ERROR_TIMEOUT_SEC',
+      },
     },
 
     controlAgentConfig: {
@@ -216,6 +228,13 @@ const config = convict<AppConfig>({
     format: Number,
     default: 60,
     env: 'RETRY_START_TIMEOUT_SEC',
+  },
+
+  retryDnsErrorTimeoutSec: {
+    doc: 'Interval to retry DNS errors (in seconds)',
+    format: Number,
+    default: 5,
+    env: 'RETRY_DNS_ERROR_TIMEOUT_SEC',
   },
 });
 

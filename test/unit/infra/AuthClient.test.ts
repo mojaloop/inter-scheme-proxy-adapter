@@ -1,5 +1,6 @@
 import { AuthClient } from '#src/infra';
 import { logger } from '#src/utils';
+import { DnsError } from '#src/errors';
 import config from '#src/config';
 
 describe('AuthClient Tests -->', () => {
@@ -10,10 +11,11 @@ describe('AuthClient Tests -->', () => {
     authClient = new AuthClient({ authConfig, logger });
   });
 
-  test('should return null in case of any network error', async () => {
+  test('should return oidcToken === null in case of any network error', async () => {
     authClient['deps'].authConfig.tokenEndpoint = 'http://123-xyz.abcd/token';
-    const token = await authClient.getOidcToken();
-    expect(token).toBeNull();
+    const oidcData = await authClient.getOidcToken();
+    expect(oidcData.oidcToken).toBeNull();
+    expect(DnsError.isDnsRelatedError((oidcData as any).error)).toBe(true);
   });
 
   test('should emit empty string as accessToken in case of any error during getOidcToken()', async () => {
