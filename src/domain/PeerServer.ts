@@ -97,8 +97,7 @@ export class PeerServer extends EventEmitter implements TPeerServer {
     // prettier-ignore
     const delayMs = 1000 * (isDnsError
       ? config.get('retryDnsErrorTimeoutSec')
-      : config.get('retryStartTimeoutSec')
-    );
+      : config.get('retryStartTimeoutSec'));
     this.retryStartTimer = setTimeout(() => this.startPm4mlPart(), delayMs);
     this.deps.logger.info('retryStartPm4ml is scheduled', { isDnsError, delayMs });
   }

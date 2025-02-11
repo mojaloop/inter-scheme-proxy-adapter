@@ -1,22 +1,17 @@
-import axios from 'axios';
-import { IHttpClient, ILogger, HttpRequestOptions, ProxyHandlerResponse } from '../domain/types';
+import { isAxiosError, AxiosError } from 'axios';
+import { IHttpClient, HttpRequestOptions, ProxyHandlerResponse } from '../domain/types';
+import { HttpClientDeps } from './types';
 import { DEFAULT_ERROR_STATUS_CODE } from '../constants';
-
-axios.defaults.headers.common = {}; // to avoid setting "accept"/"content-type" headers by default
-
-type HttpClientDeps = {
-  logger: ILogger;
-};
 
 export class HttpClient implements IHttpClient {
   constructor(private readonly deps: HttpClientDeps) {}
 
   async sendRequest(options: HttpRequestOptions): Promise<ProxyHandlerResponse> {
-    const { logger } = this.deps;
+    const { axiosInstance, logger } = this.deps;
     const { httpsAgent, ...restOptions } = options;
 
     try {
-      const result = await axios({
+      const result = await axiosInstance({
         ...restOptions,
         ...(httpsAgent && { httpsAgent }),
       });
@@ -34,8 +29,8 @@ export class HttpClient implements IHttpClient {
   private prepareErrorResponse(err: unknown): ProxyHandlerResponse {
     this.deps.logger.error('proxy response error:', err);
 
-    if (axios.isAxiosError(err)) {
-      const axiosError = err as axios.AxiosError;
+    if (isAxiosError(err)) {
+      const axiosError = err as AxiosError;
       if (axiosError.response) {
         const { data, status, headers } = axiosError.response;
         return { data, status, headers };

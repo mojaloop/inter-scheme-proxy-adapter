@@ -1,4 +1,5 @@
 import { type Agent } from 'node:https';
+import { AxiosInstance } from 'axios';
 import { PeerLabel, ILogger, ServerStateEvent } from '../domain/types';
 /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 import { HEALTH_STATUSES } from '../constants';
@@ -64,10 +65,15 @@ export type HttpServerDeps = {
   logger: ILogger;
 };
 
+export type HttpClientDeps = {
+  axiosInstance: AxiosInstance;
+  logger: ILogger;
+};
+
 export type AuthClientDeps = {
+  axiosInstance: AxiosInstance;
   authConfig: AuthConfig;
   logger: ILogger;
-  // httpClient: HttpClient; // axios
 };
 
 type Status = (typeof HEALTH_STATUSES)[keyof typeof HEALTH_STATUSES];
