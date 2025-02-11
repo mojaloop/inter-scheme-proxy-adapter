@@ -38,7 +38,6 @@ export class AuthClient implements IAuthClient {
       updateTimeoutSec = DnsError.isDnsRelatedError(oidcData.error)
         ? authConfig.retryDnsErrorTimeoutSec
         : authConfig.retryAccessTokenUpdatesTimeoutSec;
-      // think, if we need to stop after several failed retries
     } else {
       const { access_token, expires_in = Infinity } = oidcData.oidcToken;
       emitNewToken(access_token);

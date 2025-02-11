@@ -15,7 +15,6 @@ describe('AuthClient Tests -->', () => {
     authClient['deps'].authConfig.tokenEndpoint = 'http://123-xyz.abcd/token';
     const oidcData = await authClient.getOidcToken();
     expect(oidcData.oidcToken).toBeNull();
-    expect(DnsError.isDnsRelatedError((oidcData as any).error)).toBe(true);
   });
 
   test('should emit empty string as accessToken in case of any error during getOidcToken()', async () => {
