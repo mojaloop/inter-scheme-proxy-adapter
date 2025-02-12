@@ -1,16 +1,15 @@
 import { ProxyService, IProxyService } from '#src/domain';
-import { HttpClient } from '#src/infra';
+import { HttpClient, configureAxios } from '#src/infra';
 import { PROXY_HEADER, AUTH_HEADER, SCHEME_HTTPS } from '#src/constants';
 import { logger } from '#src/utils';
 import config from '#src/config';
 import * as fixtures from '#test/fixtures';
 
-const httpClient = new HttpClient({ logger });
-
 describe('ISPAService Tests -->', () => {
   let service: IProxyService;
 
   beforeEach(() => {
+    const httpClient = new HttpClient({ logger, axiosInstance: configureAxios({ logger }) });
     service = new ProxyService({ httpClient, logger });
   });
 

@@ -41,10 +41,10 @@ export const errorResponsePeerFailedToStartDto = () =>
   });
 
 export const serverStateToHealthcheckDetailsDto = (state: ServerState): HealthcheckDetails => {
-  if(!pm4mlEnabled) {
+  if (!pm4mlEnabled) {
     return {
-      isReady: true
-    }
+      isReady: true,
+    };
   }
   const accessToken = Boolean(state.accessToken);
   const certs = Boolean(state.httpsAgent);

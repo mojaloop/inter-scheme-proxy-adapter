@@ -12,6 +12,16 @@ module.exports = {
     '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.test.json' }],
   },
   collectCoverage: true,
+  // todo: improve coverage
+  // coverageThreshold: {
+  //   global: {
+  //     branches: 90,
+  //     functions: 90,
+  //     lines: 90,
+  //     statements: 90,
+  //   },
+  // },
+  collectCoverageFrom: ['./src/**'],
   coveragePathIgnorePatterns: [
     '<rootDir>/src/utils/Logger.ts',
     '<rootDir>/src/utils/startingProcess.ts',

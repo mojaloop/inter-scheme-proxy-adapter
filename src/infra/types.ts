@@ -1,4 +1,5 @@
 import { type Agent } from 'node:https';
+import { AxiosInstance } from 'axios';
 import { PeerLabel, ILogger, ServerStateEvent } from '../domain/types';
 /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 import { HEALTH_STATUSES } from '../constants';
@@ -16,6 +17,7 @@ export type AppConfig = {
   incomingHeadersRemoval: string[];
   checkPeerJwsInterval: number;
   retryStartTimeoutSec: number;
+  retryDnsErrorTimeoutSec: number;
 };
 
 export type PeerServerConfig = {
@@ -45,7 +47,7 @@ export type AuthConfig = {
   clientSecret: string;
   accessTokenUpdateIntervalSec: number;
   retryAccessTokenUpdatesTimeoutSec: number;
-  // think, if we need to add mTlsEnabled option
+  retryDnsErrorTimeoutSec: number; // or try to add it only to the AppConfig?
 };
 
 export type TlsOptions = Readonly<{
@@ -63,10 +65,15 @@ export type HttpServerDeps = {
   logger: ILogger;
 };
 
+export type HttpClientDeps = {
+  axiosInstance: AxiosInstance;
+  logger: ILogger;
+};
+
 export type AuthClientDeps = {
+  axiosInstance: AxiosInstance;
   authConfig: AuthConfig;
   logger: ILogger;
-  // httpClient: HttpClient; // axios
 };
 
 type Status = (typeof HEALTH_STATUSES)[keyof typeof HEALTH_STATUSES];

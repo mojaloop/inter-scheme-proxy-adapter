@@ -1,5 +1,6 @@
 import { EventEmitter } from 'node:events';
 import { INTERNAL_EVENTS } from '../constants';
+import { DnsError } from '../errors';
 import { ICACerts, ICAPeerJWSCert } from '../infra';
 import config from '../config'; // try to avoid this dependency (pass through ctor?)
 import {
@@ -68,7 +69,7 @@ export class PeerServer extends EventEmitter implements TPeerServer {
       } catch (err) {
         this.deps.logger.error('error in startPm4mlPart:', err);
         if (!NEED_RETRY_ON_FAILURE) throw err;
-        await this.retryStartPm4ml();
+        await this.retryStartPm4ml(DnsError.isDnsRelatedError(err));
         return false;
       }
     }
@@ -90,21 +91,24 @@ export class PeerServer extends EventEmitter implements TPeerServer {
     return (this.isReady = false);
   }
 
-  private async retryStartPm4ml() {
-    // todo: think if it's better to retry only failed steps
+  private async retryStartPm4ml(isDnsError = false) {
+    // think, if it's better to retry only failed steps
     await this.stopPm4mlPart();
-    const delayMs = config.get('retryStartTimeoutSec') * 1000;
+    // prettier-ignore
+    const delayMs = 1000 * (isDnsError
+      ? config.get('retryDnsErrorTimeoutSec')
+      : config.get('retryStartTimeoutSec'));
     this.retryStartTimer = setTimeout(() => this.startPm4mlPart(), delayMs);
-    this.deps.logger.info('retryStartPm4ml is scheduled', { delayMs });
+    this.deps.logger.info('retryStartPm4ml is scheduled', { isDnsError, delayMs });
   }
 
   private async getAccessToken() {
     const emitNewToken = (accessToken: string) => this.emitServerStateEvent({ accessToken });
-    const isOk = await this.deps.authClient.startAccessTokenUpdates(emitNewToken);
-    if (!isOk) throw new Error('getAccessToken is failed');
+    const result = await this.deps.authClient.startAccessTokenUpdates(emitNewToken);
+    if (!result.success) throw result.error;
 
-    this.deps.logger.debug('getAccessToken is done', { isOk });
-    return isOk;
+    this.deps.logger.debug('getAccessToken is done', result);
+    return result.success;
   }
 
   private async initControlAgent() {

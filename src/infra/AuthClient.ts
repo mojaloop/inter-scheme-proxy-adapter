@@ -1,50 +1,52 @@
-import axios from 'axios';
-import { IAuthClient, OIDCToken } from '../domain/types';
+import { AxiosResponse } from 'axios';
+import { IAuthClient, OIDCToken, OidcResponseData, AccessTokenUpdatesResult } from '../domain/types';
 import { IN_ADVANCE_PERIOD_SEC } from '../constants';
+import { DnsError } from '../errors';
 import { AuthClientDeps } from './types';
 
-type OIDCTokenResponse = axios.AxiosResponse<OIDCToken>;
+type OidcHttpResponse = AxiosResponse<OIDCToken>;
 
 export class AuthClient implements IAuthClient {
   private timer: NodeJS.Timeout | null = null;
 
   constructor(private readonly deps: AuthClientDeps) {}
 
-  async getOidcToken(): Promise<OIDCToken | null> {
+  async getOidcToken(): Promise<OidcResponseData> {
     const { logger } = this.deps;
     try {
-      const { data, status }: OIDCTokenResponse = await this.sendRequest();
-      logger.debug('oidc token data received:', { data, status });
+      const { data, status }: OidcHttpResponse = await this.sendRequest();
+      logger.debug('oidcToken data received:', { data, status });
 
       if (!data.access_token || !data.expires_in) {
-        throw new Error('Invalid response format from token endpoint');
+        throw new Error('Invalid response format from oidcToken endpoint');
       }
-      return data;
-    } catch (err) {
-      logger.error('error in getOidcToken:', err);
-      return null;
+      return { oidcToken: data };
+    } catch (error: unknown) {
+      logger.error('error in getOidcToken:', error);
+      return { oidcToken: null, error };
     }
   }
 
-  async startAccessTokenUpdates(emitNewToken: (token: string) => void): Promise<boolean> {
+  async startAccessTokenUpdates(emitNewToken: (token: string) => void): Promise<AccessTokenUpdatesResult> {
     const { authConfig, logger } = this.deps;
 
-    const tokenData = await this.getOidcToken();
+    const oidcData = await this.getOidcToken();
     let updateTimeoutSec: number;
 
-    if (!tokenData) {
+    if (!oidcData.oidcToken) {
       emitNewToken('');
-      updateTimeoutSec = authConfig.retryAccessTokenUpdatesTimeoutSec;
-      // todo: think, if we need to stop after several failed retries
+      updateTimeoutSec = DnsError.isDnsRelatedError(oidcData.error)
+        ? authConfig.retryDnsErrorTimeoutSec
+        : authConfig.retryAccessTokenUpdatesTimeoutSec;
     } else {
-      const { access_token, expires_in = Infinity } = tokenData;
+      const { access_token, expires_in = Infinity } = oidcData.oidcToken;
       emitNewToken(access_token);
       updateTimeoutSec = Math.min(authConfig.accessTokenUpdateIntervalSec, expires_in) - IN_ADVANCE_PERIOD_SEC;
     }
-    logger.verbose(`accessToken is ${tokenData ? '' : 'NOT '}updated, next time in:`, { updateTimeoutSec });
+    logger.verbose(`accessToken is ${oidcData.oidcToken ? '' : 'NOT '}updated, next time in:`, { updateTimeoutSec });
     this.timer = setTimeout(this.startAccessTokenUpdates.bind(this, emitNewToken), updateTimeoutSec * 1000);
 
-    return !!tokenData;
+    return this.makeAccessTokenUpdatesResult(oidcData);
   }
 
   stopUpdates() {
@@ -55,11 +57,11 @@ export class AuthClient implements IAuthClient {
     }
   }
 
-  private sendRequest(): Promise<OIDCTokenResponse> {
+  private sendRequest(): Promise<OidcHttpResponse> {
+    const { axiosInstance, logger } = this.deps;
     const httpOptions = this.createHttpOptions();
-    this.deps.logger.debug('sendRequest with httpOptions...', { httpOptions });
-    return axios(httpOptions);
-    // todo: try to use HttpClient as abstraction on top of axios lib (pass it through deps)
+    logger.debug('sendRequest with httpOptions...', { httpOptions });
+    return axiosInstance(httpOptions);
   }
 
   private createHttpOptions() {
@@ -78,5 +80,15 @@ export class AuthClient implements IAuthClient {
       },
       // add httpsAgent, if we need mTLS
     });
+  }
+
+  private makeAccessTokenUpdatesResult(data: OidcResponseData): AccessTokenUpdatesResult {
+    // prettier-ignore
+    return data.oidcToken
+      ? { success: true }
+      : {
+        success: false,
+        error: (data.error instanceof Error) ? data.error : new Error('Unknown Error in getOidcToken', { cause: data.error }),
+      };
   }
 }
