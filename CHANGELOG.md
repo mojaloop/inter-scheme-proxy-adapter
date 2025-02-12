@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.4.0](https://github.com/mojaloop/inter-scheme-proxy-adapter/compare/v1.3.4...v1.4.0) (2025-02-12)
+
+
+### Features
+
+* **csi-1120:** added support for DNS-related http errors ([314d3ee](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/314d3ee07b83e6d095ec7b0e213f1a0887dcc378))
+* **csi-1120:** added support for DNS-related http errors ([a6aec6a](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/a6aec6af67805cb0873cc1f9ffe0cff3b95aed09))
+* **csi-1120:** added support for DNS-related http errors ([66d5c2c](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/66d5c2cb8c3d46c268d957810f71a857ab0ff2de))
+* **csi-1120:** code cleaning ([26dc37f](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/26dc37f4d5141bf22832bb921d7800fdb96c2338))
+* **csi-1120:** updated deps ([65c51d7](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/65c51d7628fd3f84b1a1f2a31d06033340ab5673))
+* **csi-1120:** updated from main ([0d9ae61](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/0d9ae618a17c27290aced39044f18efb971f4f59))
+* **csi-1185:** added support retry logic ([5f51320](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/5f51320fa18e33987da6f47f2568c6e62cf35028))
+* **csi-1185:** added support retry logic ([e0bbd0b](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/e0bbd0b4b0c2a9ef620146dd71c85845802fb99d))
+* **csi-1185:** added support retry logic ([40d55dd](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/40d55ddf5051937bb1f857738328ca883b95ab1e))
+* **csi-1185:** added support retry logic ([0bc0774](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/0bc077401c0ff0d90c35abec600580395b0c0ed4))
+
 ### [1.3.4](https://github.com/mojaloop/inter-scheme-proxy-adapter/compare/v1.3.3...v1.3.4) (2025-02-04)
 
 
