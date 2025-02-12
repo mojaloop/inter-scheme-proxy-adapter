@@ -127,7 +127,7 @@ export type AccessTokenUpdatesResult =
     }
   | {
       success: false;
-      error: unknown;
+      error: Error; // Error or any of its descendant
     };
 
 export interface IAuthClient {

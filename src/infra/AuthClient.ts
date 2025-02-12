@@ -86,6 +86,9 @@ export class AuthClient implements IAuthClient {
     // prettier-ignore
     return data.oidcToken
       ? { success: true }
-      : { success: false, error: data.error };
+      : {
+        success: false,
+        error: (data.error instanceof Error) ? data.error : new Error('Unknown Error in getOidcToken', { cause: data.error }),
+      };
   }
 }
