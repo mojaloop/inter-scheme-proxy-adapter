@@ -37,9 +37,10 @@ export interface ICAParams {
   id?: string;
   address?: string;
   port: number;
-  timeout: number;
-  logger: ILogger;
+  connectionTimeout: number;
+  timeout: number; // to receive a single message
   reconnectInterval: number;
+  logger: ILogger;
 }
 
 /**************************************************************************

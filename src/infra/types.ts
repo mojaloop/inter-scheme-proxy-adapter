@@ -37,6 +37,7 @@ export type ServerConfig = {
 export type ControlAgentConfig = {
   wsHost: string;
   wsPort: number;
+  connectionTimeout: number;
   timeout: number;
   reconnectInterval: number;
 };

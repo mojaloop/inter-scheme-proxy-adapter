@@ -17,6 +17,8 @@ import {
 
 const WS_CLOSE_TIMEOUT_MS = 5_000;
 
+type Timer = NodeJS.Timeout | undefined;
+
 /**************************************************************************
  * Client
  *
@@ -28,23 +30,27 @@ const WS_CLOSE_TIMEOUT_MS = 5_000;
  *************************************************************************/
 export class ControlAgent implements IControlAgent {
   private _ws: WebSocket | null = null;
-  private _id: string;
   private _logger: ILogger;
+  private _callbackFns: ICACallbacks | null = null;
+  private _id: string;
   private _address: string;
   private _port: number;
-  private _callbackFns: ICACallbacks | null = null;
+  private _connectionTimeout: number;
   private _timeout: number;
   private _reconnectInterval: number;
   private _shouldReconnect: boolean;
+
+  private reconnectTimer: Timer;
 
   constructor(params: ICAParams) {
     this._id = params.id || 'ControlAgent';
     this._address = params.address || 'localhost';
     this._port = params.port;
-    this._logger = params.logger;
+    this._connectionTimeout = params.connectionTimeout;
     this._timeout = params.timeout;
-    this._shouldReconnect = true;
     this._reconnectInterval = params.reconnectInterval;
+    this._shouldReconnect = true;
+    this._logger = params.logger;
     this.receive = this.receive.bind(this);
   }
 
@@ -69,6 +75,13 @@ export class ControlAgent implements IControlAgent {
     const log = this._logger.child({ address });
 
     return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => {
+        clearTimeout(this.reconnectTimer);
+        const errMessage = `${this.id} websocket connection timeout during ${this._connectionTimeout} ms`;
+        log.error(errMessage);
+        reject(new Error(errMessage));
+      }, this._connectionTimeout);
+
       if (this._ws && this._ws.readyState === WebSocket.OPEN) {
         reject(new Error('WebSocket is already open'));
         return;
@@ -77,6 +90,7 @@ export class ControlAgent implements IControlAgent {
       this._ws = new WebSocket(address);
 
       this._ws.on('open', () => {
+        clearTimeout(timer);
         log.info(`${this.id} websocket connected`);
         resolve();
       });
@@ -86,11 +100,11 @@ export class ControlAgent implements IControlAgent {
         log.warn(`${this.id} websocket disconnected`);
 
         if (this._shouldReconnect) {
-          log.info(`${this.id} reconnecting in ${this._reconnectInterval}ms...`);
-          setTimeout(async () => {
+          log.debug(`${this.id} websocket reconnecting in ${this._reconnectInterval} ms...`);
+          this.reconnectTimer = setTimeout(async () => {
             await this.open();
             await this.loadCerts();
-            log.debug(`${this.id} reconnecting is done`);
+            log.verbose(`${this.id} websocket reconnecting is done`);
           }, this._reconnectInterval);
         }
       });
@@ -166,9 +180,8 @@ export class ControlAgent implements IControlAgent {
           }
         }
 
-        resolve(msg);
-
         clearTimeout(timer);
+        resolve(msg);
       });
     });
   }

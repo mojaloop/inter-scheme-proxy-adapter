@@ -8,7 +8,6 @@ import * as dto from '../../dto';
 import { HttpServerDeps, HealthcheckState } from '../types';
 import { loggingPlugin } from './plugins';
 
-
 export class HttpServer extends EventEmitter implements IHttpServer {
   private readonly server: Hapi.Server;
   // think, if it's better to move state to PeerServer or ProxyService?
@@ -29,7 +28,7 @@ export class HttpServer extends EventEmitter implements IHttpServer {
     const { logger } = this.deps;
     await this.registerPlugins();
     await this.registerProxy(proxyHandler);
-    this.deps.logger.debug('plugins and routes are registered');
+    logger.debug('plugins and routes are registered');
     await this.server.start();
     logger.verbose('httpServer is started', this.server.info);
     return true;

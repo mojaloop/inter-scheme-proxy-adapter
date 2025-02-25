@@ -11,12 +11,13 @@ type createControlAgentDeps = {
 
 export const createControlAgent = (deps: createControlAgentDeps) => {
   const id = `controlAgent-${deps.peer}`;
-  const { wsHost, wsPort, timeout, reconnectInterval } = deps.controlAgentConfig;
+  const { wsHost, wsPort, connectionTimeout, timeout, reconnectInterval } = deps.controlAgentConfig;
 
   return new ControlAgent({
     id,
     address: wsHost,
     port: wsPort,
+    connectionTimeout,
     timeout,
     reconnectInterval,
     logger: deps.logger.child(id),

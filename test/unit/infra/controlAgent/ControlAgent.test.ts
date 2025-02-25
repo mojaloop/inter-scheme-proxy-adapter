@@ -17,6 +17,17 @@ describe('ControlAgent Tests', () => {
   const wsAddress = 'localhost';
   const wsPort = 8000;
 
+  const testControlAgentParamsDto = () =>
+    Object.freeze({
+      id: 'testControlAgent',
+      address: wsAddress,
+      port: wsPort,
+      logger,
+      connectionTimeout: 1_000,
+      timeout: 5_000,
+      reconnectInterval: 1_000,
+    });
+
   beforeEach(async () => {
     logger = loggerFactory();
     logLevelValues.forEach((method) => {
@@ -38,14 +49,7 @@ describe('ControlAgent Tests', () => {
       onPeerJWS: jest.fn(),
     };
 
-    controlAgent = new ControlAgent({
-      id: 'testControlAgent',
-      address: wsAddress,
-      port: wsPort,
-      logger,
-      timeout: 5_000,
-      reconnectInterval: 1_000,
-    });
+    controlAgent = new ControlAgent(testControlAgentParamsDto());
 
     // we need to modify the _handle method since mock-socket's
     // message format is different from the one expected by ControlAgent
@@ -75,6 +79,14 @@ describe('ControlAgent Tests', () => {
   test('should open WebSocket connection', async () => {
     expect(logger.info).toHaveBeenCalledWith('testControlAgent websocket connected');
     expect(mockWsServer.clients()).toHaveLength(1);
+  });
+
+  test('should throw connection timeout error if no "open" event occurred', async () => {
+    expect.assertions(1);
+    const ctrlAgent = new ControlAgent({ ...testControlAgentParamsDto(), address: 'ws://some.host' });
+    await ctrlAgent.open().catch((err) => {
+      expect(err.message).toContain('websocket connection timeout');
+    });
   });
 
   test('should reconnect on close', async () => {
