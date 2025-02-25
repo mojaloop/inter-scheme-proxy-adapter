@@ -110,7 +110,7 @@ export class ControlAgent implements IControlAgent {
       });
 
       this._ws.on('error', (error) => {
-        log.error(`${this.id} websocket error`, error);
+        log.error(`${this.id} websocket error [readyState: ${this._ws?.readyState}]`, error);
         this._ws?.close();
       });
 
