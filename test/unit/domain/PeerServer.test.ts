@@ -49,9 +49,9 @@ describe('PeerServer Tests -->', () => {
 
     const { result, statusCode } = await injectHealthCheckRequest(httpServer);
     expect(result).toBeDefined();
-    expect(result?.status).toBe(HEALTH_STATUSES.down);
+    expect(result?.status).toBe(HEALTH_STATUSES.ok);
     expect(result?.details.accessToken).toBe(false);
-    expect(statusCode).toBe(502);
+    expect(statusCode).toBe(200);
   });
 
   test('should return successful healthCheck state if all data exists', async () => {
@@ -90,16 +90,18 @@ describe('PeerServer Tests -->', () => {
 
     await peer.start();
 
-    let { statusCode } = await injectHealthCheckRequest(httpServer);
+    let { statusCode, result } = await injectHealthCheckRequest(httpServer);
     expect(retrySpy).toHaveBeenCalledTimes(1);
-    expect(statusCode).toBe(502);
+    expect(statusCode).toBe(200);
+    expect(result?.details.isReady).toBe(false);
 
     await sleep(config.get('retryStartTimeoutSec') * 1000);
-    ({ statusCode } = await injectHealthCheckRequest(httpServer));
+    ({ statusCode, result } = await injectHealthCheckRequest(httpServer));
     expect(statusCode).toBe(200);
+    expect(result?.details.isReady).toBe(true);
   });
 
-  test('should return unhealthy status in case of error during accessToken updates', async () => {
+  test('should return healthy status in case of error during accessToken updates', async () => {
     const sec = 1;
     const oidcToken = fixtures.oidcTokenDto({ expires_in: IN_ADVANCE_PERIOD_SEC + sec });
     resetTokenEndpoint(200, oidcToken);
@@ -109,7 +111,7 @@ describe('PeerServer Tests -->', () => {
     await sleep((sec + 2) * 1000); // wait for accessToken updates to fail
 
     const { result, statusCode } = await injectHealthCheckRequest(peer['deps'].httpServer);
-    expect(statusCode).toBe(502);
+    expect(statusCode).toBe(200);
     expect(result?.details.accessToken).toBe(false);
     expect(result?.details.isReady).toBe(false);
     expect(result?.details.certs).toBe(true);

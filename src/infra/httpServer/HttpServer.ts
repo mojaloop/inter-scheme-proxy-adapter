@@ -50,10 +50,9 @@ export class HttpServer extends EventEmitter implements IHttpServer {
   }
 
   heathCheck(): HealthcheckState {
-    // todo: think, if we need to ping peerEndpoint?
     const details = dto.serverStateToHealthcheckDetailsDto(this.state);
     return Object.freeze({
-      status: details.isReady ? HEALTH_STATUSES.ok : HEALTH_STATUSES.down,
+      status: HEALTH_STATUSES.ok, // we check only if httpServer is up and running
       details,
       startTime: new Date(this.server.info.created).toISOString(),
       versionNumber: SERVICE_NAME,
