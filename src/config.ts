@@ -72,8 +72,14 @@ const config = convict<AppConfig>({
         default: null,
         env: 'MGMT_API_WS_PORT_A',
       },
+      connectionTimeout: {
+        doc: 'Connection timeout for control agent A',
+        format: Number,
+        default: 4000,
+        env: 'MGMT_API_WS_CONNECTION_TIMEOUT_A',
+      },
       timeout: {
-        doc: 'Timeout for control agent A',
+        doc: 'Message timeout for control agent A',
         format: Number,
         default: 5000,
         env: 'MGMT_API_WS_TIMEOUT_A',
@@ -165,8 +171,14 @@ const config = convict<AppConfig>({
         default: null,
         env: 'MGMT_API_WS_PORT_B',
       },
+      connectionTimeout: {
+        doc: 'Connection timeout for control agent B',
+        format: Number,
+        default: 4000,
+        env: 'MGMT_API_WS_CONNECTION_TIMEOUT_B',
+      },
       timeout: {
-        doc: 'Timeout for control agent B',
+        doc: 'Message timeout for control agent B',
         format: Number,
         default: 5000,
         env: 'MGMT_API_WS_TIMEOUT_B',

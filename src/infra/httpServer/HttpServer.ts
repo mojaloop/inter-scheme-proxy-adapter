@@ -8,7 +8,6 @@ import * as dto from '../../dto';
 import { HttpServerDeps, HealthcheckState } from '../types';
 import { loggingPlugin } from './plugins';
 
-
 export class HttpServer extends EventEmitter implements IHttpServer {
   private readonly server: Hapi.Server;
   // think, if it's better to move state to PeerServer or ProxyService?
@@ -29,7 +28,7 @@ export class HttpServer extends EventEmitter implements IHttpServer {
     const { logger } = this.deps;
     await this.registerPlugins();
     await this.registerProxy(proxyHandler);
-    this.deps.logger.debug('plugins and routes are registered');
+    logger.debug('plugins and routes are registered');
     await this.server.start();
     logger.verbose('httpServer is started', this.server.info);
     return true;
@@ -51,10 +50,9 @@ export class HttpServer extends EventEmitter implements IHttpServer {
   }
 
   heathCheck(): HealthcheckState {
-    // todo: think, if we need to ping peerEndpoint?
     const details = dto.serverStateToHealthcheckDetailsDto(this.state);
     return Object.freeze({
-      status: details.isReady ? HEALTH_STATUSES.ok : HEALTH_STATUSES.down,
+      status: HEALTH_STATUSES.ok, // we check only if httpServer is up and running
       details,
       startTime: new Date(this.server.info.created).toISOString(),
       versionNumber: SERVICE_NAME,

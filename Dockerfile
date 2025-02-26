@@ -7,7 +7,7 @@ ARG NODE_VERSION=lts-alpine
 #    -t infitx-org/inter-scheme-proxy-adapter:local \
 #    . \
 
-FROM node:${NODE_VERSION} as builder
+FROM node:${NODE_VERSION} AS builder
 
 WORKDIR /opt/app
 COPY tsconfig.json package*.json ./
