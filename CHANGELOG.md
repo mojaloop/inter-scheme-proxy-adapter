@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.4.1](https://github.com/mojaloop/inter-scheme-proxy-adapter/compare/v1.4.0...v1.4.1) (2025-02-26)
+
+
+### Bug Fixes
+
+* **csi-1238:** added timeout on ws-connection ([4f457f2](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/4f457f2b2af07170806c351e6528f625c80a74dd))
+* **csi-1238:** added ws.readyState to error log ([f4d0757](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/f4d075766344eb19d116516db089b30c5dc6f450))
+* **csi-1238:** updated deps ([d1d8017](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/d1d80174205e356f983e0b8ccd68f957ac479924))
+* **csi-1238:** updated healthCheck logic ([c4196e8](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/c4196e80b93b695cef716eff71f61698773e0ac8))
+
 ## [1.4.0](https://github.com/mojaloop/inter-scheme-proxy-adapter/compare/v1.3.4...v1.4.0) (2025-02-12)
 
 
