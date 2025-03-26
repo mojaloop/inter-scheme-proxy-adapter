@@ -218,7 +218,10 @@ export class ControlAgent implements IControlAgent {
 
   private _checkSocketState() {
     if (!this._ws || this._ws.readyState !== WebSocket.OPEN) {
-      throw new Error(`${this.id} WebSocket is not open`);
+      const errMessage = `${this.id} WebSocket is not open  [ws.readyState: ${this._ws?.readyState}]`;
+      this._logger.warn(errMessage);
+      // todo: try to reconnect
+      throw new Error(errMessage);
     }
   }
 
