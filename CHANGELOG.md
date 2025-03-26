@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.4.2](https://github.com/mojaloop/inter-scheme-proxy-adapter/compare/v1.4.1...v1.4.2) (2025-03-26)
+
+
+### Chore
+
+* **csi-1343:** added log to ws _checkSocketState ([29892cd](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/29892cde04c61f236d970e68811b65037e1d65eb))
+* **csi-1343:** added log to ws _checkSocketState ([ceaa64e](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/ceaa64ecc6b86542b239188f160a1ca657f73fe8))
+
 ### [1.4.1](https://github.com/mojaloop/inter-scheme-proxy-adapter/compare/v1.4.0...v1.4.1) (2025-02-26)
 
 
