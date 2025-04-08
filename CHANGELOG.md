@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.5.0](https://github.com/mojaloop/inter-scheme-proxy-adapter/compare/v1.4.2...v1.5.0) (2025-04-08)
+
+
+### Features
+
+* add broken connection logic ([#14](https://github.com/mojaloop/inter-scheme-proxy-adapter/issues/14)) ([bf662c9](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/bf662c95c2ffb38a6a9c6c60d7d3270be8ce061b))
+
 ### [1.4.2](https://github.com/mojaloop/inter-scheme-proxy-adapter/compare/v1.4.1...v1.4.2) (2025-03-26)
 
 
