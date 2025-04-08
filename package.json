@@ -38,7 +38,7 @@
   "dependencies": {
     "@hapi/hapi": "^21.4.0",
     "@mojaloop/central-services-logger": "^11.8.1",
-    "@mojaloop/sdk-standard-components": "^19.11.2",
+    "@mojaloop/sdk-standard-components": "^19.11.3",
     "axios": "^1.8.4",
     "axios-retry": "4.5.0",
     "convict": "^6.2.4",
