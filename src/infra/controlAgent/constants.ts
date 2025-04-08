@@ -27,3 +27,5 @@ export enum ERROR {
 export enum EVENT {
   RECONFIGURE = 'RECONFIGURE',
 }
+
+export const PING_INTERVAL_MS = 30000;

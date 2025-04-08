@@ -81,21 +81,6 @@ describe('ControlAgent Tests', () => {
     expect(mockWsServer.clients()).toHaveLength(1);
   });
 
-  test('should throw connection timeout error if no "open" event occurred', async () => {
-    expect.assertions(1);
-    const ctrlAgent = new ControlAgent({ ...testControlAgentParamsDto(), address: 'ws://some.host' });
-    await ctrlAgent.open().catch((err) => {
-      expect(err.message).toContain('websocket connection timeout');
-    });
-  });
-
-  test('should reconnect on close', async () => {
-    const openSpy = jest.spyOn(controlAgent, 'open');
-    mockSocket.close();
-    await wait(1500);
-    expect(openSpy).toHaveBeenCalled();
-  });
-
   test('should close socket on error', async () => {
     const closeSpy = controlAgent['_ws'] && jest.spyOn(controlAgent['_ws'], 'close');
     mockWsServer.emit('error', {});

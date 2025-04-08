@@ -1,6 +1,6 @@
 import ws, { WebSocket } from 'ws';
 import { ILogger } from '../../domain';
-import { MESSAGE, VERB } from './constants';
+import { MESSAGE, VERB, PING_INTERVAL_MS } from './constants';
 import { build, deserialise, serialise } from './mcm';
 import {
   GenericObject,
@@ -35,20 +35,15 @@ export class ControlAgent implements IControlAgent {
   private _id: string;
   private _address: string;
   private _port: number;
-  private _connectionTimeout: number;
   private _timeout: number;
-  private _reconnectInterval: number;
   private _shouldReconnect: boolean;
-
-  private reconnectTimer: Timer;
+  private _pingTimeout: Timer;
 
   constructor(params: ICAParams) {
     this._id = params.id || 'ControlAgent';
     this._address = params.address || 'localhost';
     this._port = params.port;
-    this._connectionTimeout = params.connectionTimeout;
     this._timeout = params.timeout;
-    this._reconnectInterval = params.reconnectInterval;
     this._shouldReconnect = true;
     this._logger = params.logger;
     this.receive = this.receive.bind(this);
@@ -75,12 +70,15 @@ export class ControlAgent implements IControlAgent {
     const log = this._logger.child({ address });
 
     return new Promise((resolve, reject) => {
-      const timer = setTimeout(() => {
-        clearTimeout(this.reconnectTimer);
-        const errMessage = `${this.id} websocket connection timeout during ${this._connectionTimeout} ms`;
-        log.error(errMessage);
-        reject(new Error(errMessage));
-      }, this._connectionTimeout);
+      const schedulePing = () => {
+        clearTimeout(this._pingTimeout);
+        this._pingTimeout = setTimeout(async () => {
+            log.error('Ping timeout, possible broken connection. Restarting server...');
+            await this.open();
+            await this.loadCerts();
+        }, PING_INTERVAL_MS + this._timeout);
+      };
+      schedulePing();
 
       if (this._ws && this._ws.readyState === WebSocket.OPEN) {
         reject(new Error('WebSocket is already open'));
@@ -90,9 +88,13 @@ export class ControlAgent implements IControlAgent {
       this._ws = new WebSocket(address);
 
       this._ws.on('open', () => {
-        clearTimeout(timer);
         log.info(`${this.id} websocket connected`);
         resolve();
+      });
+
+      this._ws.on('ping', () => {
+          log.debug('Received ping from control server');
+          schedulePing();
       });
 
       // Reconnect on close
@@ -100,12 +102,7 @@ export class ControlAgent implements IControlAgent {
         log.warn(`${this.id} websocket disconnected`);
 
         if (this._shouldReconnect) {
-          log.debug(`${this.id} websocket reconnecting in ${this._reconnectInterval} ms...`);
-          this.reconnectTimer = setTimeout(async () => {
-            await this.open();
-            await this.loadCerts();
-            log.verbose(`${this.id} websocket reconnecting is done`);
-          }, this._reconnectInterval);
+          schedulePing();
         }
       });
 
@@ -122,6 +119,7 @@ export class ControlAgent implements IControlAgent {
     const log = this._logger;
     // think, if we need to rethrow in case of error?
     const isOK = await new Promise((resolve) => {
+      clearTimeout(this._pingTimeout);
       log.verbose(`shutting down websocket...`, { WS_CLOSE_TIMEOUT_MS });
 
       const timer = setTimeout(() => {
