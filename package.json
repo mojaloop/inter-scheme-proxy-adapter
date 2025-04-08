@@ -37,8 +37,8 @@
   },
   "dependencies": {
     "@hapi/hapi": "^21.4.0",
-    "@mojaloop/central-services-logger": "^11.8.0",
-    "@mojaloop/sdk-standard-components": "^19.11.1",
+    "@mojaloop/central-services-logger": "^11.8.1",
+    "@mojaloop/sdk-standard-components": "^19.11.2",
     "axios": "^1.8.4",
     "axios-retry": "4.5.0",
     "convict": "^6.2.4",
@@ -53,10 +53,10 @@
     "@types/convict": "^6.1.6",
     "@types/jest": "^29.5.14",
     "@types/lodash": "^4.17.16",
-    "@types/node": "^22.13.13",
-    "@types/ws": "^8.18.0",
-    "@typescript-eslint/eslint-plugin": "8.28.0",
-    "@typescript-eslint/parser": "8.28.0",
+    "@types/node": "^22.14.0",
+    "@types/ws": "^8.18.1",
+    "@typescript-eslint/eslint-plugin": "8.29.1",
+    "@typescript-eslint/parser": "8.29.1",
     "audit-ci": "7.1.0",
     "axios-mock-adapter": "^2.1.0",
     "dotenv": "^16.4.7",
@@ -73,9 +73,9 @@
     "prettier": "3.5.3",
     "replace": "^1.2.2",
     "standard-version": "^9.5.0",
-    "ts-jest": "29.3.0",
+    "ts-jest": "29.3.1",
     "ts-node": "10.9.2",
-    "typescript": "5.8.2"
+    "typescript": "5.8.3"
   },
   "engines": {
     "node": ">=18.x"
