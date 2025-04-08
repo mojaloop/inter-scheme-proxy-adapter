@@ -14,7 +14,6 @@ import {
   isCertsPayload,
   ICAPeerJWSCert,
 } from './types';
-import { AppConfig } from '../types';
 
 const WS_CLOSE_TIMEOUT_MS = 5_000;
 
