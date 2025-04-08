@@ -1,6 +1,6 @@
 import ws, { WebSocket } from 'ws';
 import { ILogger } from '../../domain';
-import { MESSAGE, VERB } from './constants';
+import { MESSAGE, VERB, PING_INTERVAL_MS } from './constants';
 import { build, deserialise, serialise } from './mcm';
 import {
   GenericObject,
@@ -14,6 +14,7 @@ import {
   isCertsPayload,
   ICAPeerJWSCert,
 } from './types';
+import { AppConfig } from '../types';
 
 const WS_CLOSE_TIMEOUT_MS = 5_000;
 
@@ -39,6 +40,7 @@ export class ControlAgent implements IControlAgent {
   private _timeout: number;
   private _reconnectInterval: number;
   private _shouldReconnect: boolean;
+  private _pingTimeout: Timer;
 
   private reconnectTimer: Timer;
 
@@ -87,6 +89,16 @@ export class ControlAgent implements IControlAgent {
         return;
       }
 
+      const schedulePing = () => {
+        clearTimeout(this._pingTimeout);
+        this._pingTimeout = setTimeout(async () => {
+            log.error('Ping timeout, possible broken connection. Restarting server...');
+            await this.open();
+            await this.loadCerts();
+        }, PING_INTERVAL_MS + this._timeout);
+      };
+      schedulePing();
+
       this._ws = new WebSocket(address);
 
       this._ws.on('open', () => {
@@ -95,8 +107,14 @@ export class ControlAgent implements IControlAgent {
         resolve();
       });
 
+      this._ws.on('ping', () => {
+          log.debug('Received ping from control server');
+          schedulePing();
+      });
+
       // Reconnect on close
       this._ws.on('close', () => {
+        clearTimeout(this._pingTimeout);
         log.warn(`${this.id} websocket disconnected`);
 
         if (this._shouldReconnect) {
@@ -122,6 +140,7 @@ export class ControlAgent implements IControlAgent {
     const log = this._logger;
     // think, if we need to rethrow in case of error?
     const isOK = await new Promise((resolve) => {
+      clearTimeout(this._pingTimeout);
       log.verbose(`shutting down websocket...`, { WS_CLOSE_TIMEOUT_MS });
 
       const timer = setTimeout(() => {
