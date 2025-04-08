@@ -36,21 +36,15 @@ export class ControlAgent implements IControlAgent {
   private _id: string;
   private _address: string;
   private _port: number;
-  private _connectionTimeout: number;
   private _timeout: number;
-  private _reconnectInterval: number;
   private _shouldReconnect: boolean;
   private _pingTimeout: Timer;
-
-  private reconnectTimer: Timer;
 
   constructor(params: ICAParams) {
     this._id = params.id || 'ControlAgent';
     this._address = params.address || 'localhost';
     this._port = params.port;
-    this._connectionTimeout = params.connectionTimeout;
     this._timeout = params.timeout;
-    this._reconnectInterval = params.reconnectInterval;
     this._shouldReconnect = true;
     this._logger = params.logger;
     this.receive = this.receive.bind(this);
@@ -77,18 +71,6 @@ export class ControlAgent implements IControlAgent {
     const log = this._logger.child({ address });
 
     return new Promise((resolve, reject) => {
-      const timer = setTimeout(() => {
-        clearTimeout(this.reconnectTimer);
-        const errMessage = `${this.id} websocket connection timeout during ${this._connectionTimeout} ms`;
-        log.error(errMessage);
-        reject(new Error(errMessage));
-      }, this._connectionTimeout);
-
-      if (this._ws && this._ws.readyState === WebSocket.OPEN) {
-        reject(new Error('WebSocket is already open'));
-        return;
-      }
-
       const schedulePing = () => {
         clearTimeout(this._pingTimeout);
         this._pingTimeout = setTimeout(async () => {
@@ -99,10 +81,14 @@ export class ControlAgent implements IControlAgent {
       };
       schedulePing();
 
+      if (this._ws && this._ws.readyState === WebSocket.OPEN) {
+        reject(new Error('WebSocket is already open'));
+        return;
+      }
+
       this._ws = new WebSocket(address);
 
       this._ws.on('open', () => {
-        clearTimeout(timer);
         log.info(`${this.id} websocket connected`);
         resolve();
       });
@@ -114,16 +100,10 @@ export class ControlAgent implements IControlAgent {
 
       // Reconnect on close
       this._ws.on('close', () => {
-        clearTimeout(this._pingTimeout);
         log.warn(`${this.id} websocket disconnected`);
 
         if (this._shouldReconnect) {
-          log.debug(`${this.id} websocket reconnecting in ${this._reconnectInterval} ms...`);
-          this.reconnectTimer = setTimeout(async () => {
-            await this.open();
-            await this.loadCerts();
-            log.verbose(`${this.id} websocket reconnecting is done`);
-          }, this._reconnectInterval);
+          schedulePing();
         }
       });
 
