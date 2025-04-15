@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.5.1](https://github.com/mojaloop/inter-scheme-proxy-adapter/compare/v1.5.0...v1.5.1) (2025-04-15)
+
+
+### Chore
+
+* **csi-1348:** removed @mojaloop/sdk-standard-components ([21b6d4b](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/21b6d4b17b2dbaac8ecf806b321b08c317ae42bb))
+* **csi-1348:** used deps ([bea87f6](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/bea87f6cf6d10d710e1f4e96358da35506ea394b))
+* **csi-1348:** used mojaloop/build@1.0.55 ([06b6010](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/06b6010727348b6bb24c18f7eb915adf4a87ce86))
+
 ## [1.5.0](https://github.com/mojaloop/inter-scheme-proxy-adapter/compare/v1.4.2...v1.5.0) (2025-04-08)
 
 
