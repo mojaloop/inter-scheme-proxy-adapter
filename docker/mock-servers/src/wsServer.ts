@@ -1,11 +1,16 @@
-import * as console from 'node:console';
 import { randomUUID } from 'node:crypto';
 import { WebSocketServer, WebSocket } from 'ws';
-import { WS_PORT, clientCerts } from './config';
+import { WS_PORT, WS_PING_INTERVAL_MS, clientCerts } from './config';
+import { logger } from './utils';
 
-const wss = new WebSocketServer({ port: WS_PORT });
-const sockets: WebSocket[] = [];
-const receivedMessages: any[] = [];
+const log = logger.child({ component: 'wsServer' });
+
+class WsWithAlive extends WebSocket {
+  isAlive = false;
+}
+
+const wss = new WebSocketServer<typeof WsWithAlive>({ port: WS_PORT });
+const receivedMessages: unknown[] = [];
 
 const credsMessageDto = (id: string) => ({
   id,
@@ -21,26 +26,27 @@ const credsMessageDto = (id: string) => ({
 });
 
 const handleTestMessage = (msgObj: any, ws: WebSocket) => {
+  log.info('Received test message', msgObj);
   const { verb, data } = msgObj;
-  console.log('Received test message', msgObj);
 
   switch (verb) {
-    case 'PUBLISH':
+    case 'PUBLISH': {
       const msg = JSON.stringify(data);
-      console.log(`Publishing message: ${msg}`);
-      sockets.forEach((socket) => socket.send(msg));
+      log.verbose(`Publishing message: ${msg}`);
+      wss.clients.forEach((socket) => socket.send(msg));
       break;
+    }
     case 'GET_MESSAGES':
       ws.send(JSON.stringify(receivedMessages));
       break;
     default:
-      console.error(`Unknown verb: ${verb}`);
+      log.error(`Unknown verb: ${verb}`);
   }
 };
 
-wss.on('connection', (ws: WebSocket) => {
-  console.log('Client connected');
-  sockets.push(ws);
+wss.on('connection', (ws: WsWithAlive) => {
+  log.info('Client connected');
+  ws.isAlive = true;
 
   ws.on('message', (message: string) => {
     receivedMessages.unshift(message);
@@ -48,31 +54,52 @@ wss.on('connection', (ws: WebSocket) => {
     const id = `mock-${randomUUID()}`;
     // todo: - check, if we need to extract ID from incoming message
     //       - improve logic to handle different messages
-    console.log(`Received message: ${message}`, { id });
-    
+    log.info('Received message: ', { id, message });
+
     // if this is a test message, handle it and return
     try {
       const msgObj = JSON.parse(message);
       const { msg } = msgObj;
 
       if (msg === 'TEST') {
-        handleTestMessage(msgObj, ws)
+        handleTestMessage(msgObj, ws);
         return;
       }
-    } catch(err) {
-      console.warn('Error parsing message: ', { err, message });
+    } catch (err) {
+      log.warn('Error parsing message: ', { err, message });
     }
 
     ws.send(JSON.stringify(credsMessageDto(id)));
   });
 
-  ws.on('close', () => {
-    console.log('Client disconnected');
+  ws.on('pong', () => {
+    ws.isAlive = true;
   });
 
-  ws.on('error', (error: any) => {
-    console.error(`Connection error: ${error.message}`);
+  ws.on('close', () => {
+    log.info('Client disconnected');
+  });
+
+  ws.on('error', (error: unknown) => {
+    log.error('Connection error: ', error);
   });
 });
 
-console.log(`Mock men-api server is listening on ws://localhost:${WS_PORT}`);
+const interval = setInterval(function ping() {
+  wss.clients.forEach((ws) => {
+    if (!ws.isAlive) return ws.terminate();
+
+    ws.isAlive = false;
+    ws.ping();
+  });
+}, WS_PING_INTERVAL_MS);
+
+wss.on('close', () => {
+  clearInterval(interval);
+  log.warn('WSS is closing...');
+});
+wss.on('error', (err) => {
+  log.error('WSS error: ', err);
+});
+
+log.info(`Mock men-api server is listening on ws://localhost:${WS_PORT}`);

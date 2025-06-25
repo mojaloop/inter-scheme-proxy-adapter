@@ -1,6 +1,6 @@
 {
   "name": "mock-servers",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Mock servers toolkit for development and testing ISPA",
   "author": "Eugen Klymniuk (geka-evk)",
   "main": "src/server.ts",
@@ -13,9 +13,10 @@
     "client:ws": "ts-node src/wsClient.ts"
   },
   "dependencies": {
+    "@mojaloop/central-services-logger": "11.9.0",
     "@types/node": "^20.14.2",
     "body-parser": "^1.20.2",
-    "express": "^4.19.2",
+    "express": "^4.21.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.5",
     "ws": "^8.17.1"
