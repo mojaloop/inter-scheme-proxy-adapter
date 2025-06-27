@@ -26,7 +26,7 @@
  ******/
 
 import { requests, BaseRequestTLSConfig } from '@mojaloop/sdk-standard-components';
-import { ILogger } from '../domain';
+import { ILogger, MlPingRequests } from '../domain';
 
 type CreateMlPingRequestsOptions = {
   logger: ILogger;
@@ -37,25 +37,27 @@ type CreateMlPingRequestsOptions = {
 
 export type MtlsCreds = BaseRequestTLSConfig['creds'];
 
-export const createMlPingRequestsFactory = (opts: CreateMlPingRequestsOptions) => (creds: MtlsCreds) => {
-  const tls = {
-    mutualTLS: { enabled: opts.mTlsEnabled },
-    // todo: clarify a proper format; see BaseRequestTLSConfig and sdk-standard-components/src/lib/requests/baseRequests.js (line 63)
-    enabled: opts.mTlsEnabled,
-    creds,
-  };
+// prettier-ignore
+export const createMlPingRequestsFactory = (opts: CreateMlPingRequestsOptions) =>
+  (creds: MtlsCreds): MlPingRequests => {
+    const tls = {
+      mutualTLS: { enabled: opts.mTlsEnabled },
+      // todo: clarify a proper format; see BaseRequestTLSConfig and sdk-standard-components/src/lib/requests/baseRequests.js (line 63)
+      enabled: opts.mTlsEnabled,
+      creds,
+    };
 
-  return new requests.PingRequests({
-    tls,
-    logger: opts.logger,
-    dfspId: opts.proxyId,
-    peerEndpoint: opts.peerEndpoint,
-    pingEndpoint: opts.peerEndpoint, // think if we need a separate option for pingEndpoint
-    jwsSign: false, // we don't validate JWS for ISPA
-    // think if we need the rest opts:
-    // jwsSigningKey: opts.jwsSigningKey;
-    // wso2: config.wso2;
-    // resourceVersions: opts.resourceVersions;
-    // apiType: opts.apiType;
-  });
-};
+    return new requests.PingRequests({
+      tls,
+      logger: opts.logger,
+      dfspId: opts.proxyId,
+      peerEndpoint: opts.peerEndpoint,
+      pingEndpoint: opts.peerEndpoint, // think if we need a separate option for pingEndpoint
+      jwsSign: false, // we don't validate JWS for ISPA
+      // think if we need the rest opts:
+      // jwsSigningKey: opts.jwsSigningKey;
+      // wso2: config.wso2;
+      // resourceVersions: opts.resourceVersions;
+      // apiType: opts.apiType;
+    });
+  };

@@ -42,15 +42,15 @@ export type MlPingRequests = {
   putPingError: (params: PutPingErrorParams) => Promise<MlPingResponse>; // we don't use is so far
 };
 
-export type PutPingParams = requests.PutPingParams;
-export type PutPingErrorParams = PutPingParams & {
+type PutPingParams = requests.PutPingParams;
+type PutPingErrorParams = PutPingParams & {
   errInfo: Errors.MojaloopApiErrorObject;
 };
-export type MlPingResponse = GenericRequestResponse | undefined;
+type MlPingResponse = GenericRequestResponse | undefined;
 
 export class InboundPingService implements IPingService {
-  private mTlsCreds: MtlsCreds | undefined; // todo: add possibility to get it dynamically
-  protected log: ILogger;
+  private mTlsCreds: MtlsCreds | undefined;
+  private log: ILogger;
 
   constructor(private readonly deps: InboundPingServiceDeps) {
     this.log = deps.logger.child({ component: 'InboundPingService' });

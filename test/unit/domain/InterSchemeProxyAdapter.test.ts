@@ -6,7 +6,7 @@ import MockAdapter from 'axios-mock-adapter';
 
 import { InterSchemeProxyAdapter, PeerServer } from '#src/domain';
 import { createProxyAdapter, createPeerServer } from '#src/createProxyAdapter';
-import { AUTH_HEADER, PROXY_HEADER } from '#src/constants';
+import { HEADERS_FSPIOP, AUTH_HEADER } from '#src/constants';
 import config from '#src/config';
 
 import * as fixtures from '#test/fixtures';
@@ -53,7 +53,7 @@ describe('InterSchemeProxyAdapter Tests -->', () => {
       deps.logger.info('incoming hub request headers:', reqOptions.headers);
       if (!reqOptions?.headers) throw new Error('No headers in request');
 
-      expect(reqOptions.headers[PROXY_HEADER]).toBe(config.get('PROXY_ID'));
+      expect(reqOptions.headers[HEADERS_FSPIOP.PROXY]).toBe(config.get('PROXY_ID'));
       expect(reqOptions.headers[AUTH_HEADER]).toBe(`Bearer ${oidcToken.access_token}`);
       expect(reqOptions.headers.test).toBe(headers.test);
       return [200, mockHubResponse];

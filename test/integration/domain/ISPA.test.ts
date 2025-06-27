@@ -2,7 +2,7 @@ import https from 'node:https';
 import axios from 'axios'; // add wrapper?
 
 import config from '#src/config';
-import { PROXY_HEADER, AUTH_HEADER, SCHEME_HTTPS, HEALTH_STATUSES } from '#src/constants';
+import { HEADERS_FSPIOP, AUTH_HEADER, SCHEME_HTTPS, HEALTH_STATUSES } from '#src/constants';
 import { logger as globalLogger } from '#src/utils';
 import * as fixtures from '#test/fixtures';
 
@@ -11,7 +11,7 @@ const logger = globalLogger.child({ flow: 'ISPA Tests' });
 const { peerAConfig, PROXY_ID } = config.get();
 
 const checkProxyServiceHeaders = (headers: Record<string, unknown>) => {
-  expect(headers[PROXY_HEADER.toLowerCase()]).toBe(PROXY_ID);
+  expect(headers[HEADERS_FSPIOP.PROXY.toLowerCase()]).toBe(PROXY_ID);
   expect(headers[AUTH_HEADER.toLowerCase()]).toMatch(/^Bearer /);
   // add possibility to validate token value
 };

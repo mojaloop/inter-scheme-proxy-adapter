@@ -1,10 +1,11 @@
 import https from 'node:https';
-import * as console from 'node:console';
 import express, { Request, Response, NextFunction } from 'express';
 import bodyParser from 'body-parser';
 
 import { MTLS_PORT, DELAY_MS, HUB_HEADERS } from './config';
-import { createTlsServerOptions } from './utils';
+import { createTlsServerOptions, logger } from './utils';
+
+const log = logger.child({ component: 'hubServer' });
 
 const tlsOpts = createTlsServerOptions();
 
@@ -18,7 +19,7 @@ app.get('/health', (req: Request, res: Response) => {
 
 app.put('/ping/:id', (req: Request, res: Response) => {
   const { body, params } = req;
-  console.log('ping request:', { body, params });
+  log.info('ping request:', { body, params });
   res.status(200).end();
 });
 
@@ -27,7 +28,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   // todo: improve auth validation (jwt-token)
   if (!authorization?.startsWith('Bearer ')) {
     const error = 'Authorization Error';
-    console.error(error, authorization);
+    log.warn(error, authorization);
     res.status(401).json({ error });
   } else {
     next();
@@ -42,7 +43,7 @@ app.all('*', async (req: Request, res: Response) => {
     query: req.query,
     body: req.body,
   };
-  console.log('incoming request...', input);
+  log.info('incoming request...', input);
   await new Promise((resolve) => setTimeout(resolve, DELAY_MS));
 
   res.set(HUB_HEADERS).json(input);
@@ -51,5 +52,5 @@ app.all('*', async (req: Request, res: Response) => {
 const httpsServer = https.createServer(tlsOpts, app);
 
 httpsServer.listen(MTLS_PORT, () => {
-  console.log(`Mock HTTPS hub-server is running on https://localhost:${MTLS_PORT}`);
+  log.info(`Mock HTTPS hub-server is running on https://localhost:${MTLS_PORT}`);
 });

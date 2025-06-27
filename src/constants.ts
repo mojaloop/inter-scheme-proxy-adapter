@@ -2,9 +2,6 @@ import { name, version } from '../package.json';
 
 export const SERVICE_NAME = `${name}@${version}`;
 
-export const PROXY_HEADER = 'fspiop-proxy'; // todo: use HEADERS_FSPIOP
-export const AUTH_HEADER = 'Authorization';
-
 export const HEADERS_FSPIOP = {
   // to avoid additional deps on central-services-shared
   SOURCE: 'fspiop-source',
@@ -14,6 +11,8 @@ export const HEADERS_FSPIOP = {
   // HTTP_METHOD: 'fspiop-http-method',
   // URI: 'fspiop-uri',
 } as const;
+
+export const AUTH_HEADER = 'Authorization';
 
 export const SCHEME_HTTP = 'http';
 export const SCHEME_HTTPS = 'https';

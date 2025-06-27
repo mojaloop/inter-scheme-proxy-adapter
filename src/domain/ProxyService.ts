@@ -1,6 +1,6 @@
 import config from '../config';
 import * as dto from '../dto';
-import { PROXY_HEADER, AUTH_HEADER, SCHEME_HTTP, SCHEME_HTTPS } from '../constants';
+import { HEADERS_FSPIOP, AUTH_HEADER, SCHEME_HTTP, SCHEME_HTTPS } from '../constants';
 import { cleanupIncomingHeaders } from '../utils';
 import {
   IProxyService,
@@ -44,7 +44,7 @@ export class ProxyService implements IProxyService {
       url: `${pm4mlEnabled ? SCHEME_HTTPS : SCHEME_HTTP}://${peerEndpoint}${url.pathname}${url.search}`,
       headers: {
         ...this.cleanupIncomingHeaders(headers),
-        [PROXY_HEADER]: PROXY_ID,
+        [HEADERS_FSPIOP.PROXY]: PROXY_ID,
         [AUTH_HEADER]: `Bearer ${accessToken}`,
       },
     };
