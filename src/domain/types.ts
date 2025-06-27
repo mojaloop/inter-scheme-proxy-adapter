@@ -1,10 +1,10 @@
 import { URL } from 'node:url';
 import { ServerInfo, Server } from '@hapi/hapi';
+import { Logger, Errors } from '@mojaloop/sdk-standard-components';
 import { INTERNAL_EVENTS } from '../constants';
 import { ProxyTlsAgent, IControlAgent, TlsOptions, ICAPeerJWSCert } from '../infra/types';
-import { LogMethods, LogContext } from '../utils/types';
 
-type Headers = Record<string, string>; // check, why it doesn't work with Json
+export type Headers = Record<string, string>; // check why it doesn't work with Json
 
 export type ProxyTarget = {
   url: string;
@@ -83,9 +83,7 @@ export interface IHttpClient {
   sendRequest: (options: HttpRequestOptions) => Promise<ProxyHandlerResponse>;
 }
 
-export interface ILogger extends LogMethods {
-  child(context?: LogContext): ILogger;
-}
+export type ILogger = Logger.SdkLogger;
 
 export type ServerState = {
   peerEndpoint: string;
@@ -142,4 +140,22 @@ export type OIDCToken = {
   token_type: string;
   scope: string;
   [key: string]: unknown;
+};
+
+export type IPingService = {
+  handlePostPing: (reqDetails: PostPingRequestDetails) => PostPingResponseDetails;
+  handleFailedValidation: (err: Error | undefined) => Errors.MojaloopApiErrorObject;
+  updateTlsCreds: (tlsCreds: TlsOptions) => void;
+};
+
+export type PostPingRequestDetails = {
+  headers: Headers;
+  payload: {
+    requestId: string;
+  };
+};
+
+export type PostPingResponseDetails = {
+  success: boolean;
+  errorObject?: Errors.MojaloopApiErrorObject;
 };

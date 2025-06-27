@@ -1,6 +1,6 @@
 import { type Agent } from 'node:https';
 import { AxiosInstance } from 'axios';
-import { PeerLabel, ILogger, ServerStateEvent } from '../domain/types';
+import { PeerLabel, IPingService, ILogger, ServerStateEvent } from '../domain/types';
 /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 import { HEALTH_STATUSES } from '../constants';
 
@@ -63,6 +63,7 @@ export type ProxyTlsAgent = Agent | null;
 export type HttpServerDeps = {
   serverConfig: ServerConfig;
   peerEndpoint: string; // url
+  pingService: IPingService;
   logger: ILogger;
 };
 

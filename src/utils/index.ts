@@ -1,7 +1,6 @@
-import { loggerFactory } from '@mojaloop/central-services-logger/src/contextLogger';
+import { Logger } from '@mojaloop/sdk-standard-components';
 
-export * from './types';
+export * from './cleanupIncomingHeaders';
 export * from './startingProcess';
 
-export { loggerFactory };
-export const logger = loggerFactory('ISPA');
+export const logger = Logger.loggerFactory({ context: 'ISPA' });

@@ -2,7 +2,15 @@ import { EventEmitter } from 'node:events';
 import { Agent } from 'node:https';
 import Hapi from '@hapi/hapi';
 
-import { ProxyHandlerFn, ProxyHandlerResponse, IHttpServer, ServerState, ServerStateEvent } from '../../domain/types';
+import { requiredHeadersSchema, pingPayloadSchema } from '../../domain';
+import {
+  ProxyHandlerFn,
+  ProxyHandlerResponse,
+  IHttpServer,
+  PostPingRequestDetails,
+  ServerState,
+  ServerStateEvent,
+} from '../../domain/types';
 import { INTERNAL_EVENTS, SERVICE_NAME, HEALTH_STATUSES } from '../../constants';
 import * as dto from '../../dto';
 import { HttpServerDeps, HealthcheckState } from '../types';
@@ -10,7 +18,7 @@ import { loggingPlugin } from './plugins';
 
 export class HttpServer extends EventEmitter implements IHttpServer {
   private readonly server: Hapi.Server;
-  // think, if it's better to move state to PeerServer or ProxyService?
+  // think if it's better to move state to PeerServer or ProxyService?
   private state: ServerState = {
     peerEndpoint: '',
     accessToken: '',
@@ -27,7 +35,7 @@ export class HttpServer extends EventEmitter implements IHttpServer {
   async start(proxyHandler: ProxyHandlerFn): Promise<boolean> {
     const { logger } = this.deps;
     await this.registerPlugins();
-    await this.registerProxy(proxyHandler);
+    await this.registerRoutes(proxyHandler);
     logger.debug('plugins and routes are registered');
     await this.server.start();
     logger.verbose('httpServer is started', this.server.info);
@@ -71,8 +79,8 @@ export class HttpServer extends EventEmitter implements IHttpServer {
     await this.server.register(plugins);
   }
 
-  private async registerProxy(proxyHandlerFn: ProxyHandlerFn) {
-    const { logger } = this.deps;
+  private async registerRoutes(proxyHandlerFn: ProxyHandlerFn) {
+    const { logger, pingService } = this.deps;
 
     this.server.route([
       {
@@ -82,6 +90,25 @@ export class HttpServer extends EventEmitter implements IHttpServer {
           const heathState = this.heathCheck();
           const statusCode = heathState.status === HEALTH_STATUSES.ok ? 200 : 502;
           return h.response(heathState).code(statusCode);
+        },
+      },
+      {
+        method: 'POST',
+        path: '/ping',
+        options: {
+          // todo:  think if we should use Swagger (OpenAPI) for such validations
+          validate: {
+            headers: requiredHeadersSchema,
+            payload: pingPayloadSchema,
+            failAction: (_: Hapi.Request, h: Hapi.ResponseToolkit, err: Error | undefined) => {
+              const errorObject = pingService.handleFailedValidation(err);
+              return h.response(errorObject).code(400).takeover();
+            },
+          },
+        },
+        handler: async (req: Hapi.Request<{ Payload: PostPingRequestDetails['payload'] }>, h: Hapi.ResponseToolkit) => {
+          const { success, errorObject } = pingService.handlePostPing(req);
+          return h.response(errorObject).code(success ? 202 : 400);
         },
       },
       {
@@ -125,6 +152,7 @@ export class HttpServer extends EventEmitter implements IHttpServer {
       if (data.certs) {
         this.state.httpsAgent = new Agent(data.certs);
         logger.verbose('httpsAgent with new certs is created');
+        this.deps.pingService.updateTlsCreds(data.certs);
       }
     });
   }

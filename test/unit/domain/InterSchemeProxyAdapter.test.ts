@@ -12,7 +12,7 @@ import config from '#src/config';
 import * as fixtures from '#test/fixtures';
 import { mockControlAgent, injectHttpRequest } from '#test/utils';
 
-const { peerAConfig, peerBConfig } = config.get();
+const { peerAConfig, peerBConfig, PROXY_ID } = config.get();
 const mockAxios = new MockAdapter(axios);
 
 const oidcToken = fixtures.oidcTokenDto();
@@ -27,8 +27,8 @@ describe('InterSchemeProxyAdapter Tests -->', () => {
     mockAxios.onPost(`/${peerAConfig.authConfig.tokenEndpoint}`).reply(200, oidcToken);
     mockAxios.onPost(`/${peerBConfig.authConfig.tokenEndpoint}`).reply(200, oidcToken);
 
-    peerA = createPeerServer(peerAConfig);
-    peerB = createPeerServer(peerBConfig);
+    peerA = createPeerServer(peerAConfig, PROXY_ID);
+    peerB = createPeerServer(peerBConfig, PROXY_ID);
     proxyAdapter = createProxyAdapter(config, { peerA, peerB });
 
     mockControlAgent(peerA);

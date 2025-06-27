@@ -15,7 +15,7 @@ import * as dto from '#src/dto';
 import * as fixtures from '#test/fixtures';
 import { injectHttpRequest, mockControlAgent } from '#test/utils';
 
-const { peerBConfig } = config.get();
+const { peerBConfig, PROXY_ID } = config.get();
 const mockAxios = new MockAdapter(axios);
 
 const resetTokenEndpoint = (status = 200, token: unknown = fixtures.oidcTokenDto()) => {
@@ -30,7 +30,7 @@ describe('PeerServer Tests -->', () => {
   let peer: PeerServer;
 
   beforeEach(() => {
-    peer = createPeerServer(peerBConfig);
+    peer = createPeerServer(peerBConfig, PROXY_ID);
     mockControlAgent(peer);
     resetTokenEndpoint();
   });
