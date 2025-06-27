@@ -16,6 +16,12 @@ app.get('/health', (req: Request, res: Response) => {
   res.json({ success: true });
 });
 
+app.put('/ping/:id', (req: Request, res: Response) => {
+  const { body, params } = req;
+  console.log('ping request:', { body, params });
+  res.status(200).end();
+});
+
 app.use((req: Request, res: Response, next: NextFunction) => {
   const { authorization } = req.headers;
   // todo: improve auth validation (jwt-token)

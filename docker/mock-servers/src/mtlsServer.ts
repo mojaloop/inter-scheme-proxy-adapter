@@ -4,10 +4,10 @@ import * as console from 'node:console';
 
 import { name } from '../package.json';
 import { MTLS_PORT } from './config';
-import { readCerds } from './utils';
+import { createTlsServerOptions } from './utils';
 // import { requestHandler } from './requestHandler';
 
-const tlsOpts = readCerds();
+const tlsOpts = createTlsServerOptions();
 
 const server = https.createServer(
   tlsOpts,

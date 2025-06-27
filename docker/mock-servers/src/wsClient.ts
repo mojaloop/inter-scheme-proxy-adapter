@@ -11,7 +11,7 @@ ws.on('open', () => {
 });
 
 ws.on('message', (message: string) => {
-  console.log(`Received message`, message.toString());
+  console.log('Received message', message.toString());
 });
 
 ws.on('close', () => {
