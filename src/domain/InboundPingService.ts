@@ -26,8 +26,8 @@
  ******/
 
 import { Errors, requests, GenericRequestResponse } from '@mojaloop/sdk-standard-components';
-import { HEADERS_FSPIOP } from '../constants';
 import { cleanupIncomingHeaders } from '../utils';
+import { HEADERS_FSPIOP } from '../constants';
 import { MtlsCreds } from '../infra';
 import { IPingService, PostPingRequestDetails, PostPingResponseDetails, ILogger, Headers } from './types';
 

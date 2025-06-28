@@ -86,7 +86,7 @@ export class HttpServer extends EventEmitter implements IHttpServer {
       {
         method: 'GET',
         path: '/health',
-        handler: async (request: Hapi.Request, h: Hapi.ResponseToolkit) => {
+        handler: async (_: Hapi.Request, h: Hapi.ResponseToolkit) => {
           const heathState = this.heathCheck();
           const statusCode = heathState.status === HEALTH_STATUSES.ok ? 200 : 502;
           return h.response(heathState).code(statusCode);

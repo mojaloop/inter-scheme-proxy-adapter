@@ -7,7 +7,7 @@
   "scripts": {
     "start": "ts-node src/server.ts",
     "start:hub": "ts-node src/hubServer.ts",
-    "start:ws": "ts-node src/wsServer.ts",
+    "start:man-api": "ts-node src/wsServer.ts",
     "start:oidc": "ts-node src/oidcServer.ts",
     "start:mtls": "ts-node src/mtlsServer.ts",
     "client:ws": "ts-node src/wsClient.ts"

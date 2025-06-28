@@ -1,6 +1,7 @@
 jest.mock('ws');
 jest.setTimeout(10_000);
 
+import { setTimeout as sleep } from 'node:timers/promises';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 
@@ -89,5 +90,34 @@ describe('InterSchemeProxyAdapter Tests -->', () => {
     expect(aStartSpy).toHaveBeenCalledTimes(1);
     const isAok = await aStartSpy.mock.results[0]?.value;
     expect(isAok).toBe(false);
+  });
+
+  test('should handle POST /ping requests', async () => {
+    const sourceId = 'hub-123';
+    const requestId = '01JYTWZBDX4S2K91PR0KAZMYHT';
+
+    let cbPayload;
+    let cbDestination;
+    mockAxios.onPut(`/ping/${requestId}`).reply((reqOpts: axios.AxiosRequestConfig) => {
+      // !!! Do not perform assertions here, coz any failures won't be "visible" to Jest
+      cbPayload = JSON.parse(reqOpts.data);
+      cbDestination = reqOpts.headers?.[HEADERS_FSPIOP.DESTINATION];
+      return [200];
+    });
+
+    await proxyAdapter.start();
+    // prettier-ignore
+    const result = await injectHttpRequest(
+      peerA['deps'].httpServer,
+      '/ping',
+      'POST',
+      fixtures.mockHeaders({ sourceId }),
+      { requestId },
+    );
+    expect(result.statusCode).toBe(202);
+    await sleep(1000); // wait for PUT /ping callback to be sent
+
+    expect(cbPayload).toEqual({ requestId });
+    expect(cbDestination).toBe(sourceId);
   });
 });
