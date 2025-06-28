@@ -85,7 +85,7 @@ export class InboundPingService implements IPingService {
 
   private async sendPutPingRequest(requestId: string, headers: Headers): Promise<MlPingResponse> {
     const sourceFspId = headers[HEADERS_FSPIOP.SOURCE];
-    if (!sourceFspId) throw new Error('No sourceFspId is not defined');
+    if (!sourceFspId) throw new Error(`No ${HEADERS_FSPIOP.SOURCE} header`);
 
     if (!this.mTlsCreds) throw new Error('No mTlsCreds are defined');
     // todo: think if mTlsEnabled === false
