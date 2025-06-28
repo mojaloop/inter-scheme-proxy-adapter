@@ -1,10 +1,10 @@
 import { URL } from 'node:url';
 import { ServerInfo, Server } from '@hapi/hapi';
-import { Logger, Errors } from '@mojaloop/sdk-standard-components';
+import { Logger, Errors, type Headers } from '@mojaloop/sdk-standard-components';
 import { INTERNAL_EVENTS } from '../constants';
 import { ProxyTlsAgent, IControlAgent, TlsOptions, ICAPeerJWSCert } from '../infra/types';
 
-export type Headers = Record<string, string>; // check why it doesn't work with Json
+export { Headers };
 
 export type ProxyTarget = {
   url: string;
