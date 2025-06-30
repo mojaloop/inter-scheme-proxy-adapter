@@ -80,14 +80,14 @@ export class InboundPingService implements IPingService {
 
   updateTlsCreds(creds: MtlsCreds) {
     this.mTlsCreds = creds;
-    this.log.verbose('updateTlsCreds is done');
+    this.log.verbose('updateTlsCreds is done', { creds });
   }
 
   private async sendPutPingRequest(requestId: string, headers: Headers): Promise<MlPingResponse> {
     const sourceFspId = headers[HEADERS_FSPIOP.SOURCE];
     if (!sourceFspId) throw new Error(`No ${HEADERS_FSPIOP.SOURCE} header`);
 
-    if (!this.mTlsCreds) throw new Error('No mTlsCreds are defined');
+    if (!this.mTlsCreds) throw new Error('No mTlsCreds defined');
     // todo: think if mTlsEnabled === false
 
     const mlPingRequests = this.deps.createMlPingRequests(this.mTlsCreds);

@@ -46,6 +46,11 @@ export const createMlPingRequestsFactory = (opts: CreateMlPingRequestsOptions) =
       enabled: opts.mTlsEnabled,
       creds,
     };
+    opts.logger.debug('creating PingRequests...', {
+      tls,
+      dfspId: opts.proxyId,
+      peerEndpoint: opts.peerEndpoint,
+    });
 
     return new requests.PingRequests({
       tls,
