@@ -1,3 +1,5 @@
+process.env.PEER_ENDPOINT_B = 'hub-b';
+
 jest.mock('ws');
 jest.setTimeout(10_000);
 
@@ -96,16 +98,20 @@ describe('InterSchemeProxyAdapter Tests -->', () => {
     const sourceId = 'hub-123';
     const requestId = '01JYTWZBDX4S2K91PR0KAZMYHT';
 
+    let cbBaseURL;
     let cbPayload;
     let cbDestination;
     mockAxios.onPut(`/ping/${requestId}`).reply((reqOpts: axios.AxiosRequestConfig) => {
       // !!! Do not perform assertions here, coz any failures won't be "visible" to Jest
+      cbBaseURL = reqOpts.baseURL;
       cbPayload = JSON.parse(reqOpts.data);
       cbDestination = reqOpts.headers?.[HEADERS_FSPIOP.DESTINATION];
       return [200];
     });
 
     await proxyAdapter.start();
+    // in real scenario, peer.emitServerStateEvent() is called by controlAgent during loadCerts()
+    peerB['emitServerStateEvent']({ certs: fixtures.mtlsCertsDto().outbound.tls.creds });
     // prettier-ignore
     const result = await injectHttpRequest(
       peerA['deps'].httpServer,
@@ -117,6 +123,7 @@ describe('InterSchemeProxyAdapter Tests -->', () => {
     expect(result.statusCode).toBe(202);
     await sleep(1000); // wait for PUT /ping callback to be sent
 
+    expect(cbBaseURL).toContain(peerAConfig.pingCallbackEndpoint);
     expect(cbPayload).toEqual({ requestId });
     expect(cbDestination).toBe(sourceId);
   });

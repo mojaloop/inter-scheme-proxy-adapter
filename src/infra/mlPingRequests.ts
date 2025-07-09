@@ -31,7 +31,7 @@ import { ILogger, MlPingRequests } from '../domain';
 type CreateMlPingRequestsOptions = {
   logger: ILogger;
   proxyId: string;
-  peerEndpoint: string;
+  pingCallbackEndpoint: string;
   mTlsEnabled: boolean;
 };
 
@@ -48,15 +48,15 @@ export const createMlPingRequestsFactory = (opts: CreateMlPingRequestsOptions) =
     };
     opts.logger.debug('creating MlPingRequests...', {
       dfspId: opts.proxyId,
-      peerEndpoint: opts.peerEndpoint,
+      peerEndpoint: opts.pingCallbackEndpoint,
     });
 
     return new requests.PingRequests({
       tls,
       logger: opts.logger,
       dfspId: opts.proxyId,
-      peerEndpoint: opts.peerEndpoint,
-      pingEndpoint: opts.peerEndpoint, // think if we need a separate option for pingEndpoint
+      peerEndpoint: opts.pingCallbackEndpoint, // think if we need a separate option for peerEndpoint
+      pingEndpoint: opts.pingCallbackEndpoint,
       jwsSign: false, // we don't validate JWS for ISPA
       // think if we need the rest opts:
       // jwsSigningKey: opts.jwsSigningKey;

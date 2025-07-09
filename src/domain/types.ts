@@ -57,9 +57,14 @@ export type TPeerServer = {
   handleProxyRequest: ProxyHandlerFn;
   start: () => Promise<boolean>;
   stop: () => Promise<boolean>;
-  on: (eventName: typeof INTERNAL_EVENTS.peerJWS, listener: (peerJWSEvent: PeerJWSEvent) => void) => void;
+  on: OnEventHandler;
   propagatePeerJWSEvent: (peerJWSEvent: PeerJWSEvent) => boolean;
+  propagateTlsCredsEvent: (event: TlsOptions) => boolean;
   // state: ServerState; // PeerState?
+};
+type OnEventHandler = {
+  (eventName: typeof INTERNAL_EVENTS.peerJWS, listener: (event: PeerJWSEvent) => void): void;
+  (eventName: typeof INTERNAL_EVENTS.tlsCreds, listener: (event: TlsOptions) => void): void;
 };
 
 export type TPeerServerDeps = {
@@ -105,6 +110,7 @@ export interface IHttpServer {
   start: (proxyHandlerFn: ProxyHandlerFn) => Promise<boolean>;
   stop: () => Promise<boolean>;
   emit: (event: typeof INTERNAL_EVENTS.serverState, data: ServerStateEvent) => boolean;
+  updatePingTlsCreds: (creds: TlsOptions) => void;
   // think, if it's better to emit separate events for each state change
   info: ServerInfo; // think, if we need this
   hapiServer: Readonly<Server>; // for testing purposes

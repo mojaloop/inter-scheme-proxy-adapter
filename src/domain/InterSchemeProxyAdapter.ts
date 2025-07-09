@@ -1,4 +1,5 @@
 import { INTERNAL_EVENTS } from '../constants';
+import { TlsOptions } from '../infra/types';
 import { IProxyAdapter, ISPADeps, PeerJWSEvent } from './types';
 
 export class InterSchemeProxyAdapter implements IProxyAdapter {
@@ -39,6 +40,16 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
     peerB.on(INTERNAL_EVENTS.peerJWS, (event: PeerJWSEvent) => {
       const isSent = peerA.propagatePeerJWSEvent(event);
       logger.info('peerJWS event is processed [B --> A]', { isSent });
+    });
+
+    peerA.on(INTERNAL_EVENTS.tlsCreds, (event: TlsOptions) => {
+      const isSent = peerB.propagateTlsCredsEvent(event);
+      logger.info('tlsCreds event is processed [A --> B]', { isSent });
+    });
+
+    peerB.on(INTERNAL_EVENTS.tlsCreds, (event: TlsOptions) => {
+      const isSent = peerA.propagateTlsCredsEvent(event);
+      logger.info('tlsCreds event is processed [B --> A]', { isSent });
     });
   }
 }

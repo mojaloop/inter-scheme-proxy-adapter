@@ -45,7 +45,7 @@ const createInboundPingService = ({
   appConfig = config
 }: CreatePingServiceOptions = {}) => {
   const proxyId = appConfig.get('PROXY_ID');
-  const { peerEndpoint } = appConfig.get('peerAConfig');
+  const { pingCallbackEndpoint } = appConfig.get('peerAConfig');
 
   return new InboundPingService({
     proxyId,
@@ -53,7 +53,7 @@ const createInboundPingService = ({
     createMlPingRequests: createMlPingRequests || createMlPingRequestsFactory({
       logger,
       proxyId,
-      peerEndpoint,
+      pingCallbackEndpoint,
       mTlsEnabled: true,
     }),
   });

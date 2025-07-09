@@ -1,7 +1,7 @@
 import { EventEmitter } from 'node:events';
 import { INTERNAL_EVENTS } from '../constants';
 import { DnsError } from '../errors';
-import { ICACerts, ICAPeerJWSCert } from '../infra';
+import { ICACerts, ICAPeerJWSCert, TlsOptions } from '../infra';
 import config from '../config'; // try to avoid this dependency (pass through ctor?)
 import {
   TPeerServer,
@@ -56,6 +56,16 @@ export class PeerServer extends EventEmitter implements TPeerServer {
     }
     this.deps.controlAgent.sendPeerJWS(event?.peerJWS);
     this.deps.logger.debug('peerJWSEvent is sent');
+    return true;
+  }
+
+  propagateTlsCredsEvent(event: TlsOptions) {
+    if (!this.isReady) {
+      this.deps.logger.warn('tlsOptionsEvent is NOT sent, coz peerServer is not ready');
+      return false;
+    }
+    this.deps.httpServer.updatePingTlsCreds(event); // used in pingService to send PUT /ping callback
+    this.deps.logger.debug('tlsOptionsEvent is propagated');
     return true;
   }
 
@@ -138,6 +148,10 @@ export class PeerServer extends EventEmitter implements TPeerServer {
 
   private emitServerStateEvent(stateEvent: ServerStateEvent) {
     this.deps.httpServer.emit(INTERNAL_EVENTS.serverState, stateEvent);
+    if (stateEvent.certs) {
+      this.emit(INTERNAL_EVENTS.tlsCreds, stateEvent.certs);
+      this.deps.logger.verbose('tlsOptionsEvent is emitted for another peer');
+    }
   }
 
   private emitPeerJWSEvent(event: PeerJWSEvent) {
