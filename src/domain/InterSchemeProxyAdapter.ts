@@ -1,5 +1,5 @@
 import { INTERNAL_EVENTS } from '../constants';
-import { IProxyAdapter, ISPADeps, PeerJWSEvent } from './types';
+import { IProxyAdapter, ISPADeps, PeerJWSEvent, PingAuthDetails } from './types';
 
 export class InterSchemeProxyAdapter implements IProxyAdapter {
   constructor(private readonly deps: ISPADeps) {
@@ -39,6 +39,16 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
     peerB.on(INTERNAL_EVENTS.peerJWS, (event: PeerJWSEvent) => {
       const isSent = peerA.propagatePeerJWSEvent(event);
       logger.info('peerJWS event is processed [B --> A]', { isSent });
+    });
+
+    peerA.on(INTERNAL_EVENTS.pingAuthDetails, (event: PingAuthDetails) => {
+      peerB.updatePingAuthDetails(event);
+      logger.info('pingAuthDetails event is processed [A --> B]');
+    });
+
+    peerB.on(INTERNAL_EVENTS.pingAuthDetails, (event: PingAuthDetails) => {
+      peerA.updatePingAuthDetails(event);
+      logger.info('pingAuthDetails event is processed [B --> A]');
     });
   }
 }

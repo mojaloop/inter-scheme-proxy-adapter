@@ -26,7 +26,7 @@
  ******/
 
 import { setTimeout as sleep } from 'node:timers/promises';
-import { InboundPingService, MlPingRequests } from '#src/domain';
+import { InboundPingService, MlPingRequests, PingAuthDetails } from '#src/domain';
 import { createMlPingRequestsFactory, MtlsCreds } from '#src/infra';
 import { logger } from '#src/utils';
 import config from '#src/config';
@@ -45,7 +45,7 @@ const createInboundPingService = ({
   appConfig = config
 }: CreatePingServiceOptions = {}) => {
   const proxyId = appConfig.get('PROXY_ID');
-  const { peerEndpoint } = appConfig.get('peerAConfig');
+  const { pingCallbackEndpoint } = appConfig.get('peerAConfig');
 
   return new InboundPingService({
     proxyId,
@@ -53,7 +53,7 @@ const createInboundPingService = ({
     createMlPingRequests: createMlPingRequests || createMlPingRequestsFactory({
       logger,
       proxyId,
-      peerEndpoint,
+      pingCallbackEndpoint,
       mTlsEnabled: true,
     }),
   });
@@ -73,10 +73,8 @@ describe('InboundPingService Tests -->', () => {
     const pingService = createInboundPingService({
       createMlPingRequests: () => mockPingRequests,
     });
-    pingService.updateTlsCreds({
-      cert: 'cert',
-      key: 'key',
-      ca: 'ca',
+    pingService.updateAuthDetails({
+      certs: { cert: 'cert', key: 'key', ca: 'ca' },
     });
 
     const result = pingService.handlePostPing({
@@ -105,7 +103,7 @@ describe('InboundPingService Tests -->', () => {
     const pingService = createInboundPingService({
       createMlPingRequests: () => mockPingRequests,
     });
-    pingService.updateTlsCreds({ ca: 'ca' } as MtlsCreds);
+    pingService.updateAuthDetails({ certs: { ca: 'ca' } } as PingAuthDetails);
 
     pingService.handlePostPing({
       headers: fixtures.mockHeaders(),

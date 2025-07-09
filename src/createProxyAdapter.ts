@@ -13,7 +13,7 @@ import {
 } from './infra';
 
 export const createPeerServer = (peerConfig: PeerServerConfig, proxyId: string) => {
-  const { peer, peerEndpoint, authConfig, controlAgentConfig, serverConfig } = peerConfig;
+  const { peer, peerEndpoint, pingCallbackEndpoint, authConfig, controlAgentConfig, serverConfig } = peerConfig;
 
   const logger = globalLogger.child({ peer });
   const axiosInstance = configureAxios({ logger });
@@ -29,7 +29,7 @@ export const createPeerServer = (peerConfig: PeerServerConfig, proxyId: string) 
     createMlPingRequests: createMlPingRequestsFactory({
       logger,
       proxyId,
-      peerEndpoint,
+      pingCallbackEndpoint,
       mTlsEnabled: true, // todo: make it configurable
     }),
   });
@@ -45,6 +45,7 @@ export const createPeerServer = (peerConfig: PeerServerConfig, proxyId: string) 
     authClient,
     controlAgent,
     httpServer,
+    pingService,
     logger,
   });
 };

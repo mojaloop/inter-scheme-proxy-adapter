@@ -152,7 +152,6 @@ export class HttpServer extends EventEmitter implements IHttpServer {
       if (data.certs) {
         this.state.httpsAgent = new Agent(data.certs);
         logger.verbose('httpsAgent with new certs is created');
-        this.deps.pingService.updateTlsCreds(data.certs);
       }
     });
   }

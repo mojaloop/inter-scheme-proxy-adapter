@@ -13,10 +13,17 @@ const config = convict<AppConfig>({
     peer: 'A',
 
     peerEndpoint: {
-      doc: 'Base URL on hub A',
+      doc: 'Base URL of hub A',
       format: String,
       default: null,
       env: 'PEER_ENDPOINT_A',
+    },
+
+    pingCallbackEndpoint: {
+      doc: 'Base URL of hub B (buffer scheme) to send PUT /ping callback',
+      format: String,
+      default: null,
+      env: 'PEER_ENDPOINT_B',
     },
 
     authConfig: {
@@ -112,10 +119,17 @@ const config = convict<AppConfig>({
     peer: 'B',
 
     peerEndpoint: {
-      doc: 'Base URL on hub B',
+      doc: 'Base URL of hub B',
       format: String,
       default: null,
       env: 'PEER_ENDPOINT_B',
+    },
+
+    pingCallbackEndpoint: {
+      doc: 'Base URL of hub A (regional scheme) to send PUT /ping callback',
+      format: String,
+      default: null,
+      env: 'PEER_ENDPOINT_A',
     },
 
     authConfig: {

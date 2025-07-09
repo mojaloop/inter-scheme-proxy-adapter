@@ -23,6 +23,7 @@ export type AppConfig = {
 export type PeerServerConfig = {
   peer: PeerLabel;
   peerEndpoint: string;
+  pingCallbackEndpoint: string;
   authConfig: AuthConfig;
   controlAgentConfig: ControlAgentConfig;
   serverConfig: ServerConfig;
