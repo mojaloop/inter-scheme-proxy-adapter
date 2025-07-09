@@ -8,7 +8,7 @@ export const HEADERS_FSPIOP = {
   DESTINATION: 'fspiop-destination',
   PROXY: 'fspiop-proxy',
   SIGNATURE: 'fspiop-signature',
-  // HTTP_METHOD: 'fspiop-http-method',
+  HTTP_METHOD: 'fspiop-http-method',
   // URI: 'fspiop-uri',
 } as const;
 
@@ -24,7 +24,7 @@ export const IN_ADVANCE_PERIOD_SEC = 30; // time before accessToken expiration t
 export const INTERNAL_EVENTS = {
   peerJWS: 'peerJWS',
   serverState: 'serverState',
-  tlsCreds: 'tlsCreds',
+  pingAuthDetails: 'pingAuthDetails',
 } as const;
 
 export const HEALTH_STATUSES = {

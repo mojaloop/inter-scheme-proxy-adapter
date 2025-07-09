@@ -27,9 +27,16 @@
 
 import { Errors, requests, GenericRequestResponse } from '@mojaloop/sdk-standard-components';
 import { cleanupIncomingHeaders } from '../utils';
-import { HEADERS_FSPIOP } from '../constants';
+import { HEADERS_FSPIOP, AUTH_HEADER } from '../constants';
 import { MtlsCreds } from '../infra';
-import { IPingService, PostPingRequestDetails, PostPingResponseDetails, ILogger, Headers } from './types';
+import {
+  IPingService,
+  PostPingRequestDetails,
+  PostPingResponseDetails,
+  ILogger,
+  Headers,
+  PingAuthDetails,
+} from './types';
 
 export type InboundPingServiceDeps = {
   proxyId: string;
@@ -50,6 +57,7 @@ type MlPingResponse = GenericRequestResponse | undefined;
 
 export class InboundPingService implements IPingService {
   private mTlsCreds: MtlsCreds | undefined;
+  private accessToken: string = '';
   private log: ILogger;
 
   constructor(private readonly deps: InboundPingServiceDeps) {
@@ -78,10 +86,13 @@ export class InboundPingService implements IPingService {
     };
   }
 
-  updateTlsCreds(creds: MtlsCreds) {
-    this.mTlsCreds = creds;
-    this.log.verbose('updateTlsCreds is done');
-    if (!creds.cert) this.log.warn('No mTlsCreds.cert provided');
+  updateAuthDetails({ certs, accessToken }: PingAuthDetails) {
+    if (certs) {
+      this.mTlsCreds = certs;
+      if (!this.mTlsCreds.cert) this.log.warn('No mTlsCreds.cert provided');
+    }
+    if (accessToken) this.accessToken = accessToken;
+    this.log.debug('updateAuthDetails is done');
   }
 
   private async sendPutPingRequest(requestId: string, headers: Headers): Promise<MlPingResponse> {
@@ -106,8 +117,10 @@ export class InboundPingService implements IPingService {
     const cleanedHeaders = cleanupIncomingHeaders(headers);
     return {
       ...cleanedHeaders,
+      [AUTH_HEADER]: `Bearer ${this.accessToken}`,
       [HEADERS_FSPIOP.DESTINATION]: headers[HEADERS_FSPIOP.SOURCE]!,
       [HEADERS_FSPIOP.SOURCE]: this.deps.proxyId,
+      [HEADERS_FSPIOP.HTTP_METHOD]: 'PUT',
     };
   }
 }

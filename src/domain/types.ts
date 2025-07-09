@@ -59,19 +59,26 @@ export type TPeerServer = {
   stop: () => Promise<boolean>;
   on: OnEventHandler;
   propagatePeerJWSEvent: (peerJWSEvent: PeerJWSEvent) => boolean;
-  propagateTlsCredsEvent: (event: TlsOptions) => boolean;
-  // state: ServerState; // PeerState?
+  // propagateTlsCredsEvent: (event: TlsOptions) => boolean;
+  updatePingAuthDetails: (details: PingAuthDetails) => void;
 };
 type OnEventHandler = {
   (eventName: typeof INTERNAL_EVENTS.peerJWS, listener: (event: PeerJWSEvent) => void): void;
-  (eventName: typeof INTERNAL_EVENTS.tlsCreds, listener: (event: TlsOptions) => void): void;
+  (eventName: typeof INTERNAL_EVENTS.pingAuthDetails, listener: (event: PingAuthDetails) => void): void;
 };
+
+export type PingAuthDetails = ServerStateEvent;
+// export type PingAuthDetails = {
+//   creds?: TlsOptions;
+//   accessToken?: string;
+// };
 
 export type TPeerServerDeps = {
   proxyService: IProxyService;
-  httpServer: IHttpServer;
   authClient: IAuthClient;
   controlAgent: IControlAgent;
+  httpServer: IHttpServer;
+  pingService: IPingService;
   logger: ILogger;
 };
 
@@ -98,9 +105,9 @@ export type ServerState = {
 
 export type ServerStateEvent = Partial<{
   accessToken: string;
-  certs: TlsOptions;
+  certs: TlsOptions; // rename to creds
 }>;
-// todo: define that, at least, one of the fields should be present
+// define that, at least, one of the fields should be present
 
 export type PeerJWSEvent = {
   peerJWS: ICAPeerJWSCert[];
@@ -110,7 +117,6 @@ export interface IHttpServer {
   start: (proxyHandlerFn: ProxyHandlerFn) => Promise<boolean>;
   stop: () => Promise<boolean>;
   emit: (event: typeof INTERNAL_EVENTS.serverState, data: ServerStateEvent) => boolean;
-  updatePingTlsCreds: (creds: TlsOptions) => void;
   // think, if it's better to emit separate events for each state change
   info: ServerInfo; // think, if we need this
   hapiServer: Readonly<Server>; // for testing purposes
@@ -151,7 +157,7 @@ export type OIDCToken = {
 export type IPingService = {
   handlePostPing: (reqDetails: PostPingRequestDetails) => PostPingResponseDetails;
   handleFailedValidation: (err: Error | undefined) => Errors.MojaloopApiErrorObject;
-  updateTlsCreds: (tlsCreds: TlsOptions) => void;
+  updateAuthDetails: (details: PingAuthDetails) => void;
 };
 
 export type PostPingRequestDetails = {

@@ -1,13 +1,14 @@
 import { EventEmitter } from 'node:events';
 import { INTERNAL_EVENTS } from '../constants';
 import { DnsError } from '../errors';
-import { ICACerts, ICAPeerJWSCert, TlsOptions } from '../infra';
+import { ICACerts, ICAPeerJWSCert } from '../infra';
 import config from '../config'; // try to avoid this dependency (pass through ctor?)
 import {
   TPeerServer,
   TPeerServerDeps,
   ServerStateEvent,
   PeerJWSEvent,
+  PingAuthDetails,
   IncomingRequestDetails,
   ServerState,
 } from './types';
@@ -59,14 +60,8 @@ export class PeerServer extends EventEmitter implements TPeerServer {
     return true;
   }
 
-  propagateTlsCredsEvent(event: TlsOptions) {
-    if (!this.isReady) {
-      this.deps.logger.warn('tlsOptionsEvent is NOT sent, coz peerServer is not ready');
-      return false;
-    }
-    this.deps.httpServer.updatePingTlsCreds(event); // used in pingService to send PUT /ping callback
-    this.deps.logger.debug('tlsOptionsEvent is propagated');
-    return true;
+  updatePingAuthDetails(details: PingAuthDetails) {
+    this.deps.pingService.updateAuthDetails(details);
   }
 
   private async startPm4mlPart() {
@@ -148,13 +143,14 @@ export class PeerServer extends EventEmitter implements TPeerServer {
 
   private emitServerStateEvent(stateEvent: ServerStateEvent) {
     this.deps.httpServer.emit(INTERNAL_EVENTS.serverState, stateEvent);
-    if (stateEvent.certs) {
-      this.emit(INTERNAL_EVENTS.tlsCreds, stateEvent.certs);
-      this.deps.logger.verbose('tlsOptionsEvent is emitted for another peer');
-    }
+    this.emitPingAuthDetails(stateEvent); // used by another peer to send PUT /ping callback
   }
 
   private emitPeerJWSEvent(event: PeerJWSEvent) {
     this.emit(INTERNAL_EVENTS.peerJWS, event);
+  }
+
+  private emitPingAuthDetails(details: PingAuthDetails) {
+    this.emit(INTERNAL_EVENTS.pingAuthDetails, details);
   }
 }

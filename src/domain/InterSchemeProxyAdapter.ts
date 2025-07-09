@@ -1,6 +1,5 @@
 import { INTERNAL_EVENTS } from '../constants';
-import { TlsOptions } from '../infra/types';
-import { IProxyAdapter, ISPADeps, PeerJWSEvent } from './types';
+import { IProxyAdapter, ISPADeps, PeerJWSEvent, PingAuthDetails } from './types';
 
 export class InterSchemeProxyAdapter implements IProxyAdapter {
   constructor(private readonly deps: ISPADeps) {
@@ -42,14 +41,14 @@ export class InterSchemeProxyAdapter implements IProxyAdapter {
       logger.info('peerJWS event is processed [B --> A]', { isSent });
     });
 
-    peerA.on(INTERNAL_EVENTS.tlsCreds, (event: TlsOptions) => {
-      const isSent = peerB.propagateTlsCredsEvent(event);
-      logger.info('tlsCreds event is processed [A --> B]', { isSent });
+    peerA.on(INTERNAL_EVENTS.pingAuthDetails, (event: PingAuthDetails) => {
+      peerB.updatePingAuthDetails(event);
+      logger.info('pingAuthDetails event is processed [A --> B]');
     });
 
-    peerB.on(INTERNAL_EVENTS.tlsCreds, (event: TlsOptions) => {
-      const isSent = peerA.propagateTlsCredsEvent(event);
-      logger.info('tlsCreds event is processed [B --> A]', { isSent });
+    peerB.on(INTERNAL_EVENTS.pingAuthDetails, (event: PingAuthDetails) => {
+      peerA.updatePingAuthDetails(event);
+      logger.info('pingAuthDetails event is processed [B --> A]');
     });
   }
 }

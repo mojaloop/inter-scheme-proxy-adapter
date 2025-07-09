@@ -45,6 +45,7 @@ export const createPeerServer = (peerConfig: PeerServerConfig, proxyId: string) 
     authClient,
     controlAgent,
     httpServer,
+    pingService,
     logger,
   });
 };

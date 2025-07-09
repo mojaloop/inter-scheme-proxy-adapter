@@ -13,7 +13,7 @@ import {
 } from '../../domain/types';
 import { INTERNAL_EVENTS, SERVICE_NAME, HEALTH_STATUSES } from '../../constants';
 import * as dto from '../../dto';
-import { HttpServerDeps, HealthcheckState, TlsOptions } from '../types';
+import { HttpServerDeps, HealthcheckState } from '../types';
 import { loggingPlugin } from './plugins';
 
 export class HttpServer extends EventEmitter implements IHttpServer {
@@ -65,10 +65,6 @@ export class HttpServer extends EventEmitter implements IHttpServer {
       startTime: new Date(this.server.info.created).toISOString(),
       versionNumber: SERVICE_NAME,
     });
-  }
-
-  updatePingTlsCreds(creds: TlsOptions) {
-    this.deps.pingService.updateTlsCreds(creds);
   }
 
   private async registerPlugins() {
