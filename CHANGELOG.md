@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.7.0](https://github.com/mojaloop/inter-scheme-proxy-adapter/compare/v1.7.0-snapshot.7...v1.7.0) (2025-07-10)
+
 ### [1.5.1](https://github.com/mojaloop/inter-scheme-proxy-adapter/compare/v1.5.0...v1.5.1) (2025-04-15)
 
 
