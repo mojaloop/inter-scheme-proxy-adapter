@@ -13,9 +13,9 @@ x-hub: &HUB
   <<: *MOCK_SERVER
   command: npm run start:hub
 
-x-men-api: &MEN_API
+x-man-api: &MAN_API
   <<: *MOCK_SERVER
-  command: npm run start:ws
+  command: npm run start:man-api
 
 x-oidc-server: &OIDC_SERVER
   <<: *MOCK_SERVER
@@ -33,8 +33,8 @@ services:
     environment:
       - PEER_ENDPOINT_A=hub-a:6443
       - PEER_ENDPOINT_B=hub-b:6443
-      - MGMT_API_WS_URL_A=men-api-a
-      - MGMT_API_WS_URL_B=men-api-b
+      - MGMT_API_WS_URL_A=man-api-a
+      - MGMT_API_WS_URL_B=man-api-b
       - MGMT_API_WS_PORT_B=4005
       - OAUTH_TOKEN_ENDPOINT_A=http://oidc-server-a:8080/openid-connect/token
       - OAUTH_TOKEN_ENDPOINT_B=http://oidc-server-b:8080/openid-connect/token
@@ -44,8 +44,8 @@ services:
     depends_on:
       - hub-a
       - hub-b
-      - men-api-a
-      - men-api-b
+      - man-api-a
+      - man-api-b
       - oidc-server-a
       - oidc-server-b
 
@@ -63,15 +63,15 @@ services:
     ports:
       - "26443:6443"
 
-  men-api-a:
-    <<: *MEN_API
+  man-api-a:
+    <<: *MAN_API
     environment:
       - CLIENT_CERTS_FIELD=client-hub-a
     ports:
       - "${MGMT_API_WS_PORT_A}:4005"
 
-  men-api-b:
-    <<: *MEN_API
+  man-api-b:
+    <<: *MAN_API
     environment:
       - CLIENT_CERTS_FIELD=client-hub-b
     ports:

@@ -1,6 +1,6 @@
 import { ProxyService, IProxyService } from '#src/domain';
 import { HttpClient, configureAxios } from '#src/infra';
-import { PROXY_HEADER, AUTH_HEADER, SCHEME_HTTPS } from '#src/constants';
+import { HEADERS_FSPIOP, AUTH_HEADER, SCHEME_HTTPS } from '#src/constants';
 import { logger } from '#src/utils';
 import config from '#src/config';
 import * as fixtures from '#test/fixtures';
@@ -28,7 +28,7 @@ describe('ISPAService Tests -->', () => {
     expect(proxyTarget.url).toBe(`${SCHEME_HTTPS}://${state.peerEndpoint}/${path}?${query}`);
     expect(proxyTarget.headers).toEqual({
       ...headers,
-      [PROXY_HEADER]: config.get('PROXY_ID'),
+      [HEADERS_FSPIOP.PROXY]: config.get('PROXY_ID'),
       [AUTH_HEADER]: `Bearer ${state.accessToken}`,
     });
   });

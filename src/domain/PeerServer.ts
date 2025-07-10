@@ -8,6 +8,7 @@ import {
   TPeerServerDeps,
   ServerStateEvent,
   PeerJWSEvent,
+  PingAuthDetails,
   IncomingRequestDetails,
   ServerState,
 } from './types';
@@ -57,6 +58,10 @@ export class PeerServer extends EventEmitter implements TPeerServer {
     this.deps.controlAgent.sendPeerJWS(event?.peerJWS);
     this.deps.logger.debug('peerJWSEvent is sent');
     return true;
+  }
+
+  updatePingAuthDetails(details: PingAuthDetails) {
+    this.deps.pingService.updateAuthDetails(details);
   }
 
   private async startPm4mlPart() {
@@ -138,9 +143,14 @@ export class PeerServer extends EventEmitter implements TPeerServer {
 
   private emitServerStateEvent(stateEvent: ServerStateEvent) {
     this.deps.httpServer.emit(INTERNAL_EVENTS.serverState, stateEvent);
+    this.emitPingAuthDetails(stateEvent); // used by another peer to send PUT /ping callback
   }
 
   private emitPeerJWSEvent(event: PeerJWSEvent) {
     this.emit(INTERNAL_EVENTS.peerJWS, event);
+  }
+
+  private emitPingAuthDetails(details: PingAuthDetails) {
+    this.emit(INTERNAL_EVENTS.pingAuthDetails, details);
   }
 }

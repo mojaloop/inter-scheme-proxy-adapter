@@ -12,7 +12,7 @@ export const mockControlAgent = (peer: PeerServer, certs = { ...fixtures.certsJs
   deps.controlAgent['close'] = async () => {};
   deps.controlAgent['loadCerts'] = async () => certs;
   deps.controlAgent['triggerFetchPeerJws'] = () => {};
-  // todo: find a better way to mock MenAPI (ws) functionality
+  // todo: find a better way to mock ManAPI (ws) functionality
 };
 
 export const injectHttpRequest = async <T>(
@@ -20,5 +20,5 @@ export const injectHttpRequest = async <T>(
   url = '/',
   method = 'GET',
   headers = {},
-  payload = undefined,
+  payload: object | undefined = undefined,
 ) => httpServer.hapiServer.inject<T>({ url, method, headers, payload });

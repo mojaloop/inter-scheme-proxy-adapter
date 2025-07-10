@@ -1,10 +1,10 @@
 import { URL } from 'node:url';
 import { ServerInfo, Server } from '@hapi/hapi';
+import { Logger, Errors, type Headers } from '@mojaloop/sdk-standard-components';
 import { INTERNAL_EVENTS } from '../constants';
 import { ProxyTlsAgent, IControlAgent, TlsOptions, ICAPeerJWSCert } from '../infra/types';
-import { LogMethods, LogContext } from '../utils/types';
 
-type Headers = Record<string, string>; // check, why it doesn't work with Json
+export { Headers };
 
 export type ProxyTarget = {
   url: string;
@@ -57,16 +57,28 @@ export type TPeerServer = {
   handleProxyRequest: ProxyHandlerFn;
   start: () => Promise<boolean>;
   stop: () => Promise<boolean>;
-  on: (eventName: typeof INTERNAL_EVENTS.peerJWS, listener: (peerJWSEvent: PeerJWSEvent) => void) => void;
+  on: OnEventHandler;
   propagatePeerJWSEvent: (peerJWSEvent: PeerJWSEvent) => boolean;
-  // state: ServerState; // PeerState?
+  // propagateTlsCredsEvent: (event: TlsOptions) => boolean;
+  updatePingAuthDetails: (details: PingAuthDetails) => void;
 };
+type OnEventHandler = {
+  (eventName: typeof INTERNAL_EVENTS.peerJWS, listener: (event: PeerJWSEvent) => void): void;
+  (eventName: typeof INTERNAL_EVENTS.pingAuthDetails, listener: (event: PingAuthDetails) => void): void;
+};
+
+export type PingAuthDetails = ServerStateEvent;
+// export type PingAuthDetails = {
+//   creds?: TlsOptions;
+//   accessToken?: string;
+// };
 
 export type TPeerServerDeps = {
   proxyService: IProxyService;
-  httpServer: IHttpServer;
   authClient: IAuthClient;
   controlAgent: IControlAgent;
+  httpServer: IHttpServer;
+  pingService: IPingService;
   logger: ILogger;
 };
 
@@ -83,9 +95,7 @@ export interface IHttpClient {
   sendRequest: (options: HttpRequestOptions) => Promise<ProxyHandlerResponse>;
 }
 
-export interface ILogger extends LogMethods {
-  child(context?: LogContext): ILogger;
-}
+export type ILogger = Logger.SdkLogger;
 
 export type ServerState = {
   peerEndpoint: string;
@@ -95,9 +105,9 @@ export type ServerState = {
 
 export type ServerStateEvent = Partial<{
   accessToken: string;
-  certs: TlsOptions;
+  certs: TlsOptions; // rename to creds
 }>;
-// todo: define that, at least, one of the fields should be present
+// define that, at least, one of the fields should be present
 
 export type PeerJWSEvent = {
   peerJWS: ICAPeerJWSCert[];
@@ -142,4 +152,22 @@ export type OIDCToken = {
   token_type: string;
   scope: string;
   [key: string]: unknown;
+};
+
+export type IPingService = {
+  handlePostPing: (reqDetails: PostPingRequestDetails) => PostPingResponseDetails;
+  handleFailedValidation: (err: Error | undefined) => Errors.MojaloopApiErrorObject;
+  updateAuthDetails: (details: PingAuthDetails) => void;
+};
+
+export type PostPingRequestDetails = {
+  headers: Headers;
+  payload: {
+    requestId: string;
+  };
+};
+
+export type PostPingResponseDetails = {
+  success: boolean;
+  errorObject?: Errors.MojaloopApiErrorObject;
 };

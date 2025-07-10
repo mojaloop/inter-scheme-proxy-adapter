@@ -4,3 +4,4 @@ export * from './configureAxios';
 export * from './controlAgent';
 export * from './httpServer';
 export * from './HttpClient';
+export * from './mlPingRequests';

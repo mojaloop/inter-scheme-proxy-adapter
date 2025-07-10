@@ -3,12 +3,12 @@ jest.unmock('ws');
 import { randomUUID } from 'node:crypto';
 import config from '#src/config';
 import { createControlAgent, ICACerts, ICAPeerJWSCert, deserialise, serialise } from '#src/infra';
-import { loggerFactory } from '#src/utils';
+import { logger as globalLogger } from '#src/utils';
 
 const wait = (ms: number = 10) => new Promise((resolve) => setTimeout(resolve, ms));
 
 describe('ControlAgent Integration Tests -->', () => {
-  const logger = loggerFactory('CAIT');
+  const logger = globalLogger.child({ flow: 'CAIT' });
   const controlAgentA = createControlAgent({
     peer: 'A',
     controlAgentConfig: config.get('peerAConfig.controlAgentConfig'),

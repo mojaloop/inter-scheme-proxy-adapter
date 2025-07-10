@@ -73,9 +73,9 @@ export class ControlAgent implements IControlAgent {
       const schedulePing = () => {
         clearTimeout(this._pingTimeout);
         this._pingTimeout = setTimeout(async () => {
-            log.error('Ping timeout, possible broken connection. Restarting server...');
-            await this.open();
-            await this.loadCerts();
+          log.error('Ping timeout, possible broken connection. Restarting server...');
+          await this.open();
+          await this.loadCerts();
         }, PING_INTERVAL_MS + this._timeout);
       };
       schedulePing();
@@ -93,8 +93,8 @@ export class ControlAgent implements IControlAgent {
       });
 
       this._ws.on('ping', () => {
-          log.debug('Received ping from control server');
-          schedulePing();
+        log.debug('Received ping from control server');
+        schedulePing();
       });
 
       // Reconnect on close
@@ -120,7 +120,7 @@ export class ControlAgent implements IControlAgent {
     // think, if we need to rethrow in case of error?
     const isOK = await new Promise((resolve) => {
       clearTimeout(this._pingTimeout);
-      log.verbose(`shutting down websocket...`, { WS_CLOSE_TIMEOUT_MS });
+      log.verbose('shutting down websocket...', { WS_CLOSE_TIMEOUT_MS });
 
       const timer = setTimeout(() => {
         log.warn('websocket close timed out', { WS_CLOSE_TIMEOUT_MS });
@@ -142,7 +142,7 @@ export class ControlAgent implements IControlAgent {
     });
 
     this._ws = null;
-    this._logger.info(`websocket is closed`, { isOK });
+    this._logger.info('websocket is closed', { isOK });
   }
 
   send(msg: string | GenericObject) {

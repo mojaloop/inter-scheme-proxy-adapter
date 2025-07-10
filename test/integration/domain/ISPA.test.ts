@@ -2,23 +2,23 @@ import https from 'node:https';
 import axios from 'axios'; // add wrapper?
 
 import config from '#src/config';
-import { PROXY_HEADER, AUTH_HEADER, SCHEME_HTTPS, HEALTH_STATUSES } from '#src/constants';
-import { loggerFactory } from '#src/utils';
+import { HEADERS_FSPIOP, AUTH_HEADER, SCHEME_HTTPS, HEALTH_STATUSES } from '#src/constants';
+import { logger as globalLogger } from '#src/utils';
 import * as fixtures from '#test/fixtures';
 
 const PROXY_HOST = 'http://localhost';
-const logger = loggerFactory('ISPA Tests');
+const logger = globalLogger.child({ flow: 'ISPA Tests' });
 const { peerAConfig, PROXY_ID } = config.get();
 
 const checkProxyServiceHeaders = (headers: Record<string, unknown>) => {
-  expect(headers[PROXY_HEADER.toLowerCase()]).toBe(PROXY_ID);
+  expect(headers[HEADERS_FSPIOP.PROXY.toLowerCase()]).toBe(PROXY_ID);
   expect(headers[AUTH_HEADER.toLowerCase()]).toMatch(/^Bearer /);
   // add possibility to validate token value
 };
 
 const sendRequest = async (options: axios.AxiosRequestConfig) =>
   axios.request(options).catch((err) => {
-    logger.warn('error on sending mTLS request', err);
+    logger.warn('error on sending mTLS request: ', err);
     return err;
   });
 
@@ -62,7 +62,6 @@ describe('ISPA Integration Tests -->', () => {
 
   describe('mTLS hub (peer-endpoint) Tests -->', () => {
     const url = `${SCHEME_HTTPS}://${peerAConfig.peerEndpoint}/int-test`;
-    logger.info('mTLS URL', { url });
     // prettier-ignore
     const sendGetRequest = (options: axios.AxiosRequestConfig) => sendRequest({
       ...options,
@@ -90,4 +89,28 @@ describe('ISPA Integration Tests -->', () => {
     });
   });
   // todo: add negative scenario with wrong auth token
+
+  describe('ping Tests -->', () => {
+    const requestId = '01JYNRSYHQTMKFW2QG57MASRSH';
+
+    const sendPostPingRequest = (requestId: string, headers: Record<string, string> = {}) =>
+      sendRequest({
+        method: 'POST',
+        url: `${PROXY_HOST}:${peerAConfig.serverConfig.port}/ping`,
+        data: { requestId },
+        headers,
+      });
+
+    test('should reply with proper statusCode', async () => {
+      const result = await sendPostPingRequest(requestId, fixtures.mockHeaders());
+      expect(result.status).toBe(202);
+    });
+
+    test('should throw error if no required headers provided', async () => {
+      const result = await sendPostPingRequest(requestId);
+      expect(result.status).toBe(400);
+    });
+
+    // todo: add /history endpoint to mockServer, and check if PUT callback was sent
+  });
 });

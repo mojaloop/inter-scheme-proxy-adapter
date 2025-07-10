@@ -5,6 +5,6 @@ export const createHttpServer = (deps: HttpServerDeps) => {
 
   return new HttpServer({
     ...restDeps,
-    logger: logger.child('HttpServer'),
+    logger: logger.child({ component: 'HttpServer' }),
   });
 };

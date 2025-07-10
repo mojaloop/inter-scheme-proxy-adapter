@@ -25,22 +25,19 @@
  --------------
  ******/
 
-import https from 'node:https';
-import { loggerFactory } from '@mojaloop/central-services-logger/src/contextLogger';
-import { serverCerts } from './config';
+import Joi from 'joi';
+import { HEADERS_FSPIOP } from '../constants';
 
-export const createTlsServerOptions = () => {
-  const { ca, cert, key } = serverCerts;
+export const requiredHeadersSchema = Joi.object({
+  [HEADERS_FSPIOP.SOURCE]: Joi.string(),
+  // todo: add all required headers
+}).options({
+  allowUnknown: true,
+  presence: 'required',
+});
 
-  const options: https.ServerOptions = {
-    ca,
-    cert,
-    key,
-    requestCert: true,
-    rejectUnauthorized: true,
-  };
-
-  return options;
-};
-
-export const logger = loggerFactory('mock-servers');
+export const pingPayloadSchema = Joi.object({
+  requestId: Joi.string()
+    .regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-7][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$|^[0-9A-HJKMNP-TV-Z]{26}$/)
+    .required(),
+});

@@ -1,9 +1,12 @@
 import stringify from 'fast-safe-stringify';
 import { Client, Server } from 'mock-socket';
 import { ControlAgent, ICAPeerJWSCert, deserialise } from '#src/infra/controlAgent';
-import { ICACallbacks, ILogger, logLevelValues } from '#src/types';
-import { loggerFactory } from '#src/utils';
+import { ICACallbacks, ILogger } from '#src/types';
+import { logger as globalLogger } from '#src/utils';
 import { mtlsCertsDto, peerJWSCertsDto } from '#test/fixtures';
+
+// think if we need it, and if so - import from @mojaloop/central-services-logger
+export const logLevelValues = ['error', 'warn', 'info', 'verbose', 'debug', 'silly', 'audit', 'trace', 'perf'] as const;
 
 const wait = (ms: number = 10) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -29,9 +32,9 @@ describe('ControlAgent Tests', () => {
     });
 
   beforeEach(async () => {
-    logger = loggerFactory();
+    logger = globalLogger.child({ test: 'ControlAgentTests' });
     logLevelValues.forEach((method) => {
-      jest.spyOn((logger as any).constructor.prototype, method);
+      jest.spyOn(logger.constructor.prototype, method);
     }); // to be able to check logger.child() instance calls
 
     serverReceivedMessages = [];
