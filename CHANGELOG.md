@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.7.1](https://github.com/mojaloop/inter-scheme-proxy-adapter/compare/v1.7.0...v1.7.1) (2025-07-17)
+
+
+### Chore
+
+* add initial sbom ([8a27719](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/8a2771969e70f77a41e98a78e1f1878b7d696df1))
+
 ## [1.7.0](https://github.com/mojaloop/inter-scheme-proxy-adapter/compare/v1.7.0-snapshot.7...v1.7.0) (2025-07-10)
 
 ### [1.5.1](https://github.com/mojaloop/inter-scheme-proxy-adapter/compare/v1.5.0...v1.5.1) (2025-04-15)
