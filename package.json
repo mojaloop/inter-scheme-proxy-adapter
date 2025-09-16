@@ -37,8 +37,8 @@
   },
   "dependencies": {
     "@hapi/hapi": "^21.4.0",
-    "@mojaloop/sdk-standard-components": "19.16.0",
-    "axios": "^1.10.0",
+    "@mojaloop/sdk-standard-components": "19.16.8",
+    "axios": "^1.12.0",
     "axios-retry": "4.5.0",
     "convict": "^6.2.4",
     "fast-json-patch": "^3.1.1",
