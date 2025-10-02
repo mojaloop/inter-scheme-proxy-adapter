@@ -24,7 +24,7 @@ export class HttpServer extends EventEmitter implements IHttpServer {
     accessToken: '',
     httpsAgent: null,
   };
-  private oldAgentShoutdownTimer: NodeJS.Timeout | null = null;
+  private oldAgentShutdownTimer: NodeJS.Timeout | null = null;
 
   constructor(private readonly deps: HttpServerDeps) {
     super();
@@ -46,7 +46,7 @@ export class HttpServer extends EventEmitter implements IHttpServer {
   async stop(): Promise<boolean> {
     await this.server.stop();
     this.removeAllListeners(INTERNAL_EVENTS.serverState);
-    if (this.oldAgentShoutdownTimer) clearTimeout(this.oldAgentShoutdownTimer);
+    if (this.oldAgentShutdownTimer) clearTimeout(this.oldAgentShutdownTimer);
     this.deps.logger.verbose('httpServer is stopped');
     return true;
   }
@@ -170,10 +170,10 @@ export class HttpServer extends EventEmitter implements IHttpServer {
 
     // gracefully shutdown old agent by waiting for in-flight requests to complete
     if (oldAgent) {
-      this.oldAgentShoutdownTimer = setTimeout(() => {
+      this.oldAgentShutdownTimer = setTimeout(() => {
         oldAgent.destroy();
         logger.debug('old httpsAgent destroyed after graceful period', { GRACEFUL_AGENT_SHUTDOWN_MS });
-        this.oldAgentShoutdownTimer = null;
+        this.oldAgentShutdownTimer = null;
       }, GRACEFUL_AGENT_SHUTDOWN_MS);
     }
   }
