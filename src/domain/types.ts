@@ -59,19 +59,12 @@ export type TPeerServer = {
   stop: () => Promise<boolean>;
   on: OnEventHandler;
   propagatePeerJWSEvent: (peerJWSEvent: PeerJWSEvent) => boolean;
-  // propagateTlsCredsEvent: (event: TlsOptions) => boolean;
   updatePingAuthDetails: (details: PingAuthDetails) => void;
 };
 type OnEventHandler = {
   (eventName: typeof INTERNAL_EVENTS.peerJWS, listener: (event: PeerJWSEvent) => void): void;
   (eventName: typeof INTERNAL_EVENTS.pingAuthDetails, listener: (event: PingAuthDetails) => void): void;
 };
-
-export type PingAuthDetails = ServerStateEvent;
-// export type PingAuthDetails = {
-//   creds?: TlsOptions;
-//   accessToken?: string;
-// };
 
 export type TPeerServerDeps = {
   proxyService: IProxyService;
@@ -108,6 +101,8 @@ export type ServerStateEvent = Partial<{
   certs: TlsOptions; // rename to creds
 }>;
 // define that, at least, one of the fields should be present
+
+export type PingAuthDetails = ServerStateEvent;
 
 export type PeerJWSEvent = {
   peerJWS: ICAPeerJWSCert[];
