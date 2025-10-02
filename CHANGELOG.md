@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.8.0](https://github.com/mojaloop/inter-scheme-proxy-adapter/compare/v1.7.1...v1.8.0) (2025-10-02)
+
+
+### Features
+
+* **oss-4267:** destroyed old httpsAgent ([3a90933](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/3a9093384aa327f3c4c4a939f96c2f4c0be16f15))
+* **oss-4267:** destroyed old httpsAgent ([9c72ed8](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/9c72ed896a03996ee42b506abef424a3e0b51c18))
+* **oss-4267:** ignore some Grype scan vulnerabilities ([c634f9f](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/c634f9f8a16113a9938dee0cf017182498bc4ecd))
+* **oss-4267:** updated deps ([bd5d1b2](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/bd5d1b23395d696d7b8c7abd9a36e4ac45bb8a3e))
+* **oss-4267:** updated mojaloop/build version to 1.1.6 ([02059ba](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/02059ba606ba6a2b034656b6b7a6fcd0bf1471fe))
+
 ### [1.7.1](https://github.com/mojaloop/inter-scheme-proxy-adapter/compare/v1.7.0...v1.7.1) (2025-07-17)
 
 
