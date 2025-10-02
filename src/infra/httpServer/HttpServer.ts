@@ -1,5 +1,4 @@
 import { EventEmitter } from 'node:events';
-import { Agent } from 'node:https';
 import Hapi from '@hapi/hapi';
 
 import { requiredHeadersSchema, pingPayloadSchema } from '../../domain';
@@ -13,7 +12,8 @@ import {
 } from '../../domain/types';
 import { INTERNAL_EVENTS, SERVICE_NAME, HEALTH_STATUSES } from '../../constants';
 import * as dto from '../../dto';
-import { HttpServerDeps, HealthcheckState } from '../types';
+import { HttpServerDeps, HealthcheckState, TlsOptions } from '../types';
+import { createHttpsAgent, GRACEFUL_AGENT_SHUTDOWN_MS } from '../createHttpsAgent';
 import { loggingPlugin } from './plugins';
 
 export class HttpServer extends EventEmitter implements IHttpServer {
@@ -24,6 +24,7 @@ export class HttpServer extends EventEmitter implements IHttpServer {
     accessToken: '',
     httpsAgent: null,
   };
+  private oldAgentShutdownTimer: NodeJS.Timeout | null = null;
 
   constructor(private readonly deps: HttpServerDeps) {
     super();
@@ -45,6 +46,7 @@ export class HttpServer extends EventEmitter implements IHttpServer {
   async stop(): Promise<boolean> {
     await this.server.stop();
     this.removeAllListeners(INTERNAL_EVENTS.serverState);
+    if (this.oldAgentShutdownTimer) clearTimeout(this.oldAgentShutdownTimer);
     this.deps.logger.verbose('httpServer is stopped');
     return true;
   }
@@ -150,14 +152,30 @@ export class HttpServer extends EventEmitter implements IHttpServer {
       }
 
       if (data.certs) {
-        this.state.httpsAgent = new Agent(data.certs);
-        logger.verbose('httpsAgent with new certs is created');
+        this.reCreateHttpsAgent(data.certs);
       }
     });
   }
 
   private createServer() {
     return new Hapi.Server(this.deps.serverConfig);
+  }
+
+  private reCreateHttpsAgent(certs: TlsOptions) {
+    const { logger } = this.deps;
+    const oldAgent = this.state.httpsAgent;
+
+    this.state.httpsAgent = createHttpsAgent(certs);
+    logger.verbose('httpsAgent with new certs is created');
+
+    // gracefully shutdown old agent by waiting for in-flight requests to complete
+    if (oldAgent) {
+      this.oldAgentShutdownTimer = setTimeout(() => {
+        oldAgent.destroy();
+        logger.debug('old httpsAgent destroyed after graceful period', { GRACEFUL_AGENT_SHUTDOWN_MS });
+        this.oldAgentShutdownTimer = null;
+      }, GRACEFUL_AGENT_SHUTDOWN_MS);
+    }
   }
 
   private static prepareHapiResponse(proxyResponse: ProxyHandlerResponse, h: Hapi.ResponseToolkit) {
