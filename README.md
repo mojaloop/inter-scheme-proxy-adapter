@@ -31,6 +31,8 @@ npm start
 npm test
 ```
 
+> **Note:** Integration tests use mTLS certificates that expire periodically. If tests fail with "certificate has expired" errors, see [CERT-UPDATE.md](./CERT-UPDATE.md) for renewal instructions.
+
 
 ## Testing proxy JWS functionality
 

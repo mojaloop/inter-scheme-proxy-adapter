@@ -2,9 +2,12 @@
 disabled: false
 
 ignore:
-  - vulnerability: CVE-2025-9230
-  - vulnerability: CVE-2025-9231
-  - vulnerability: CVE-2025-9232
+  - vulnerability: GHSA-5j98-mcp5-4vw2
+    reason: "No fixes to glob npm available as of 2026-01-14 on Dockerfile base image 22.21.1-alpine3.23"
+  - vulnerability: CVE-2025-60876
+    reason: "No fixes to busybox apk available as of 2026-01-14 on Dockerfile base image 22.21.1-alpine3.23"
+  - vulnerability: CVE-2026-22184
+    reason: "No fixes to zlib apk available as of 2026-01-14 on Dockerfile base image 22.21.1-alpine3.23"
 
 
 # Set output format defaults
