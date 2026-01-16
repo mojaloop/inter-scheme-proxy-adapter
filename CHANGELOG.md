@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.8.1](https://github.com/mojaloop/inter-scheme-proxy-adapter/compare/v1.8.0...v1.8.1) (2026-01-16)
+
+
+### Chore
+
+* add grype ignore ([4f1483d](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/4f1483df994327488fe812817ea0c3911f664cab))
+* add grype ignores ([0980491](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/09804915918e6e93c606fa151e32208d8b687b6d))
+* update certs ([e8ab6f7](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/e8ab6f75d375e278d53fc0ca0ff9b73072072897))
+* update certs docs and fix vuls ([86d82e9](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/86d82e96fffe9c8a3271da67305b4a1dde3051b8))
+* update CODEOWNERS ([ff0efdb](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/ff0efdb040fccc5a13f576e9eb8b72d854d47b6f))
+* update dependencies and apply security patches ([ad60398](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/ad603989bec149e4666b5fe454c40e82f73cce1c))
+* update orb,node ver and deps ([409a14f](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/409a14fb953965408ee3414922ab54dc7ddf27f1))
+
 ## [1.8.0](https://github.com/mojaloop/inter-scheme-proxy-adapter/compare/v1.7.1...v1.8.0) (2025-10-02)
 
 

@@ -1,6 +1,6 @@
 {
   "name": "inter-scheme-proxy-adapter",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "private": true,
   "description": "Schemes Proxy implementation (ISPA)",
   "author": "Eugen Klymniuk (geka-evk)",
@@ -100,7 +100,6 @@
     "js-yaml": "4.1.1",
     "diff": "8.0.3",
     "brace-expansion": "2.0.2"
-
   },
   "standard-version": {
     "scripts": {
