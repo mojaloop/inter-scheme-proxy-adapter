@@ -38,6 +38,7 @@ export class ControlAgent implements IControlAgent {
   private _timeout: number;
   private _shouldReconnect: boolean;
   private _pingTimeout: Timer;
+  private _pendingReject: ((err: Error) => void) | null = null;
 
   constructor(params: ICAParams) {
     this._id = params.id || 'ControlAgent';
@@ -84,6 +85,7 @@ export class ControlAgent implements IControlAgent {
       };
 
       this._cleanupWebSocket();
+      this._pendingReject = reject;
       this._ws = new WebSocket(address);
       let settled = false;
 
@@ -129,12 +131,19 @@ export class ControlAgent implements IControlAgent {
 
   private _cleanupWebSocket() {
     clearTimeout(this._pingTimeout);
+
     if (this._ws) {
       this._ws.removeAllListeners();
-      if (this._ws.readyState === WebSocket.OPEN || this._ws.readyState === WebSocket.CONNECTING) {
+
+      if (this._ws.readyState === WebSocket.OPEN) {
+        this._ws.close();
+      } else if (this._ws.readyState === WebSocket.CONNECTING) {
+        this._pendingReject?.(new Error('WebSocket replaced by new connection'));
         this._ws.close();
       }
+
       this._ws = null;
+      this._pendingReject = null;
     }
   }
 

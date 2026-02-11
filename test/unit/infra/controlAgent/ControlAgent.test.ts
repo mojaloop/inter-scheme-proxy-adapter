@@ -65,9 +65,9 @@ describe('ControlAgent Tests', () => {
     await controlAgent.init(callbacks);
 
     // patch mock-socket WebSocket to support removeAllListeners
-    const mockWsProto = controlAgent['_ws'] && Object.getPrototypeOf(controlAgent['_ws']);
-    if (mockWsProto && !mockWsProto.removeAllListeners) {
-      mockWsProto.removeAllListeners = function () {
+    const wsInstance: any = controlAgent['_ws'];
+    if (wsInstance && typeof wsInstance.removeAllListeners !== 'function') {
+      wsInstance.removeAllListeners = function () {
         return this;
       };
     }
@@ -99,19 +99,21 @@ describe('ControlAgent Tests', () => {
     expect(closeSpy).toHaveBeenCalled();
   });
 
-  test('should close old WebSocket when open() is called while already connected', () => {
+  test('should close old WebSocket when open() is called while already connected', async () => {
     // open() cleans up old WS and reconnects instead of rejecting.
-    // mock-socket lacks removeAllListeners(), so we verify cleanup is initiated.
+    // mock-socket lacks removeAllListeners(), so we verify only check this PRcleanup is initiated.
     const oldWs = controlAgent['_ws']!;
     const closeSpy = jest.spyOn(oldWs, 'close');
 
-    controlAgent.open();
+    const openPromise = controlAgent.open();
 
     expect(closeSpy).toHaveBeenCalled();
 
     // cleanup: prevent dangling timers from old handlers
     controlAgent['_shouldReconnect'] = false;
     clearTimeout(controlAgent['_pingTimeout']);
+
+    await openPromise.catch(() => {});
   });
 
   test('should close WebSocket connection', async () => {

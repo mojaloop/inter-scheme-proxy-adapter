@@ -192,6 +192,24 @@ describe('ControlAgent connection Tests -->', () => {
       expect(ws1.listenerCount('error')).toBe(0);
       expect(ws1.listenerCount('message')).toBe(0);
     });
+
+    test('should reject first open() promise when open() is called again while CONNECTING', async () => {
+      const ca = new ControlAgent(createParams());
+
+      // First open — socket stays in CONNECTING
+      const p1 = ca.open();
+      expect(mockInstances).toHaveLength(1);
+
+      // Second open — should reject p1
+      const p2 = ca.open();
+      expect(mockInstances).toHaveLength(2);
+
+      await expect(p1).rejects.toThrow('WebSocket replaced by new connection');
+
+      const ws2 = mockInstances[1]!;
+      ws2.emit('open');
+      await expect(p2).resolves.toBeUndefined();
+    });
   });
 
   describe('reconnection after established connection drops', () => {
