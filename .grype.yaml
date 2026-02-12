@@ -8,7 +8,12 @@ ignore:
     reason: "No fixes to busybox apk available as of 2026-01-14 on Dockerfile base image 22.21.1-alpine3.23"
   - vulnerability: CVE-2026-22184
     reason: "No fixes to zlib apk available as of 2026-01-14 on Dockerfile base image 22.21.1-alpine3.23"
-
+  - vulnerability: GHSA-34x7-hfp2-rc4v
+    reason: "tar is bundled inside npm, not used at runtime. ISPA never extracts tar archives. No fix available in base image npm."
+  - vulnerability: GHSA-r6q2-hw4h-h46w
+    reason: "tar is bundled inside npm, not used at runtime. ISPA never extracts tar archives. No fix available in base image npm."
+  - vulnerability: GHSA-8qq5-rm4j-mr97
+    reason: "tar is bundled inside npm, not used at runtime. ISPA never extracts tar archives. No fix available in base image npm."
 
 # Set output format defaults
 output:

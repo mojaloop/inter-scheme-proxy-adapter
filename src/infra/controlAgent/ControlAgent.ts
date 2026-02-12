@@ -38,6 +38,7 @@ export class ControlAgent implements IControlAgent {
   private _timeout: number;
   private _shouldReconnect: boolean;
   private _pingTimeout: Timer;
+  private _pendingReject: ((err: Error) => void) | null = null;
 
   constructor(params: ICAParams) {
     this._id = params.id || 'ControlAgent';
@@ -74,21 +75,24 @@ export class ControlAgent implements IControlAgent {
         clearTimeout(this._pingTimeout);
         this._pingTimeout = setTimeout(async () => {
           log.error('Ping timeout, possible broken connection. Restarting server...');
-          await this.open();
-          await this.loadCerts();
+          try {
+            await this.open();
+            await this.loadCerts();
+          } catch (err) {
+            log.error('failed to reconnect after ping timeout: ', err);
+          }
         }, PING_INTERVAL_MS + this._timeout);
       };
-      schedulePing();
 
-      if (this._ws && this._ws.readyState === WebSocket.OPEN) {
-        reject(new Error('WebSocket is already open'));
-        return;
-      }
-
+      this._cleanupWebSocket();
+      this._pendingReject = reject;
       this._ws = new WebSocket(address);
+      let settled = false;
 
       this._ws.on('open', () => {
+        settled = true;
         log.info(`${this.id} websocket connected`);
+        schedulePing();
         resolve();
       });
 
@@ -97,9 +101,14 @@ export class ControlAgent implements IControlAgent {
         schedulePing();
       });
 
-      // Reconnect on close
       this._ws.on('close', () => {
         log.warn(`${this.id} websocket disconnected`);
+
+        if (!settled) {
+          settled = true;
+          reject(new Error('WebSocket closed before connection established'));
+          return;
+        }
 
         if (this._shouldReconnect) {
           schedulePing();
@@ -108,11 +117,34 @@ export class ControlAgent implements IControlAgent {
 
       this._ws.on('error', (error) => {
         log.error(`${this.id} websocket error [readyState: ${this._ws?.readyState}]`, error);
+
+        if (!settled) {
+          settled = true;
+          reject(error);
+        }
         this._ws?.close();
       });
 
       this._ws.on('message', this._handle.bind(this));
     });
+  }
+
+  private _cleanupWebSocket() {
+    clearTimeout(this._pingTimeout);
+
+    if (this._ws) {
+      this._ws.removeAllListeners();
+
+      if (this._ws.readyState === WebSocket.OPEN) {
+        this._ws.close();
+      } else if (this._ws.readyState === WebSocket.CONNECTING) {
+        this._pendingReject?.(new Error('WebSocket replaced by new connection'));
+        this._ws.close();
+      }
+
+      this._ws = null;
+      this._pendingReject = null;
+    }
   }
 
   async close(): Promise<void> {
