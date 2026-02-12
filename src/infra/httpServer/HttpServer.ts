@@ -29,7 +29,7 @@ export class HttpServer extends EventEmitter implements IHttpServer {
   constructor(private readonly deps: HttpServerDeps) {
     super();
     this.server = this.createServer();
-    this.initInternalEvents();
+    this.initInternalEvents(); // think if we need to do inside start() method
     this.state.peerEndpoint = deps.peerEndpoint;
   }
 
