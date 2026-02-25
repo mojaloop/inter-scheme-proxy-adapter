@@ -42,6 +42,11 @@ ignore:
   - vulnerability: GHSA-xxjr-mmjv-4gpg
     include-aliases: true
     reason: "Unfixable npm transitive vulnerability: lodash-es (moderate severity) as of 2026-02-25"
+  - vulnerability: GHSA-5j98-mcp5-4vw2
+    include-aliases: true
+    reason: >-
+      Base image npm package: glob - bundled in Node.js base image npm, not fixable via application dependencies as of
+      2026-02-25 (high severity)
 output:
   - table
   - json
