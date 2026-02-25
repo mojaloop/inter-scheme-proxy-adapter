@@ -4,19 +4,8 @@
   // Only use one of ["low": true, "moderate": true, "high": true, "critical": true]
   "moderate": true,
   "allowlist": [ // NOTE: Please add as much information as possible to any items added to the allowList
-    "GHSA-282f-qqgm-c34q", // https://github.com/advisories/GHSA-282f-qqgm-c34q
-    "GHSA-3xgq-45jj-v275", // https://github.com/advisories/GHSA-3xgq-45jj-v275
-    "GHSA-6vfc-qv3f-vr6c", // https://github.com/advisories/GHSA-6vfc-qv3f-vr6c
-    "GHSA-7fh5-64p2-3v2j", // https://github.com/advisories/GHSA-7fh5-64p2-3v2j
-    "GHSA-c2qf-rxjj-qqgw", // https://github.com/advisories/GHSA-c2qf-rxjj-qqgw
-    "GHSA-cgfm-xwp7-2cvr", // https://github.com/advisories/GHSA-cgfm-xwp7-2cvr
-    "GHSA-ghr5-ch3p-vcr6", // https://github.com/advisories/GHSA-ghr5-ch3p-vcr6
-    "GHSA-mjxr-4v3x-q3m4", // https://github.com/advisories/GHSA-mjxr-4v3x-q3m4
-    "GHSA-p9pc-299p-vxgp", // https://github.com/advisories/GHSA-p9pc-299p-vxgp
-    "GHSA-phwq-j96m-2c2q", // https://github.com/advisories/GHSA-phwq-j96m-2c2q
-    "GHSA-rjqq-98f6-6j3r", // https://github.com/advisories/GHSA-rjqq-98f6-6j3r
-    "GHSA-rm97-x556-q36h", // https://github.com/advisories/GHSA-rm97-x556-q36h
-    "GHSA-v88g-cgmw-v5xw", // https://github.com/advisories/GHSA-v88g-cgmw-v5xw
-    "GHSA-968p-4wvh-cqc8" // https://github.com/advisories/GHSA-968p-4wvh-cqc8
+    "GHSA-2g4f-4pwh-qvx6", // ajv ReDoS - no fix available in 8.x line, unfixable via override
+    "GHSA-3ppc-4f35-3m26", // minimatch ReDoS - fix requires v10 (major version break), unfixable via override
+    "GHSA-xxjr-mmjv-4gpg" // lodash-es prototype pollution - transitive via ts-auto-mock in @mojaloop/api-snippets
   ]
 }
