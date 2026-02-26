@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.8.2](https://github.com/mojaloop/inter-scheme-proxy-adapter/compare/v1.8.1...v1.8.2) (2026-02-26)
+
+
+### Bug Fixes
+
+* add qs GHSA-6rw7-vpxm-498p to grype ignore list ([69b3f13](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/69b3f134dc93b6247b3db3efc7fb4b4c3db4d2ef))
+* **grype:** ignore glob base image vulnerability GHSA-5j98-mcp5-4vw2 ([75a1e4e](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/75a1e4e9d71bb2a07db92b39558ef2c21f4e9265))
+* resolve minimatch GHSA-3ppc-4f35-3m26 with per-major-version overrides ([5d46b79](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/5d46b79d775a0a494d27160aeb80fbc760273456))
+* revert CircleCI orb to 1.1.10 ([17717dc](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/17717dc052fd4c3a401aa5b76916dc6b1c9788c4))
+
+
+### Chore
+
+* fix TS build errors, security updates, and CI config cleanup ([9263a61](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/9263a61494dd5bf307d6dce6e4d3d9121a0b30ba))
+* update orb ([a61fde5](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/a61fde52562e5c3425efaba8f1a32b2e5426b9cf))
+
 ### [1.8.1](https://github.com/mojaloop/inter-scheme-proxy-adapter/compare/v1.8.0...v1.8.1) (2026-01-16)
 
 
