@@ -3,6 +3,8 @@ import Hapi from '@hapi/hapi';
 
 import { requiredHeadersSchema, pingPayloadSchema } from '../../domain';
 import {
+  Headers,
+  IncomingRequestDetails,
   ProxyHandlerFn,
   ProxyHandlerResponse,
   IHttpServer,
@@ -109,7 +111,10 @@ export class HttpServer extends EventEmitter implements IHttpServer {
           },
         },
         handler: async (req: Hapi.Request<{ Payload: PostPingRequestDetails['payload'] }>, h: Hapi.ResponseToolkit) => {
-          const { success, errorObject } = pingService.handlePostPing(req);
+          const { success, errorObject } = pingService.handlePostPing({
+            headers: req.headers as Headers,
+            payload: req.payload as PostPingRequestDetails['payload'],
+          });
           return h.response(errorObject).code(success ? 202 : 400);
         },
       },
@@ -118,10 +123,10 @@ export class HttpServer extends EventEmitter implements IHttpServer {
         path: '/{any*}',
         handler: async (request: Hapi.Request, h: Hapi.ResponseToolkit) => {
           const { url, method, headers, payload } = request;
-          const reqDetails = {
+          const reqDetails: IncomingRequestDetails = {
             url,
             method,
-            headers,
+            headers: headers as Headers,
             payload,
           };
           logger.debug('incoming request details', reqDetails);
