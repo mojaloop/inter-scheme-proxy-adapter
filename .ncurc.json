@@ -1,0 +1,12 @@
+{
+  "reject": [
+    "eslint",
+    "why-eslint: the ts lint parser and plugin in this repo only support eslint v8 (carried over from the yaml config)",
+    "typescript",
+    "why-typescript: 7.0.2 fails npm install with ERESOLVE because the ts lint parser 8.x declares a peer range of typescript <6.1.0, and the 7.x package ships Go-built tsgo binaries that make the CircleCI Grype source scan report High Go stdlib CVEs; stay on 6.x until the parser supports 7 and the binaries are rebuilt on a patched Go",
+    "@types/node",
+    "why-types-node: its major must match the Node runtime major in .nvmrc (24); a higher major only weakens type checking (tsc accepts newer-Node-only APIs that crash at runtime); bump together with the runtime",
+    "ts-jest",
+    "why-ts-jest: 29.4.10 started honouring moduleResolution nodeNext with per-import resolutionMode, so the axios namespace types (axios.AxiosInstance, axios.CreateAxiosDefaults) resolve to the ESM d.ts and 8 suites fail with TS2503 Cannot find namespace and duplicate AxiosStatic types; hold at 29.4.6 until the sources use named type imports (reproduced 2026-09-18)"
+  ]
+}
