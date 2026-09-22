@@ -15,15 +15,24 @@
   "dependencies": {
     "@mojaloop/central-services-logger": "11.9.0",
     "@types/node": "^20.14.2",
-    "body-parser": "^1.20.2",
+    "body-parser": "^1.20.6",
     "express": "^4.21.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.5",
-    "ws": "^8.17.1"
+    "ws": "^8.21.3"
   },
   "devDependencies": {
     "@types/body-parser": "^1.19.5",
     "@types/express": "^4.17.21",
     "@types/ws": "^8.5.10"
-  }
+  },
+  "overrides": {
+    "qs": "6.16.0",
+    "diff": "4.0.4",
+    "path-to-regexp": "0.1.13",
+    "express": {
+      "body-parser": "1.20.8"
+    }
+  },
+  "license": "Apache-2.0"
 }
