@@ -4,7 +4,20 @@
   // Only use one of ["low": true, "moderate": true, "high": true, "critical": true]
   "moderate": true,
   "allowlist": [ // NOTE: Please add as much information as possible to any items added to the allowList
-    "GHSA-2g4f-4pwh-qvx6", // ajv ReDoS - no fix available in 8.x line, unfixable via override
-    "GHSA-xxjr-mmjv-4gpg" // lodash-es prototype pollution - transitive via ts-auto-mock in @mojaloop/api-snippets
+    "GHSA-2g4f-4pwh-qvx6",
+    "GHSA-xxjr-mmjv-4gpg",
+    "GHSA-m9gg-hp2v-232j",
+    "GHSA-f596-whhp-79r4",
+    "GHSA-vfj7-8cjw-p6xm",
+    "GHSA-qw65-cvwx-89v3",
+    "GHSA-58mr-gqgx-xq4g",
+    "GHSA-hrr3-gc8f-f4qj",
+    "GHSA-xw65-4hp5-5hc7",
+    "GHSA-8r5x-fm3f-whwj",
+    "GHSA-p8wg-vrv2-v86f",
+    "GHSA-253c-mchw-3w2r",
+    "GHSA-3wwx-pv8p-q78v",
+    "GHSA-r53p-7pc4-xj5r",
+    "GHSA-rfgv-xxqx-mfg5"
   ]
 }
