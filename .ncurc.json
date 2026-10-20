@@ -1,9 +1,9 @@
 {
   "reject": [
     "eslint",
-    "why-eslint: the ts lint parser and plugin in this repo only support eslint v8 (carried over from the yaml config)",
+    "why-eslint: 10.x cannot be installed by npm ci - eslint-plugin-import 2.32.0 (latest) declares a peer range that stops at eslint 9; held at the 9.x line (re-tested 2026-10-20)",
     "typescript",
-    "why-typescript: 7.0.2 fails npm install with ERESOLVE because the ts lint parser 8.x declares a peer range of typescript <6.1.0, and the 7.x package ships Go-built tsgo binaries that make the CircleCI Grype source scan report High Go stdlib CVEs; stay on 6.x until the parser supports 7 and the binaries are rebuilt on a patched Go",
+    "why-typescript: 7.0.2 fails npm install with ERESOLVE because the ts lint parser 8.72 declares a peer range of typescript <6.1.0, and its Go-built tsgo binaries trip the Grype source scan (re-tested 2026-10-20)",
     "@types/node",
     "why-types-node: its major must match the Node runtime major in .nvmrc (24); a higher major only weakens type checking (tsc accepts newer-Node-only APIs that crash at runtime); bump together with the runtime",
     "ts-jest",
