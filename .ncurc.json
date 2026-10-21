@@ -1,0 +1,12 @@
+{
+  "reject": [
+    "eslint",
+    "why-eslint: 10.x cannot be installed by npm ci - eslint-plugin-import 2.32.0 (latest) declares a peer range that stops at eslint 9; held at the 9.x line (re-tested 2026-10-20)",
+    "typescript",
+    "why-typescript: 7.0.2 fails npm install with ERESOLVE because the ts lint parser 8.72 declares a peer range of typescript <6.1.0, and its Go-built tsgo binaries trip the Grype source scan (re-tested 2026-10-20)",
+    "@types/node",
+    "why-types-node: its major must match the Node runtime major in .nvmrc (24); a higher major only weakens type checking (tsc accepts newer-Node-only APIs that crash at runtime); bump together with the runtime",
+    "ts-jest",
+    "why-ts-jest: 29.4.10 started honouring moduleResolution nodeNext with per-import resolutionMode, so the axios namespace types (axios.AxiosInstance, axios.CreateAxiosDefaults) resolve to the ESM d.ts and 8 suites fail with TS2503 Cannot find namespace and duplicate AxiosStatic types; hold at 29.4.6 until the sources use named type imports (reproduced 2026-09-18)"
+  ]
+}
