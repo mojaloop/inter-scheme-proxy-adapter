@@ -218,9 +218,38 @@ ignore:
     reason: >-
       Application tree: minimatch 3.1.5 / 5.1.9 (eslint 9, eslint-plugin-import, replace, dotgitignore, filelist via
       shins, @redocly/openapi-core via @mojaloop/api-snippets) - fixed only in minimatch 11, whose named-export API
-      those tools cannot take; the 10.x copies are overridden to 11.0.4. Dev/lint/release tooling only, not reachable
-      at runtime. Mirrors the audit-ci.jsonc allowlist entry (expiry 2026-12-31); reassess when the consumers move
-      to minimatch 11 (moderate severity)
+      those tools cannot take; the 10.x copies are overridden to 11.0.4. Dev/lint/release tooling only, not reachable at
+      runtime. Mirrors the audit-ci.jsonc allowlist entry (expiry 2026-12-31); reassess when the consumers move to
+      minimatch 11 (moderate severity)
+  - vulnerability: CVE-2026-111497
+    include-aliases: true
+    reason: 'Node.js binary vulnerability: node - requires Node.js runtime update as of 2026-11-03 (critical severity)'
+  - vulnerability: CVE-2026-106072
+    include-aliases: true
+    reason: 'Node.js binary vulnerability: node - requires Node.js runtime update as of 2026-11-03 (moderate severity)'
+  - vulnerability: CVE-2026-105482
+    include-aliases: true
+    reason: 'Node.js binary vulnerability: node - requires Node.js runtime update as of 2026-11-03 (high severity)'
+  - vulnerability: CVE-2026-105483
+    include-aliases: true
+    reason: 'Node.js binary vulnerability: node - requires Node.js runtime update as of 2026-11-03 (high severity)'
+  - vulnerability: CVE-2026-106069
+    include-aliases: true
+    reason: 'Node.js binary vulnerability: node - requires Node.js runtime update as of 2026-11-03 (high severity)'
+  - vulnerability: GHSA-3g3m-2fjr-6pw4
+    include-aliases: true
+    reason: >-
+      Base image npm package: glob - bundled in Node.js base image, not fixable via application dependencies as of
+      2026-11-03 (moderate severity)
+  - vulnerability: CVE-2026-105481
+    include-aliases: true
+    reason: 'Node.js binary vulnerability: node - requires Node.js runtime update as of 2026-11-03 (moderate severity)'
+  - vulnerability: CVE-2026-106074
+    include-aliases: true
+    reason: 'Node.js binary vulnerability: node - requires Node.js runtime update as of 2026-11-03 (moderate severity)'
+  - vulnerability: CVE-2026-106073
+    include-aliases: true
+    reason: 'Node.js binary vulnerability: node - requires Node.js runtime update as of 2026-11-03 (low severity)'
 output:
   - table
   - json
