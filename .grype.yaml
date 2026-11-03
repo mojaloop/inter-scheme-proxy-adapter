@@ -213,6 +213,14 @@ ignore:
   - vulnerability: CVE-2026-107891
     include-aliases: true
     reason: 'Alpine base image package (apk): musl - no npm fix available as of 2026-10-28 (info severity)'
+  - vulnerability: GHSA-g3hv-75wg-m249
+    include-aliases: true
+    reason: >-
+      Application tree: minimatch 3.1.5 / 5.1.9 (eslint 9, eslint-plugin-import, replace, dotgitignore, filelist via
+      shins, @redocly/openapi-core via @mojaloop/api-snippets) - fixed only in minimatch 11, whose named-export API
+      those tools cannot take; the 10.x copies are overridden to 11.0.4. Dev/lint/release tooling only, not reachable
+      at runtime. Mirrors the audit-ci.jsonc allowlist entry (expiry 2026-12-31); reassess when the consumers move
+      to minimatch 11 (moderate severity)
 output:
   - table
   - json
