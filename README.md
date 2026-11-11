@@ -33,6 +33,14 @@ npm test
 
 > **Note:** Integration tests use mTLS certificates that expire periodically. If tests fail with "certificate has expired" errors, see [CERT-UPDATE.md](./CERT-UPDATE.md) for renewal instructions.
 
+## Dependency update holds
+
+`.ncurc.json` holds back these packages from `npm run dep:update`. JSON has no comments, so the reasons live here:
+
+- **eslint**: ESLint 10 removes `ESLINT_USE_FLAT_CONFIG=false`, which the `lint` script and the pre-commit hook still need for `.eslintrc.js`, and `eslint-plugin-import` 2.32.0 (latest) declares a peer range that stops at ESLint 9. Held on 9.x until the flat-config migration lands (re-tested 2026-11-02).
+- **typescript**: 7.x fails `npm install` with ERESOLVE because `@typescript-eslint/parser` 8.72 declares a peer range of `typescript <6.1.0`, and its Go-built `tsgo` binaries trip the Grype source scan (re-tested 2026-10-20).
+- **@types/node**: its major must match the Node runtime major in `.nvmrc` (24). A higher major weakens type checking, because `tsc` then accepts newer-Node-only APIs that crash at runtime. Bump it together with the runtime.
+
 
 ## Testing proxy JWS functionality
 
