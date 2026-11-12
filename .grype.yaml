@@ -1,55 +1,144 @@
 scan-type: source
 ignore:
+  - vulnerability: GHSA-2m5v-pch6-74hx
+    include-aliases: true
+    package:
+      location: '/usr/local/lib/node_modules/**'
+    reason: >-
+      Base image npm package: undici 6.28.0 (bundled in npm) - base image node:24.22.2-alpine3.24, no fix in image as of
+      2026-11-02 (high severity)
+  - vulnerability: GHSA-6j4f-fj2g-mc7p
+    include-aliases: true
+    package:
+      location: '/usr/local/lib/node_modules/**'
+    reason: >-
+      Base image npm package: brace-expansion 5.0.9 (bundled in npm) - base image node:24.22.2-alpine3.24, no fix in image
+      as of 2026-11-02 (high severity)
+  - vulnerability: GHSA-qhr7-859c-m2p7
+    include-aliases: true
+    package:
+      location: '/usr/local/lib/node_modules/**'
+    reason: >-
+      Base image npm package: brace-expansion 5.0.9 (bundled in npm) - base image node:24.22.2-alpine3.24, no fix in image
+      as of 2026-11-02 (high severity)
+  - vulnerability: GHSA-qrxm-fqhp-jwvm
+    include-aliases: true
+    package:
+      location: '/usr/local/lib/node_modules/**'
+    reason: >-
+      Base image npm package: undici 6.28.0 (bundled in npm) - base image node:24.22.2-alpine3.24, no fix in image as of
+      2026-11-02 (high severity)
+  - vulnerability: GHSA-rfgv-xxqx-mfg5
+    include-aliases: true
+    package:
+      location: '/usr/local/lib/node_modules/**'
+    reason: >-
+      Base image npm package: undici 6.28.0 (bundled in npm) - base image node:24.22.2-alpine3.24, no fix in image as of
+      2026-11-02 (high severity)
+  - vulnerability: GHSA-xjj6-f33q-929c
+    include-aliases: true
+    package:
+      location: '/usr/local/lib/node_modules/**'
+    reason: >-
+      Base image npm package: undici 6.28.0 (bundled in npm) - base image node:24.22.2-alpine3.24, no fix in image as of
+      2026-11-02 (high severity)
   - vulnerability: CVE-2025-60876
     include-aliases: true
-    reason: "Alpine base image package (apk): busybox - no npm fix available as of 2026-02-25 (moderate severity)"
-  - vulnerability: GHSA-3ppc-4f35-3m26
-    include-aliases: true
     reason: >-
-      Base image npm package: minimatch - bundled in Node.js base image, not fixable via application dependencies as of
-      2026-02-25 (high severity)
-  - vulnerability: GHSA-83g3-92jg-28cx
+      Alpine base image package (apk): busybox 1.37.0-r31 / busybox-binsh 1.37.0-r31 / ssl_client 1.37.0-r31 - base image
+      node:24.22.2-alpine3.24, no fix in image as of 2026-11-02 (medium severity)
+  - vulnerability: GHSA-2vr4-cq9g-pvrc
     include-aliases: true
+    package:
+      location: '/usr/local/lib/node_modules/**'
     reason: >-
-      Base image npm package: tar - bundled in Node.js base image, not fixable via application dependencies as of
-      2026-02-25 (high severity)
-  - vulnerability: GHSA-34x7-hfp2-rc4v
+      Base image npm package: ip-address 10.5.0 (bundled in npm) - base image node:24.22.2-alpine3.24, no fix in image as
+      of 2026-11-02 (medium severity)
+  - vulnerability: GHSA-3g3m-2fjr-6pw4
     include-aliases: true
+    package:
+      location: '/usr/local/lib/node_modules/**'
     reason: >-
-      Base image npm package: tar - bundled in Node.js base image, not fixable via application dependencies as of
-      2026-02-25 (high severity)
-  - vulnerability: GHSA-73rr-hh4g-fpgx
+      Base image npm package: glob 13.0.6 (bundled in npm) - base image node:24.22.2-alpine3.24, no fix in image as of
+      2026-11-02 (medium severity)
+  - vulnerability: GHSA-3wwx-pv8p-q78v
     include-aliases: true
+    package:
+      location: '/usr/local/lib/node_modules/**'
     reason: >-
-      Base image npm package: diff - bundled in Node.js base image, not fixable via application dependencies as of
-      2026-02-25 (low severity)
-  - vulnerability: GHSA-r6q2-hw4h-h46w
+      Base image npm package: undici 6.28.0 (bundled in npm) - base image node:24.22.2-alpine3.24, no fix in image as of
+      2026-11-02 (medium severity)
+  - vulnerability: GHSA-4qv8-2p9j-2685
     include-aliases: true
+    package:
+      location: '/usr/local/lib/node_modules/**'
     reason: >-
-      Base image npm package: tar - bundled in Node.js base image, not fixable via application dependencies as of
-      2026-02-25 (high severity)
-  - vulnerability: GHSA-8qq5-rm4j-mr97
+      Base image npm package: undici 6.28.0 (bundled in npm) - base image node:24.22.2-alpine3.24, no fix in image as of
+      2026-11-02 (medium severity)
+  - vulnerability: GHSA-9fm3-97px-rjf6
     include-aliases: true
+    package:
+      location: '/usr/local/lib/node_modules/**'
     reason: >-
-      Base image npm package: tar - bundled in Node.js base image, not fixable via application dependencies as of
-      2026-02-25 (high severity)
-  - vulnerability: CVE-2026-27171
+      Base image npm package: undici 6.28.0 (bundled in npm) - base image node:24.22.2-alpine3.24, no fix in image as of
+      2026-11-02 (medium severity)
+  - vulnerability: GHSA-h3mg-xc3c-68pw
     include-aliases: true
-    reason: "Alpine base image package (apk): zlib - no npm fix available as of 2026-02-25 (moderate severity)"
-  - vulnerability: GHSA-2g4f-4pwh-qvx6
-    include-aliases: true
-    reason: "Unfixable npm transitive vulnerability: ajv (moderate severity) as of 2026-02-25"
-  - vulnerability: GHSA-xxjr-mmjv-4gpg
-    include-aliases: true
-    reason: "Unfixable npm transitive vulnerability: lodash-es (moderate severity) as of 2026-02-25"
-  - vulnerability: GHSA-6rw7-vpxm-498p
-    include-aliases: true
-    reason: "Unfixable npm transitive vulnerability: qs (high severity) as of 2026-02-25"
-  - vulnerability: GHSA-5j98-mcp5-4vw2
-    include-aliases: true
+    package:
+      location: '/usr/local/lib/node_modules/**'
     reason: >-
-      Base image npm package: glob - bundled in Node.js base image npm, not fixable via application dependencies as of
-      2026-02-25 (high severity)
+      Base image npm package: ip-address 10.5.0 (bundled in npm) - base image node:24.22.2-alpine3.24, no fix in image as
+      of 2026-11-02 (medium severity)
+  - vulnerability: GHSA-j6r3-76f7-8jcv
+    include-aliases: true
+    package:
+      location: '/usr/local/lib/node_modules/**'
+    reason: >-
+      Base image npm package: ip-address 10.5.0 (bundled in npm) - base image node:24.22.2-alpine3.24, no fix in image as
+      of 2026-11-02 (medium severity)
+  - vulnerability: GHSA-q2hr-2g5m-vwhr
+    include-aliases: true
+    package:
+      location: '/usr/local/lib/node_modules/**'
+    reason: >-
+      Base image npm package: brace-expansion 5.0.9 (bundled in npm) - base image node:24.22.2-alpine3.24, no fix in image
+      as of 2026-11-02 (medium severity)
+  - vulnerability: GHSA-rj75-hqrm-r3gf
+    include-aliases: true
+    package:
+      location: '/usr/local/lib/node_modules/**'
+    reason: >-
+      Base image npm package: postcss-selector-parser 7.1.4 (bundled in npm) - base image node:24.22.2-alpine3.24, no fix
+      in image as of 2026-11-02 (medium severity)
+  - vulnerability: GHSA-rpw4-54j3-4h4q
+    include-aliases: true
+    package:
+      location: '/usr/local/lib/node_modules/**'
+    reason: >-
+      Base image npm package: ip-address 10.5.0 (bundled in npm) - base image node:24.22.2-alpine3.24, no fix in image as
+      of 2026-11-02 (medium severity)
+  - vulnerability: GHSA-rxp7-6hxx-x8q5
+    include-aliases: true
+    package:
+      location: '/usr/local/lib/node_modules/**'
+    reason: >-
+      Base image npm package: ip-address 10.5.0 (bundled in npm) - base image node:24.22.2-alpine3.24, no fix in image as
+      of 2026-11-02 (medium severity)
+  - vulnerability: GHSA-r53p-7pc4-xj5r
+    include-aliases: true
+    package:
+      location: '/usr/local/lib/node_modules/**'
+    reason: >-
+      Base image npm package: undici 6.28.0 (bundled in npm) - base image node:24.22.2-alpine3.24, no fix in image as of
+      2026-11-02 (low severity)
+  - vulnerability: GHSA-g3hv-75wg-m249
+    include-aliases: true
+    package:
+      location: '/usr/local/lib/node_modules/**'
+    reason: >-
+      Base image npm package: minimatch 10.2.5 (bundled in npm) - base image node:24.22.2-alpine3.24, no fix in image
+      as of 2026-11-11 (moderate severity). The advisory now covers minimatch >=7.0.0 <11.0.1 only, so the
+      application tree (3.1.5, 5.1.9, 11.0.4) is no longer affected.
 output:
   - table
   - json
