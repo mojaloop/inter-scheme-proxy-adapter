@@ -1,6 +1,6 @@
 {
   "name": "inter-scheme-proxy-adapter",
-  "version": "1.8.2",
+  "version": "1.8.3",
   "private": true,
   "description": "Schemes Proxy implementation (ISPA)",
   "license": "Apache-2.0",

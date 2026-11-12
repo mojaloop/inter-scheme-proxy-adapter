@@ -2,6 +2,36 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.8.3](https://github.com/mojaloop/inter-scheme-proxy-adapter/compare/v1.8.2...v1.8.3) (2026-11-12)
+
+
+### Bug Fixes
+
+* **security:** patch fast-xml-parser, align @types/node, scope base-image grype ignores ([42c3ec4](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/42c3ec482518e2f29e0e10f7ee6e451e0236d2c5))
+
+
+### Chore
+
+* **deps:** bump joi to 18.3.0, eslint to 9.39.5, ts-jest 29.4.15, ts-eslint 8.72.0 and commitlint 21.2.4 ([5cd3fb7](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/5cd3fb7e560e375fb0b67b968549685fac42f568))
+* **deps:** bump packages published after the maintenance run ([8dcbe7b](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/8dcbe7b8045bf7f4785e41c847e186da55298ad5))
+* **deps:** fix handlebars, grpc-js, fast-uri, undici and markdown-it advisories via overrides, scope js-yaml/argparse/undici/brace-expansion/protobufjs per major, drop uuid and yaml pins, restore allowlists to braces only ([f551ab2](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/f551ab2b68146fe43adfae287603c26deb356b78))
+* **deps:** lift body-parser to 1.20.9 and qs to 6.16.1 in the mock-servers lockfile ([45162ec](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/45162ecabf043f9a10c5c5a350698d0acd617379))
+* **deps:** lift follow-redirects to 1.16.1, markdown-it to 14.3.3 and sanitize-html to 2.18.1 for the advisories published this week ([83e8a42](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/83e8a4232bcc85739871410f77dba6fea5557fa8))
+* **deps:** patch the body-parser, qs, undici and fast-uri advisories published this week and refresh direct dependencies ([f81a226](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/f81a226690156a9132dcc49ea9bfabf4be5e278b))
+* **deps:** update dependencies to their latest patch and minor releases ([6d65b99](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/6d65b9913a1150c19fcce78715c4cc785df9ea40))
+* **docker:** move the runtime to Node 24.22.2 and rebuild the base-image grype ignores ([a92ef13](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/a92ef1325804ee48d3daac1bcfc166716bd15c9c))
+* drop the obsolete ts-jest hold and the ignored .ncurc.yaml ([dc1e845](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/dc1e845e4bcf6a3bd097607d1315e214fee5efcd)), closes [#31](https://github.com/mojaloop/inter-scheme-proxy-adapter/issues/31)
+* fix overrides and allowlists after maintenance run, jest ESM flag, licence metadata ([ca5b653](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/ca5b653089f896f8e2e416e1b1bc6557af37215a))
+* fix the pre-commit ESLint config and the ncu reject list ([65974ac](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/65974ac934375684067ea414bae4ba6ddc023ba2))
+* **lint:** run eslint 9 against the existing .eslintrc via ESLINT_USE_FLAT_CONFIG=false until the flat-config migration ([d8a9b00](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/d8a9b00b67c8ee1a173c226807a96a7c8ded0e90))
+* **security:** drop the braces allowlist and grype entries now that GitHub has withdrawn GHSA-vfj7-8cjw-p6xm ([9f64b43](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/9f64b4338bee258b01b90731b3a32a80afb8e410))
+* **security:** patch the @hapi/content, follow-redirects and glob advisories, record the minimatch no-fix and refresh the lockfile ([0ec7cac](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/0ec7cacc77f15891cb8de864143af69f1da8a45c))
+* update dependencies and apply security patches ([93fe2e2](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/93fe2e2fa1ed7ed95ce74efdc21b8567c2720498))
+* update dependencies and apply security patches ([cde4db7](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/cde4db7a75ab44eedd3e60eeda929d23641d9a05))
+* update dependencies and apply security patches ([7fab18b](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/7fab18b392ea13ad52f9663ee0c45b5202c4ffd5))
+* update dependencies and apply security patches ([da93f80](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/da93f805e26f916fac50af9c82ceb0967be3ef45))
+* update dependencies and apply security patches ([5afe281](https://github.com/mojaloop/inter-scheme-proxy-adapter/commit/5afe281a34a581e56ff942cf65cf109f5b75b654))
+
 ### [1.8.2](https://github.com/mojaloop/inter-scheme-proxy-adapter/compare/v1.8.1...v1.8.2) (2026-02-26)
 
 
